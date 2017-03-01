@@ -100,8 +100,19 @@ EXEC=$(shell echo $(CASEEXEC) | tr A-Z a-z)
 TEST_EXEC=testself
 
 # Get sources to compile.
-SOURCES+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -name "*.c"))
-SOURCES+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -name "*.cpp"))
+BISON_SOURCES+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -name "*.y"))
+FLEX_SOURCES+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -name "*.l"))
+C_SOURCES+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -name "*.c"))
+CPP_SOURCES+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -name "*.cpp"))
+
+# Create a list of ojbects that need to be built.
+# Then append objdir to the object names.
+C_OBJECTS=$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(C_SOURCES))))
+CPP_OBJECTS=$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(CPP_SOURCES))))
+BISON_OBJECTS=$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(BISON_SOURCES))))
+FLEX_OBJECTS=$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(FLEX_SOURCES))))
+
+ALL_OBJECTS:= $(BISON_OBJECTS) $(FLEX_OBJECTS) $(C_OBJECTS) $(CPP_OBJECTS) 
 
 # To make sure that the directory tree of all the src directroies exists in the build directory
 SUBSRCDIRS+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -type d))
@@ -109,17 +120,13 @@ SUBSRCDIRS+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -type d))
 # Add a prefix to the folders.
 DIRECTORIES=$(addprefix $(OBJDIR)/, $(SUBSRCDIRS))
 
-# Create list of objects that need to be built.
-SIMPLE_OBJECTS:= $(addsuffix .o, $(basename $(SOURCES)))
-
-# Append objdir to the object names.
-OBJECTS=$(addprefix $(OBJDIR)/, $(SIMPLE_OBJECTS))
 
 # Include the libs...
 LD_FLAGS+=$(addprefix -l,$(LIBS))
 
 # Add the SRCDIRS to the include path.
 C_FLAGS+=$(foreach dir,$(SRCDIRS),-I $(dir) )
+C_FLAGS+=$(foreach dir,$(DIRECTORIES),-I $(dir) ) 
 
 # The goal is to get the executable.
 all: $(EXEC)
@@ -148,22 +155,32 @@ help:
 
 # The executable needs the object files.
 # To create the executable we execute the linker
-$(EXEC): $(DIRECTORIES) $(OBJECTS) 
-	$(LD) $(OBJECTS) $(LD_FLAGS) -o $@
+$(EXEC): $(DIRECTORIES) $(ALL_OBJECTS) 
+	$(LD) -lfl $(ALL_OBJECTS) $(LD_FLAGS) -o $@
 	@echo "$(ccgreen)DONE: Linking executable."
 	@echo "$(ccend)"
 
-$(TEST_EXEC): $(DIRECTORIES) $(OBJECTS) 
-	$(LD) $(OBJECTS) $(LD_FLAGS) -o $(OBJDIR)/$@
+$(TEST_EXEC): $(DIRECTORIES) $(ALL_OBJECTS) 
+	$(LD) -lfl $(ALL_OBJECTS) $(LD_FLAGS) -o $(OBJDIR)/$@
 
 # Automatic dependency graph generation
--include $(OBJECTS:.o=.d)
+-include $(C_OBJECTS:.o=.d)
+-include $(CPP_OBJECTS:.o=.d)
+-include $(BISON_OBJECTS:.o=.y.d)
+-include $(FLEX_OBJECTS:.o=.l.d)
 
 # Here we compile a object file using it's c file partner.
 $(OBJDIR)/%.o: %.cpp
 	$(CPP_COMPILER) $(CPP_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.d,$@) $< -o $@
 $(OBJDIR)/%.o: %.c
 	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.d,$@) $< -o $@
+$(OBJDIR)/%.o: %.y
+	bison -t --defines=$(patsubst %.o,%.tab.h,$@) --output=$(patsubst %.o,%.tab.c,$@) $< 
+	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.y.d,$@) $(patsubst %.o,%.tab.c,$@) -o $@
+$(OBJDIR)/%.o: %.l  
+	flex -d --outfile=$(patsubst %.o,%.yy.c,$@) $<
+	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.l.d,$@) $(patsubst %.o,%.yy.c,$@) -o $@
+
 
 # Make sure the sub-folders in src/ exists in obj/.
 $(DIRECTORIES):

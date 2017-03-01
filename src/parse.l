@@ -1,0 +1,121 @@
+%{
+
+// FIXME: Maybe we should name "symbols" to "identifiers".
+
+#include "stdio.h"
+
+/* Generated from "grammar.y". */
+#include "grammar.tab.h"
+
+/*
+ * "yytext" is a string containing the matched text.
+ * "yylineno" is self-explanatory.
+ */
+
+extern void yyerror(char *str);
+extern int line_indent;
+%}
+
+%option stack
+%option yylineno
+%option nounput
+%option noyy_top_state
+%option noinput
+
+%x comment_state
+
+%%
+
+"/*" {
+	yy_push_state(comment_state);
+}
+<comment_state>{
+	"\\/" {
+		/* Escape char. */
+	}
+	"*/" {
+		/* Exit comment. */
+		yy_pop_state();
+	}
+	"/*" {
+		/* Recursive comment. */
+		yy_push_state(comment_state);
+	}
+	\n {
+	}
+	. {
+		/* Do nothing. */
+	}
+}
+
+\"(\\.|[^"])*\" {
+	yylval.tok_string_val = strdup(yytext);
+	return TOKEN_STRING;
+}
+
+"+" {
+	return TOKEN_PLUS;
+}
+
+"-" {
+	return TOKEN_MINUS;
+}
+
+"*" {
+	return TOKEN_MULTIPLY;
+}
+
+"/" {
+	return TOKEN_DIVIDE;
+}
+
+"=" {
+	return TOKEN_ASSIGN;
+}
+
+":" {
+
+}
+
+\( {
+	return TOKEN_LPAREN;
+}
+
+\) {
+	return TOKEN_RPAREN;
+}
+
+
+"," {
+	return TOKEN_COMMA;
+}
+
+[a-zA-Z0-9]+ {
+	printf("Saw a symbol: %s\n", yytext);
+	yylval.tok_symbol_name = strdup(yytext);
+	return TOKEN_SYMBOL;
+}
+
+[0-9]+ {
+	yylval.tok_int_val = atoi(yytext);
+	return TOKEN_INT_LITERAL;
+}
+
+\n {
+	return TOKEN_NEWLINE;
+}
+
+\t {
+	++line_indent;
+	printf("Inc indentation...");
+}
+
+[ ] {
+	/* Spaces are ignored... */
+}
+
+. {
+	yyerror("Unexpected symbol");
+}
+
+%%

@@ -11,6 +11,9 @@ cheri
 # Sessions.
 Session.vim
 
+# Emacs.
+\#*\#
+
 # Temporary.
 .netrwhist
 *~

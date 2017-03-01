@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-
-#include "parse.h"
+#include "grammar.tab.h"
+#include "ast.h"
 
 /**
  * Just prints the help information. (^.^)
@@ -12,6 +12,25 @@ static void help()
 	printf("Options:\n");
 	printf("\t--help\t\tDispays this help section.\n");
 	printf("\t-o\t\tSpecifies where to place output.\n");
+}
+
+static int parse_file(char *filename)
+{
+	/* Call lexer. */
+	extern int yylineno;
+	extern FILE *yyin;
+
+	ast_root_node = ast_make_root();
+	ast_prev_node = ast_root_node;
+
+	yyin = fopen(filename, "r");
+	yyparse();
+	fclose(yyin);
+	printf("Parsed: %d lines!\n", --yylineno);
+
+	debug_ast_node(ast_root_node, 0);
+	return 0;
+
 }
 
 int main(int argc, char *args[])
