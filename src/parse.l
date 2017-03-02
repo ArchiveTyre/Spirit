@@ -28,6 +28,7 @@ extern int line_indent;
 
 "/*" {
 	yy_push_state(comment_state);
+	printf("A comment desu.");
 }
 <comment_state>{
 	"\\/" {
@@ -48,9 +49,19 @@ extern int line_indent;
 	}
 }
 
-\"(\\.|[^"])*\" {
+\"(\\.|[^"])*\" { //" /* For strings. */
 	yylval.tok_string_val = strdup(yytext);
 	return TOKEN_STRING;
+}
+
+\t {
+	// FIXME: If someone uses a tab after the sentence we'll have trouble!
+	++line_indent;
+	printf("Inc indentation...\n");
+}
+
+: {
+	return TOKEN_COLON;
 }
 
 "+" {
@@ -71,10 +82,6 @@ extern int line_indent;
 
 "=" {
 	return TOKEN_ASSIGN;
-}
-
-":" {
-
 }
 
 \( {
@@ -103,11 +110,6 @@ extern int line_indent;
 
 \n {
 	return TOKEN_NEWLINE;
-}
-
-\t {
-	++line_indent;
-	printf("Inc indentation...");
 }
 
 [ ] {

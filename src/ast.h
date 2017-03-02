@@ -1,7 +1,6 @@
 #pragma once
 
 typedef enum {
-
 	AST_NONE,
 	AST_SYMBOL,
 	AST_FUNCTION_CALL,
@@ -9,8 +8,8 @@ typedef enum {
 	AST_OPERATION,
 	AST_NUMBER,
 	AST_STRING,
-	AST_BLOCK
-
+	AST_BLOCK,
+	AST_DEFAULT_ARG
 } EAstType;
 
 typedef struct ASTNode ASTNode;
@@ -21,6 +20,7 @@ struct ASTNode {
 	int indent_level;
 	ASTNode *body_next_sibling;
 	ASTNode *body_first_child;
+	ASTNode *args_next;
 
 	/* For AST_BLOCK. */
 	char *block_type;
@@ -34,11 +34,11 @@ struct ASTNode {
 	/* For AST_SYMBOL. */
 	char *symbol_name;
 
+	/* For AST_FUNCTION_CALL and AST_BLOCK. */
+	ASTNode *args_chain;
+
 	/* For AST_FUNCTION_CALL. */
 	char *function_name;
-	ASTNode *args_chain;
-	/* This variable can be applied to anything thou.. */
-	ASTNode *args_next;
 
 	/* For AST_NUMBER. */
 	int number_value;
@@ -61,4 +61,6 @@ ASTNode *ast_make_number(int value);
 ASTNode *ast_make_symbol(char *symbol);
 ASTNode *ast_make_string(char *value);
 ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r);
+ASTNode *ast_make_block(char *block_type);
 ASTNode *ast_make_root();
+ASTNode *ast_make_default_arg();

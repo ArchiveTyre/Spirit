@@ -14,6 +14,9 @@ static void help()
 	printf("\t-o\t\tSpecifies where to place output.\n");
 }
 
+/**
+ * Parses one file and creates an AST for it.
+ */
 static int parse_file(char *filename)
 {
 	/* Call lexer. */

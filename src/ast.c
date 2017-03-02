@@ -5,22 +5,27 @@
 
 void debug_ast_node(ASTNode *node, int indent)
 {
+	if (node == NULL) {
+		printf("null");
+		return;
+	}
 	if (indent != -1)
 		for(int i = 0; i < indent; i++)
 			putchar('\t');
 
-	if (node->args_next != NULL) {
-		printf(", ");
-		debug_ast_node(node->args_next, -1);
-	}
 	switch(node->ast_type) {
+		case AST_DEFAULT_ARG:
+			printf("default");
+			break;
 		case AST_FUNCTION_CALL:
 			printf("%s(", node->function_name);
 			debug_ast_node(node->args_chain, -1);
 			printf(")");
 			break;
 		case AST_BLOCK:
-			printf("%s:", node->block_type);
+			printf("%s ", node->block_type);
+			debug_ast_node(node->args_chain, -1);
+			putchar(':');
 			break;
 		case AST_SYMBOL:
 			printf("%s", node->symbol_name);
@@ -39,8 +44,14 @@ void debug_ast_node(ASTNode *node, int indent)
 			printf("\"%s\"", node->string_value);
 			break;
 		default:
-			printf("ERROR: Compiler error (0) in switch!");
+			printf("ERROR: Compiler error (0) in switch!, %d", node->ast_type);
 	}
+
+	if (node->args_next != NULL) {
+		printf(", ");
+		debug_ast_node(node->args_next, -1);
+	}
+
 	if (indent != -1)
 		putchar('\n');
 	if (node->body_first_child != NULL)
@@ -68,15 +79,14 @@ void free_ast_node(ASTNode *target)
 			free(target->right_ast);
 			break;
 		case AST_FUNCTION_CALL:
-			free(target->args_chain);
 			free(target->function_name);
 			break;
-
 		case AST_NONE:
 		default:
 			printf("ERROR: Compiler error (1) in switch!");
 	}
-
+	if (target->args_chain != NULL)
+		free(target->args_chain);
 	if (target->args_next != NULL)
 		free_ast_node(target->args_next);
 	if (target->body_next_sibling != NULL)
@@ -90,6 +100,7 @@ extern int line_indent;
 
 void ast_insert_node(ASTNode *node)
 {
+	printf("Inserting at indent: %d\n", line_indent);
 
 	/* Descend. */
 	if (node->indent_level > ast_prev_node->indent_level) {
@@ -123,6 +134,7 @@ void ast_insert_node(ASTNode *node)
 		node->parent_node = parent;
 	}
 	ast_prev_node = node;
+	line_indent = 0;
 }
 
 static ASTNode *init_ast_node(EAstType type)
@@ -130,11 +142,11 @@ static ASTNode *init_ast_node(EAstType type)
 	printf("Creating node.\n");
 	ASTNode *target = malloc(sizeof(ASTNode));
 	target->ast_type = type;
+	target->indent_level = line_indent;
 	target->args_next = NULL;
+	target->args_chain = NULL;
 	target->body_next_sibling = NULL;
 	target->body_first_child = NULL;
-	target->indent_level = line_indent;
-
 	return target;
 }
 
@@ -146,19 +158,31 @@ ASTNode *ast_make_root()
 	return target;
 }
 
+ASTNode *ast_make_block(char *block_type)
+{
+	printf("Making block of type: %s\n", block_type);
+	ASTNode *target = init_ast_node(AST_BLOCK);
+	target->block_type = strdup(block_type);
+	return target;
+}
+
+ASTNode *ast_make_default_arg()
+{
+	ASTNode *target = init_ast_node(AST_DEFAULT_ARG);
+	return target;
+}
+
 ASTNode *ast_make_func_call(char *function_name)
 {
+	printf("Function call to: %s\n", function_name);
 	ASTNode *target = init_ast_node(AST_FUNCTION_CALL);
 	target->function_name = strdup(function_name);
-
-	printf("Function call to: %s\n", function_name);
 	return target;
 }
 
 ASTNode *ast_make_number(int value)
 {
 	printf("Creating number: %d\n", value);
-
 	ASTNode *target = init_ast_node(AST_NUMBER);
 	target->number_value = value;
 	return target;
