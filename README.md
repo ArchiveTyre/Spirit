@@ -9,7 +9,7 @@ A little compiler.
 > Right now, only parsing the file into an AST.
 I'll start with the C/C++ backend now.
 
-###### Why?
+##### Why?
 > Why not? (^.^)
 
 ## How to compile
