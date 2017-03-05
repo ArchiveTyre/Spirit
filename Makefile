@@ -1,6 +1,6 @@
 ################################
 #
-# Configureations: 
+# Configureations:
 #
 
 # Compilerd to use.
@@ -62,8 +62,8 @@ SRCDIRS=src
 #	Project started. Compiles code with automatic detection.
 #
 ################################
-# 
-# Code: 
+#
+# Code:
 #
 
 # Colors
@@ -74,9 +74,12 @@ export ccend=$(shell tput sgr0)
 
 # If debug is set then there are some additional flags.
 ifdef DEBUG
-	COMMON_FLAGS+= -O0 -g
+	COMMON_FLAGS+= -O0 -g -DDEBUG
+	BISON_FLAGS+= -t
+	FLEX_FLAGS+= -d
 else
 	COMMON_FLAGS+= -O3
+	FLEX_FLAGS+= -Cfr
 endif
 
 # If PKG_LIBS is set then execute pkg-config.
@@ -91,6 +94,8 @@ C_FLAGS+= $(COMMON_FLAGS)
 CPP_FLAGS+= $(EXTRA_CPP_FLAGS)
 CPP_FLAGS+= $(COMMON_FLAGS)
 LD_FLAGS+= $(COMMON_FLAGS)
+BISON_FLAGS+=
+FLEX_FLAGS+=
 
 # Get the target name.
 CASEEXEC=$(shell basename $(CURDIR))
@@ -112,7 +117,7 @@ CPP_OBJECTS=$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(CPP_SOURCES))))
 BISON_OBJECTS=$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(BISON_SOURCES))))
 FLEX_OBJECTS=$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(FLEX_SOURCES))))
 
-ALL_OBJECTS:= $(BISON_OBJECTS) $(FLEX_OBJECTS) $(C_OBJECTS) $(CPP_OBJECTS) 
+ALL_OBJECTS:= $(BISON_OBJECTS) $(FLEX_OBJECTS) $(C_OBJECTS) $(CPP_OBJECTS)
 
 # To make sure that the directory tree of all the src directroies exists in the build directory
 SUBSRCDIRS+=$(foreach dir,$(SRCDIRS),$(shell find $(dir)/ -type d))
@@ -126,7 +131,7 @@ LD_FLAGS+=$(addprefix -l,$(LIBS))
 
 # Add the SRCDIRS to the include path.
 C_FLAGS+=$(foreach dir,$(SRCDIRS),-I $(dir) )
-C_FLAGS+=$(foreach dir,$(DIRECTORIES),-I $(dir) ) 
+C_FLAGS+=$(foreach dir,$(DIRECTORIES),-I $(dir) )
 
 # The goal is to get the executable.
 all: $(EXEC)
@@ -155,12 +160,12 @@ help:
 
 # The executable needs the object files.
 # To create the executable we execute the linker
-$(EXEC): $(DIRECTORIES) $(ALL_OBJECTS) 
+$(EXEC): $(DIRECTORIES) $(ALL_OBJECTS)
 	$(LD) -lfl $(ALL_OBJECTS) $(LD_FLAGS) -o $@
 	@echo "$(ccgreen)DONE: Linking executable."
 	@echo "$(ccend)"
 
-$(TEST_EXEC): $(DIRECTORIES) $(ALL_OBJECTS) 
+$(TEST_EXEC): $(DIRECTORIES) $(ALL_OBJECTS)
 	$(LD) -lfl $(ALL_OBJECTS) $(LD_FLAGS) -o $(OBJDIR)/$@
 
 # Automatic dependency graph generation
@@ -175,10 +180,10 @@ $(OBJDIR)/%.o: %.cpp
 $(OBJDIR)/%.o: %.c
 	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.d,$@) $< -o $@
 $(OBJDIR)/%.o: %.y
-	bison -t --defines=$(patsubst %.o,%.tab.h,$@) --output=$(patsubst %.o,%.tab.c,$@) $< 
+	bison $(BISON_FLAGS) --defines=$(patsubst %.o,%.tab.h,$@) --output=$(patsubst %.o,%.tab.c,$@) $<
 	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.y.d,$@) $(patsubst %.o,%.tab.c,$@) -o $@
-$(OBJDIR)/%.o: %.l  
-	flex -d --outfile=$(patsubst %.o,%.yy.c,$@) $<
+$(OBJDIR)/%.o: %.l
+	flex $(FLEX_FLAGS) --outfile=$(patsubst %.o,%.yy.c,$@) $<
 	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.l.d,$@) $(patsubst %.o,%.yy.c,$@) -o $@
 
 

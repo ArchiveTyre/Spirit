@@ -7,6 +7,7 @@ fun Main:
 	print (Escape())
 	DoSomethingElse()
 	print (LOL)
+	a = 4 * (4 + 2)
 fun DoSomething:
 	print ("Something is being done")
 

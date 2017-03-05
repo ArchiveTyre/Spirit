@@ -2,6 +2,7 @@
 #include <string.h>
 #include "grammar.tab.h"
 #include "ast.h"
+#include "symtbl.h"
 
 /**
  * Just prints the help information. (^.^)
@@ -22,16 +23,28 @@ static int parse_file(char *filename)
 	/* Call lexer. */
 	extern int yylineno;
 	extern FILE *yyin;
+	extern void yylex_destroy();
 
 	ast_root_node = ast_make_root();
 	ast_prev_node = ast_root_node;
+	global_symbol_table = sym_define("root", "root", NULL);
 
 	yyin = fopen(filename, "r");
 	yyparse();
 	fclose(yyin);
-	printf("Parsed: %d lines!\n", --yylineno);
+	printf("Parsed: %d lines!\n", yylineno - 1);
 
+#if DEBUG
 	debug_ast_node(ast_root_node, 0);
+#endif
+	free_ast_node(ast_root_node);
+	free_sym(global_symbol_table);
+
+	yylex_destroy();
+
+#if DEBUG
+	printf("Cake delicious desu. You must eait it ~desu.\n");
+#endif
 	return 0;
 
 }
@@ -39,11 +52,14 @@ static int parse_file(char *filename)
 int main(int argc, char *args[])
 {
 
-	char* output_file = NULL;
+	typedef struct FilesList FilesList;
+	struct FilesList {
+		FilesList *prev;
+		char *filename;
+	};
 
-	//FIXME: This is ugly \/
-	char* input_files[30];
-	int input_files_index = 0;
+	FilesList *files_list = NULL;
+	char* output_file = NULL;
 
 	/* Parse the arguments. */
 	for(int arg_index = 1; arg_index < argc; arg_index++) {
@@ -63,17 +79,20 @@ int main(int argc, char *args[])
 			}
 		}
 		else {
-			input_files[input_files_index] = arg_to_parse;
-			input_files_index++;
+			printf("Ins: %s\n", arg_to_parse);
+			files_list = &(FilesList){files_list, arg_to_parse};
 		}
 	}
 
 	printf("Output: %s\n", output_file);
 
 	/* Parse each file given as input. */
-	for(int i = 0; i < input_files_index; i++) {
-		printf("Input %d: %s\n", i, input_files[i]);
-		parse_file(input_files[i]);
+	while(files_list != NULL) {
+#if DEBUG
+		printf("Parsing: %s\n", files_list->filename);
+#endif
+		parse_file(files_list->filename);
+		files_list = files_list->prev;
 	}
 
 	return 0;

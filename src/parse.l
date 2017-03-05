@@ -28,7 +28,6 @@ extern int line_indent;
 
 "/*" {
 	yy_push_state(comment_state);
-	printf("A comment desu.");
 }
 <comment_state>{
 	"\\/" {
@@ -57,7 +56,9 @@ extern int line_indent;
 \t {
 	// FIXME: If someone uses a tab after the sentence we'll have trouble!
 	++line_indent;
+#ifdef DEBUG
 	printf("Inc indentation...\n");
+#endif
 }
 
 : {
@@ -98,7 +99,6 @@ extern int line_indent;
 }
 
 [a-zA-Z0-9]+ {
-	printf("Saw a symbol: %s\n", yytext);
 	yylval.tok_symbol_name = strdup(yytext);
 	return TOKEN_SYMBOL;
 }
