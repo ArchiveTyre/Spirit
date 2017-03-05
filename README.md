@@ -1,14 +1,15 @@
 # Cheri
 A little compiler.
 <br><br><br>
-What is this?
+
+##### What is this?
 > Nothing special. Just a little compiler that compiles to C++ code for portability.
 
-What is implemented?
+##### What is implemented?
 > Right now, only parsing the file into an AST.
 I'll start with the C/C++ backend now.
 
-Why?
+###### Why?
 > Why not? (^.^)
 
 ## How to compile
