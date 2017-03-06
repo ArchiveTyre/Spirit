@@ -46,9 +46,9 @@ void free_sym(SymbolTableEntry *node)
 {
 	free(node->symbol_name);
 	free(node->symbol_type);
-	if (node->first_child)
+	if (node->first_child != NULL)
 		free(node->first_child);
-	if (node->next_sibling)
+	if (node->next_sibling != NULL)
 		free(node->next_sibling);
 	free(node);
 }

@@ -1,7 +1,7 @@
 #include "ast.h"
-#include "stdlib.h"
-#include "stdio.h"
-#include "string.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 void debug_ast_node(ASTNode *node, int indent)
 {
@@ -39,7 +39,7 @@ void debug_ast_node(ASTNode *node, int indent)
 			printf("\"%s\"", node->string_value);
 			break;
 		default:
-			printf("ERROR: Compiler error (0) in switch!, %d", node->ast_type);
+			printf("ERROR: Compiler error switch number 0!, %d\n", node->ast_type);
 	}
 
 	if (node->args_next != NULL) {
@@ -70,7 +70,7 @@ void free_ast_node(ASTNode *target)
 			break;
 		case AST_NONE:
 		default:
-			printf("ERROR: Compiler error (1) in switch!");
+			printf("ERROR: Compiler error in switch number 1!, %d\n", target->ast_type);
 	}
 	if (target->name != NULL)
 		free(target->name);
@@ -83,6 +83,46 @@ void free_ast_node(ASTNode *target)
 	if (target->body_first_child != NULL)
 		free_ast_node(target->body_first_child);
 	free(target);
+}
+
+void ast_make_sym_tree(ASTNode *node)
+{
+	if (node->parent_node == NULL && node != ast_root_node) {
+		printf("ERROR: Compiler error: Node has no parent.\n");
+		return;
+	}
+	switch(node->ast_type)
+	{
+		case AST_BLOCK:
+			if (strcmp(node->name, "class") == 0) {
+				node->symentry = sym_define("test", node->name, NULL);
+			}
+			else if(strcmp(node->name, "fun") == 0) {
+				node->symentry = sym_define(node->args_chain->name,
+					node->name, node->parent_node->symentry);
+			}
+			else {
+				printf("ERROR: Unknown block used: %s\n", node->name);
+			}
+			break;
+		default:
+			printf("ERROR: Compiler error in switch number 3!, %d\n", node->ast_type);
+	}
+	if (node->args_chain != NULL) {
+		/* Args are children of the function call. */
+		node->args_chain->parent_node = node;
+		ast_make_sym_tree(node->args_chain);
+	}
+	if (node->args_next != NULL) {
+		/* Siblings share their parents. (^.^)*/
+		node->args_chain->parent_node = node->parent_node;
+		ast_make_sym_tree(node->args_next);
+	}
+	if (node->body_first_child != NULL)
+		ast_make_sym_tree(node->body_first_child);
+	if (node->body_next_sibling != NULL)
+		ast_make_sym_tree(node->body_next_sibling);
+
 }
 
 extern int line_indent;
@@ -138,14 +178,17 @@ static ASTNode *init_ast_node(EAstType type)
 	target->body_next_sibling = NULL;
 	target->body_first_child = NULL;
 	target->name = NULL;
+	target->symentry = NULL;
+	target->parent_node = NULL;
 	return target;
 }
 
 ASTNode *ast_make_root()
 {
 	ASTNode *target = init_ast_node(AST_BLOCK);
-	target->name = strdup("root");
+	target->name = strdup("class");
 	target->indent_level = -1;
+	target->symentry = sym_define("root", "class", NULL);
 
 	/* When a root node is created it's always the newest one. */
 	ast_prev_node = target;

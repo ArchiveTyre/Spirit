@@ -1,8 +1,8 @@
 %{
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "ast.h"
-#include "stdlib.h"
-#include "string.h"
 
 int yyerror(char *str);
 int yylex(void);
@@ -13,25 +13,26 @@ int line_indent = 0;
 
 %union{
 	int tok_int_val;
-	char *tok_string_val;
+
+	/* This can be used by strings too.*/
+	char *tok_as_string;
+	/*char *tok_string_val;
 	char *tok_op_val;
-	char *tok_symbol_name;
+	char *tok_symbol_name;*/
 
 	struct ASTNode *tok_ast_node;
 
 }
 
 %token <tok_int_val> TOKEN_INT_LITERAL
-%token <tok_string_val> TOKEN_STRING
-%token <tok_symbol_name> TOKEN_SYMBOL;
+%token <tok_as_string> TOKEN_STRING
+%token <tok_as_string> TOKEN_SYMBOL;
 
 %token TOKEN_NEWLINE
 %token TOKEN_COLON
 %token TOKEN_ASSIGN
 %token TOKEN_INDENT
 %token TOKEN_COMMA
-
-
 
 %type <tok_int_val> t_num_exp
 %type <tok_ast_node> t_any_exp

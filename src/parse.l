@@ -2,7 +2,7 @@
 
 // FIXME: Maybe we should name "symbols" to "identifiers".
 
-#include "stdio.h"
+#include <stdio.h>
 
 /* Generated from "grammar.y". */
 #include "grammar.tab.h"
@@ -49,7 +49,7 @@ extern int line_indent;
 }
 
 \"(\\.|[^"])*\" { //" /* For strings. */
-	yylval.tok_string_val = strdup(yytext);
+	yylval.tok_as_string = strdup(yytext);
 	return TOKEN_STRING;
 }
 
@@ -99,7 +99,7 @@ extern int line_indent;
 }
 
 [a-zA-Z0-9]+ {
-	yylval.tok_symbol_name = strdup(yytext);
+	yylval.tok_as_string = strdup(yytext);
 	return TOKEN_SYMBOL;
 }
 

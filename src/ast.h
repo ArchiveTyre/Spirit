@@ -1,4 +1,5 @@
 #pragma once
+#include "symtbl.h"
 
 typedef enum {
 	AST_NONE,
@@ -20,10 +21,10 @@ struct ASTNode {
 	ASTNode *body_next_sibling;
 	ASTNode *body_first_child;
 	ASTNode *args_next;
+	SymbolTableEntry *symentry;
 	/* This can be used by: AST_OPERATION, AST_SYMBOL, AST_FUNCTION_CALL, AST_BLOCK. */
 	char *name;
-
-	/* For AST_BLOCK. */
+	/* Used by expressions and AST_BLOCK. But also set in the ast_make_sym_tree. */
 	ASTNode *parent_node;
 
 	/* For AST_FUNCTION_CALL and AST_BLOCK. */
@@ -42,14 +43,32 @@ ASTNode *ast_root_node;
 ASTNode *ast_prev_node;
 
 /**
+ * Gives a symbol entry to all child nodes.
+ */
+void ast_make_sym_tree(ASTNode *node);
+
+/**
  * This function automatically places a statement nodes or a block nodes in the
  * right places.
  */
 void ast_insert_node(ASTNode *node);
 
+/**
+ * Prints out the AST given in a tree format.
+ */
 void debug_ast_node(ASTNode *node, int indent);
+
+/**
+ * Frees the target node along with it's siblings, children
+ * and function call chain.
+ */
 void free_ast_node(ASTNode *target);
 
+/**
+ * Creates a function call. Function arguments are added
+ * later on.
+ * Example:
+ */
 ASTNode *ast_make_func_call(char *function_name);
 
 /**
@@ -63,6 +82,7 @@ ASTNode *ast_make_number(int value);
  * Creates a symbol.
  * Symbols can be seen as variables for the most part.
  * Example: var
+ *              ^
  */
 ASTNode *ast_make_symbol(char *symbol);
 
@@ -92,6 +112,6 @@ ASTNode *ast_make_block(char *block_type);
 ASTNode *ast_make_root();
 
 /**
- * Default args should be replaces at compile time.
+ * Default args should be replaced at compile time.
  */
 ASTNode *ast_make_default_arg();

@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+ * You can access the global symbol table by accessing ast_root_node->symentry.
+ */
+
 typedef struct SymbolTableEntry SymbolTableEntry;
 struct SymbolTableEntry {
 
@@ -10,7 +14,7 @@ struct SymbolTableEntry {
 	SymbolTableEntry *parent_table;
 };
 
-SymbolTableEntry *global_symbol_table;
+//SymbolTableEntry *global_symbol_table;
 SymbolTableEntry *newest_symbol_table;
 
 /**
