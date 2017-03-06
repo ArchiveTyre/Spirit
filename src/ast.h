@@ -5,7 +5,6 @@ typedef enum {
 	AST_SYMBOL,
 	AST_FUNCTION_CALL,
 	AST_FUNCTION_ARG,
-	AST_OPERATION,
 	AST_NUMBER,
 	AST_STRING,
 	AST_BLOCK,
@@ -26,10 +25,6 @@ struct ASTNode {
 
 	/* For AST_BLOCK. */
 	ASTNode *parent_node;
-
-	/* For AST_OPERATION. */
-	ASTNode *left_ast;
-	ASTNode *right_ast;
 
 	/* For AST_FUNCTION_CALL and AST_BLOCK. */
 	ASTNode *args_chain;
@@ -78,7 +73,7 @@ ASTNode *ast_make_symbol(char *symbol);
 ASTNode *ast_make_string(char *value);
 
 /**
- * Makes an operator.
+ * Makes an operator. Which is more like an infix function call.
  * Examples: +, -, /, *, etc.
  */
 ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r);

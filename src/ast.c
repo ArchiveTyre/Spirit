@@ -35,13 +35,6 @@ void debug_ast_node(ASTNode *node, int indent)
 		case AST_NUMBER:
 			printf("%d", node->number_value);
 			break;
-		case AST_OPERATION:
-			printf("(");
-			debug_ast_node(node->left_ast, -1);
-			printf(", ");
-			debug_ast_node(node->right_ast, -1);
-			printf(")");
-			break;
 		case AST_STRING:
 			printf("\"%s\"", node->string_value);
 			break;
@@ -72,9 +65,6 @@ void free_ast_node(ASTNode *target)
 			break;
 		case AST_SYMBOL:
 			break;
-		case AST_OPERATION:
-			free_ast_node(target->left_ast);
-			free_ast_node(target->right_ast);
 			break;
 		case AST_FUNCTION_CALL:
 			break;
@@ -208,10 +198,10 @@ ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r)
 #ifdef DEBUG
 	printf("Creating OP: %s\n", op);
 #endif
-	ASTNode *target = init_ast_node(AST_OPERATION);
+	ASTNode *target = init_ast_node(AST_FUNCTION_CALL);
 	target->name = strdup(op);
-	target->left_ast = l;
-	target->right_ast = r;
+	target->args_chain = l;
+	l->args_next = r;
 	return target;
 }
 
