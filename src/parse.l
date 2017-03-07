@@ -81,6 +81,10 @@ extern int line_indent;
 	return TOKEN_DIVIDE;
 }
 
+"==" {
+	return TOKEN_COMPARISON;
+}
+
 "=" {
 	return TOKEN_ASSIGN;
 }

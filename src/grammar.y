@@ -49,6 +49,7 @@ int line_indent = 0;
 %nonassoc TOKEN_COLON
 %nonassoc TOKEN_SYMBOL
 
+%nonassoc TOKEN_COMPARISON
 %left TOKEN_ASSIGN
 %left TOKEN_MINUS TOKEN_PLUS
 %left TOKEN_MULTIPLY TOKEN_DIVIDE
@@ -91,6 +92,7 @@ t_any_exp:		TOKEN_SYMBOL {$$ = ast_make_symbol($1); free($1);}
 				| t_any_exp TOKEN_MULTIPLY t_any_exp {$$ = ast_make_op("*", $1, $3);}
 				| t_any_exp TOKEN_DIVIDE t_any_exp {$$ = ast_make_op("/", $1, $3);}
 				| t_any_exp TOKEN_ASSIGN t_any_exp {$$ = ast_make_op("=", $1, $3);}
+				| t_any_exp TOKEN_COMPARISON t_any_exp {$$ = ast_make_op("==", $1, $3);}
 				| TOKEN_LPAREN t_any_exp TOKEN_RPAREN {$$ = $2;}
 				| t_func_call {$$ = $1;}
 				;

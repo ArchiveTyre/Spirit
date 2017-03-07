@@ -95,7 +95,8 @@ void ast_make_sym_tree(ASTNode *node)
 	{
 		case AST_BLOCK:
 			if (strcmp(node->name, "class") == 0) {
-				node->symentry = sym_define("test", node->name, NULL);
+				node->symentry = sym_define(node->args_chain->string_value,
+					node->name, NULL);
 			}
 			else if(strcmp(node->name, "fun") == 0) {
 				node->symentry = sym_define(node->args_chain->name,
@@ -183,12 +184,13 @@ static ASTNode *init_ast_node(EAstType type)
 	return target;
 }
 
-ASTNode *ast_make_root()
+ASTNode *ast_make_root(char *classname)
 {
 	ASTNode *target = init_ast_node(AST_BLOCK);
 	target->name = strdup("class");
+	target->args_chain = ast_make_string(classname);
 	target->indent_level = -1;
-	target->symentry = sym_define("root", "class", NULL);
+	//target->symentry = sym_define("root", "class", NULL);
 
 	/* When a root node is created it's always the newest one. */
 	ast_prev_node = target;
