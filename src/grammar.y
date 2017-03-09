@@ -13,12 +13,7 @@ int line_indent = 0;
 
 %union{
 	int tok_int_val;
-
-	/* This can be used by strings too.*/
 	char *tok_as_string;
-	/*char *tok_string_val;
-	char *tok_op_val;
-	char *tok_symbol_name;*/
 
 	struct ASTNode *tok_ast_node;
 
@@ -100,16 +95,19 @@ t_any_exp:		TOKEN_SYMBOL {$$ = ast_make_symbol($1); free($1);}
 /* Blocks end with a colon. */
 t_block:		TOKEN_SYMBOL t_call_args {
 					$$ = ast_make_block($1);
-					$$->args_chain = $2;}
+					$$->args_chain = $2;
+					free($1);}
 				;
 
 /* A basic function call. */
 t_func_call:	TOKEN_SYMBOL TOKEN_LPAREN t_call_args TOKEN_RPAREN {
 	   				$$ = ast_make_func_call($1);
-					$$->args_chain = $3;}
+					$$->args_chain = $3;
+					free($1);}
 				| TOKEN_SYMBOL t_any_exp {
 					$$ = ast_make_func_call($1);
-					$$->args_chain = $2;}
+					$$->args_chain = $2;
+					free($1);}
 	   			;
 
 /* Tries to connect one arg with another. A function could have no arguments. */

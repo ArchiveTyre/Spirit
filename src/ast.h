@@ -1,5 +1,6 @@
 #pragma once
 #include "symtbl.h"
+#include <stdbool.h>
 
 typedef enum {
 	AST_NONE,
@@ -18,6 +19,7 @@ struct ASTNode {
 	/* Genreral stuff. */
 	EAstType ast_type;
 	int indent_level;
+	int line_no;
 	ASTNode *body_next_sibling;
 	ASTNode *body_first_child;
 	ASTNode *args_next;
@@ -56,7 +58,7 @@ void ast_insert_node(ASTNode *node);
 /**
  * Prints out the AST given in a tree format.
  */
-void debug_ast_node(ASTNode *node, int indent);
+void debug_ast_node(ASTNode *node, bool in_expr, int indent);
 
 /**
  * Frees the target node along with it's siblings, children

@@ -3,12 +3,16 @@
 #include <stdio.h>
 #include <string.h>
 
-void debug_ast_node(ASTNode *node, int indent)
+void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 {
 	if (node == NULL) {
 		printf("null");
 		return;
 	}
+
+	if (!in_expr)
+		printf("L:%03d,i%01d: ", node->line_no, node->indent_level);
+
 	if (indent != -1)
 		for(int i = 0; i < indent; i++)
 			putchar('\t');
@@ -22,12 +26,12 @@ void debug_ast_node(ASTNode *node, int indent)
 			break;
 		case AST_FUNCTION_CALL:
 			printf("(");
-			debug_ast_node(node->args_chain, -1);
+			debug_ast_node(node->args_chain, true, -1);
 			printf(")");
 			break;
 		case AST_BLOCK:
 			printf(" ");
-			debug_ast_node(node->args_chain, -1);
+			debug_ast_node(node->args_chain, true, -1);
 			putchar(':');
 			break;
 		case AST_SYMBOL:
@@ -44,20 +48,22 @@ void debug_ast_node(ASTNode *node, int indent)
 
 	if (node->args_next != NULL) {
 		printf(", ");
-		debug_ast_node(node->args_next, -1);
+		debug_ast_node(node->args_next, true, -1);
 	}
 
 	if (indent != -1)
 		putchar('\n');
 	if (node->body_first_child != NULL)
-		debug_ast_node(node->body_first_child, indent+1);
+		debug_ast_node(node->body_first_child, false, indent+1);
 	if (node->body_next_sibling != NULL)
-		debug_ast_node(node->body_next_sibling, indent);
+		debug_ast_node(node->body_next_sibling, false, indent);
 }
 
 void free_ast_node(ASTNode *target)
 {
 	switch(target->ast_type) {
+		case AST_DEFAULT_ARG:
+			break;
 		case AST_BLOCK:
 			break;
 		case AST_STRING:
@@ -75,7 +81,7 @@ void free_ast_node(ASTNode *target)
 	if (target->name != NULL)
 		free(target->name);
 	if (target->args_chain != NULL)
-		free(target->args_chain);
+		free_ast_node(target->args_chain);
 	if (target->args_next != NULL)
 		free_ast_node(target->args_next);
 	if (target->body_next_sibling != NULL)
@@ -102,9 +108,27 @@ void ast_make_sym_tree(ASTNode *node)
 				node->symentry = sym_define(node->args_chain->name,
 					node->name, node->parent_node->symentry);
 			}
+			else if (strcmp(node->name, "if") == 0) {
+
+			}
+			else if (strcmp(node->name, "else") == 0) {
+
+			}
+
+			// FIXME: This error is reported else where anyway.
+			// We could just remove this so that we don't have any empty blocks.
 			else {
 				printf("ERROR: Unknown block used: %s\n", node->name);
 			}
+			break;
+		case AST_SYMBOL:
+			// FIXME: Do symbol lookup.
+			//node->symentry = sym_define(node->name, strdup("auto"), node->parent_node->symentry);
+			break;
+		case AST_FUNCTION_CALL:
+		case AST_DEFAULT_ARG:
+		case AST_NUMBER:
+		case AST_STRING:
 			break;
 		default:
 			printf("ERROR: Compiler error in switch number 3!, %d\n", node->ast_type);
@@ -116,7 +140,7 @@ void ast_make_sym_tree(ASTNode *node)
 	}
 	if (node->args_next != NULL) {
 		/* Siblings share their parents. (^.^)*/
-		node->args_chain->parent_node = node->parent_node;
+		node->args_next->parent_node = node->parent_node;
 		ast_make_sym_tree(node->args_next);
 	}
 	if (node->body_first_child != NULL)
@@ -171,9 +195,12 @@ void ast_insert_node(ASTNode *node)
 
 static ASTNode *init_ast_node(EAstType type)
 {
+	extern int yylineno;
+
 	ASTNode *target = malloc(sizeof(ASTNode));
 	target->ast_type = type;
 	target->indent_level = line_indent;
+	target->line_no = yylineno;
 	target->args_next = NULL;
 	target->args_chain = NULL;
 	target->body_next_sibling = NULL;

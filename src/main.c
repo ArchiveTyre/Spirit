@@ -31,12 +31,12 @@ static int parse_file(char *filename, FILE *out)
 	/* Get the classname based of the basnemae of the filename. */
 	// FIXME: Add error checking here.
 	char *simple_filename_free = strdup(filename);
-	char *simple_filename = basename(strdup(simple_filename_free));
+	char *simple_filename = basename(simple_filename_free);
 
 	/* Finds the first occurance of "." and copies everything up until that point. */
 	char *new_classname = strndup(simple_filename,
 		strchr(simple_filename, '.') - simple_filename);
-	printf("Classname: %s\n", new_classname);
+	printf("Compiling class: %s\n", new_classname);
 
 	/* The parse needs somewhere to put the AST into. */
 	ast_root_node = ast_make_root(new_classname);
@@ -47,17 +47,17 @@ static int parse_file(char *filename, FILE *out)
 	// FIXME: Check result of function for errors.
 	yyparse();
 	fclose(yyin);
-	printf("Parsed: %d lines!\n", yylineno - 1);
+	printf("[DONE] Parsed: %d lines!\n", yylineno - 1);
 
 #if DEBUG
-	debug_ast_node(ast_root_node, 0);
+	debug_ast_node(ast_root_node, false, 0);
 #endif
 
 	/* Before we can compile we need to create the symbol tree. */
 	ast_make_sym_tree(ast_root_node);
 
 	/* Then we can compile into a C/C++ file*/
-	compile_ast_to_cpp(ast_root_node, out);
+	compile_ast_to_cpp(ast_root_node, out, false, 0);
 
 	/* Free the AST and the symbol table. */
 	free_sym(ast_root_node->symentry);
@@ -67,6 +67,8 @@ static int parse_file(char *filename, FILE *out)
 	free(new_classname);
 
 	yylex_destroy();
+
+	printf("[DONE] Compiling: %s\n", filename);
 
 #if DEBUG
 	printf("Cake delicious desu. You must eait it ~desu.\n");
