@@ -65,6 +65,10 @@ extern int line_indent;
 	return TOKEN_COLON;
 }
 
+"->" {
+	return TOKEN_ARROW;
+}
+
 "+" {
 	return TOKEN_PLUS;
 }

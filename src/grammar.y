@@ -31,6 +31,7 @@ int line_indent = 0;
 
 %type <tok_int_val> t_num_exp
 %type <tok_ast_node> t_any_exp
+%type <tok_ast_node> t_func_return_type
 %type <tok_ast_node> t_func_call
 %type <tok_ast_node> t_func_def
 %type <tok_ast_node> t_call_args
@@ -42,17 +43,15 @@ int line_indent = 0;
  * to evluate & reduce tokens.
  */
 
+%nonassoc TOKEN_ARROW
 %nonassoc TOKEN_FUNCTION
-
 %nonassoc TOKEN_LPAREN TOKEN_RPAREN
 %nonassoc TOKEN_COLON
 %nonassoc TOKEN_SYMBOL
-
 %nonassoc TOKEN_COMPARISON
 %left TOKEN_ASSIGN
 %left TOKEN_MINUS TOKEN_PLUS
 %left TOKEN_MULTIPLY TOKEN_DIVIDE
-
 
 %start program
 
@@ -71,10 +70,10 @@ line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
 				;
 
 /* A tuple member could have an assigned value. */
-t_tuple_member:	%empty {$$ = ast_make_default_arg();}
-				| TOKEN_SYMBOL {$$ = ast_make_symbol($1); free($1);}
+t_tuple_member:	%empty {$$ = ast_make_type_specifier("void");}
+				| TOKEN_SYMBOL {$$ = ast_make_type_specifier($1); free($1);}
 				| TOKEN_SYMBOL TOKEN_ASSIGN t_any_exp {
-					$$ = ast_make_symbol($1);
+					$$ = ast_make_type_specifier($1);
 					ast_insert_arg($$, $3);
 					free($1);
 				}
@@ -91,16 +90,36 @@ t_tuple_members:
 				}
 				;
 
+/* Can either be emty. */
+t_func_return_type:
+				%empty {$$ = ast_make_tuple(ast_make_type_specifier("void"));}
+				| TOKEN_ARROW t_tuple_members {
+					$$ = ast_make_tuple($2);
+				}
+				;
+
 /* A function has a name, arguments, and a return type. */
-t_func_def:		TOKEN_FUNCTION TOKEN_SYMBOL {
+t_func_def:		TOKEN_FUNCTION TOKEN_SYMBOL t_func_return_type {
 					$$ = ast_make_block("fun");
+					/* Insert function name as first arg. */
 					ast_insert_arg($$, ast_make_symbol($2));
+
+					/* Insert function return type as second arg. */
+					ast_insert_arg($$, $3);
+
 					free($2);
 				}
-				| TOKEN_FUNCTION TOKEN_SYMBOL TOKEN_LPAREN t_tuple_members TOKEN_RPAREN {
+				| TOKEN_FUNCTION TOKEN_SYMBOL TOKEN_LPAREN t_tuple_members TOKEN_RPAREN t_func_return_type {
 					$$ = ast_make_block("fun");
+
+					/* Insert function name as first arg. */
 					ast_insert_arg($$, ast_make_symbol($2));
-					ast_insert_arg($$, $4);
+
+					/* Insert function return type as second arg. */
+					ast_insert_arg($$, $6);
+
+					/* Insert the function args chain at the end. */
+					ast_insert_arg($$, ast_make_tuple($4));
 					free($2);
 				}
 				;

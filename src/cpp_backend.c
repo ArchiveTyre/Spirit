@@ -1,6 +1,7 @@
 #include "cpp_backend.h"
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 /**
  * Tries to compile a special case function.
@@ -32,8 +33,13 @@ static void compile_sym_to_cpp(SymbolTableEntry *sym, FILE *out, int indent)
 			fputs("{};\n", out);
 	}
 	else if (strcmp("fun", sym->symbol_type) == 0) {
-		if (!compile_special_sym_function(sym, out))
-			fprintf(out, "void *%s();\n", sym->symbol_name);
+		if (!compile_special_sym_function(sym, out)) {
+
+			assert(sym->symbol_info != NULL);
+
+			char* return_type = sym->symbol_info->info_text;
+			fprintf(out, "%s %s();\n", return_type, sym->symbol_name);
+		}
 	}
 	else {
 		printf("ERROR: Undefined type: %s\n", sym->symbol_type);
@@ -67,12 +73,21 @@ static void compile_block_to_cpp(ASTNode *ast, FILE* out)
 		fputs("else", out);
 	}
 	else if (strcmp(ast->name, "fun") == 0) {
+
+		/* Override special function "construct. ". */
 		if (strcmp(ast->args_chain->name, "construct") == 0) {
-			char *classname = ast->parent_node->args_chain->string_value;
-			fprintf(out, "%s::%s()", classname, classname);
+			char *class_name = ast->parent_node->args_chain->string_value;
+			fprintf(out, "%s::%s()", class_name, class_name);
 		}
+
+		/* Normal function declaration. */
 		else {
-			fprintf(out, "void *%s::%s()", ast->parent_node->symentry->symbol_name, ast->args_chain->name);
+
+			char *return_type = ast->symentry->symbol_info->info_text;
+			char *class_name = ast->parent_node->symentry->symbol_name;
+			char *function_name = ast->args_chain->name;
+
+			fprintf(out, "%s %s::%s()", return_type, class_name, function_name);
 		}
 	}
 	else {

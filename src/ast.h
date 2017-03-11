@@ -4,14 +4,15 @@
 
 typedef enum {
 	AST_NONE,
-	AST_SYMBOL,
-	AST_FUNCTION_CALL,
-	AST_FUNCTION_ARG,
-	AST_NUMBER,
-	AST_STRING,
 	AST_BLOCK,
 	AST_DEFAULT_ARG,
+	AST_FUNCTION_ARG,
+	AST_FUNCTION_CALL,
+	AST_NUMBER,
+	AST_STRING,
+	AST_SYMBOL,
 	AST_TUPLE,
+	AST_TYPE_SPECIFIER,
 } EAstType;
 
 typedef struct ASTNode ASTNode;
@@ -36,7 +37,8 @@ struct ASTNode {
 	/* For AST_NUMBER. */
 	int number_value;
 
-	/* For AST_STRING*/
+	/* For AST_STRING. */
+	// FIXME: Use "name" instead.
 	char *string_value;
 
 
@@ -56,6 +58,9 @@ void ast_make_sym_tree(ASTNode *node);
  */
 void ast_auto_insert_node(ASTNode *node);
 
+void ast_insert_child_node(ASTNode *target_node, ASTNode *child_node);
+void ast_insert_arg(ASTNode *target_node, ASTNode *target_arg);
+
 /**
  * Prints out the AST given in a tree format.
  */
@@ -67,8 +72,29 @@ void debug_ast_node(ASTNode *node, bool in_expr, int indent);
  */
 void free_ast_node(ASTNode *target);
 
-void ast_insert_child_node(ASTNode *target_node, ASTNode *child_node);
-void ast_insert_arg(ASTNode *target_node, ASTNode *target_arg);
+/**
+ * Creates a new root node. This also sets ast_prev_node as
+ * the root node is always the first node.
+ * There can be nothing before the root node.
+ */
+ASTNode *ast_make_root();
+
+/**
+ * A block statement.
+ * Example: if, while, for, switch, etc.
+ */
+ASTNode *ast_make_block(char *block_type);
+
+/**
+ * Creates a type specifier.
+ */
+ASTNode *ast_make_type_specifier(char *type_name);
+
+/**
+ * Creates a tuple.
+ * Example: FIXME
+ */
+ ASTNode *ast_make_tuple(ASTNode *chain);
 
 /**
  * Creates a function call. Function arguments are added
@@ -78,10 +104,9 @@ void ast_insert_arg(ASTNode *target_node, ASTNode *target_arg);
 ASTNode *ast_make_func_call(char *function_name);
 
 /**
- * Creates a tuple.
- * Example: FIXME
+ * Default args should be replaced at compile time.
  */
-ASTNode *ast_make_tuple();
+ASTNode *ast_make_default_arg();
 
 /**
  * Creates a number.
@@ -89,6 +114,12 @@ ASTNode *ast_make_tuple();
  * need one, but because I'm feeling nice today: 77777777
  */
 ASTNode *ast_make_number(int value);
+
+/**
+ * Creates a string.
+ * Example: "You're only resorting to physical abuse because you can't prove that I'm wrong. ~ Armin"
+ */
+ASTNode *ast_make_string(char *value);
 
 /**
  * Creates a symbol.
@@ -99,31 +130,7 @@ ASTNode *ast_make_number(int value);
 ASTNode *ast_make_symbol(char *symbol);
 
 /**
- * Creates a string.
- * Example: "You're only resorting to physical abuse because you can't prove that I'm wrong. ~ Armin"
- */
-ASTNode *ast_make_string(char *value);
-
-/**
  * Makes an operator. Which is more like an infix function call.
  * Examples: +, -, /, *, etc.
  */
 ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r);
-
-/**
- * A block statement.
- * Example: if, while, for, switch, etc.
- */
-ASTNode *ast_make_block(char *block_type);
-
-/**
- * Creates a new root node. This also sets ast_prev_node as
- * the root node is always the first node.
- * There can be nothing before the root node.
- */
-ASTNode *ast_make_root();
-
-/**
- * Default args should be replaced at compile time.
- */
-ASTNode *ast_make_default_arg();

@@ -28,18 +28,18 @@ static int parse_file(char *filename, FILE *out)
 	extern FILE *yyin;
 	extern void yylex_destroy();
 
-	/* Get the classname based of the basnemae of the filename. */
+	/* Get the class name based of the basnemae of the filename. */
 	// FIXME: Add error checking here.
 	char *simple_filename_free = strdup(filename);
 	char *simple_filename = basename(simple_filename_free);
 
 	/* Finds the first occurance of "." and copies everything up until that point. */
-	char *new_classname = strndup(simple_filename,
+	char *new_class_name = strndup(simple_filename,
 		strchr(simple_filename, '.') - simple_filename);
-	printf("Compiling class: %s\n", new_classname);
+	printf("Compiling class: %s\n", new_class_name);
 
 	/* The parse needs somewhere to put the AST into. */
-	ast_root_node = ast_make_root(new_classname);
+	ast_root_node = ast_make_root(new_class_name);
 	ast_prev_node = ast_root_node;
 
 	/* Do the parsing. */
@@ -63,14 +63,14 @@ static int parse_file(char *filename, FILE *out)
 	compile_ast_to_cpp(ast_root_node, out, false, false, 0);
 
 	/* As the main module, run self. */
-	fprintf(out, "int main() {auto start = new %s(); return 0;}\n", new_classname);
+	fprintf(out, "int main() {auto start = new %s(); return 0;}\n", new_class_name);
 
 	/* Free the AST and the symbol table. */
 	free_sym(ast_root_node->symentry);
 	free_ast_node(ast_root_node);
 
 	free(simple_filename_free);
-	free(new_classname);
+	free(new_class_name);
 
 	yylex_destroy();
 

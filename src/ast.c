@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+extern int line_indent;
+
 void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 {
 	if (node == NULL) {
@@ -17,6 +19,10 @@ void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 		for(int i = 0; i < indent; i++)
 			putchar('\t');
 
+	if (node->ast_type == AST_TYPE_SPECIFIER) {
+		printf("->");
+	}
+
 	if (node->name != NULL)
 		printf("%s", node->name);
 
@@ -24,6 +30,11 @@ void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 		case AST_DEFAULT_ARG:
 			printf("default");
 			break;
+
+		case AST_TYPE_SPECIFIER:
+			break;
+
+		case AST_TUPLE:
 		case AST_FUNCTION_CALL:
 			printf("(");
 			debug_ast_node(node->args_chain, true, -1);
@@ -58,99 +69,6 @@ void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 	if (node->body_next_sibling != NULL)
 		debug_ast_node(node->body_next_sibling, false, indent);
 }
-
-void free_ast_node(ASTNode *target)
-{
-	switch(target->ast_type) {
-		case AST_DEFAULT_ARG:
-			break;
-		case AST_BLOCK:
-			break;
-		case AST_STRING:
-			free(target->string_value);
-			break;
-		case AST_SYMBOL:
-			break;
-			break;
-		case AST_FUNCTION_CALL:
-			break;
-		case AST_NONE:
-		default:
-			printf("ERROR: Compiler error in switch number 1!, %d\n", target->ast_type);
-	}
-	if (target->name != NULL)
-		free(target->name);
-	if (target->args_chain != NULL)
-		free_ast_node(target->args_chain);
-	if (target->args_next != NULL)
-		free_ast_node(target->args_next);
-	if (target->body_next_sibling != NULL)
-		free_ast_node(target->body_next_sibling);
-	if (target->body_first_child != NULL)
-		free_ast_node(target->body_first_child);
-	free(target);
-}
-
-void ast_make_sym_tree(ASTNode *node)
-{
-	if (node->parent_node == NULL && node != ast_root_node) {
-		printf("ERROR: Compiler error: Node has no parent.\n");
-		return;
-	}
-	switch(node->ast_type)
-	{
-		case AST_BLOCK:
-			if (strcmp(node->name, "class") == 0) {
-				node->symentry = sym_define(node->args_chain->string_value,
-					node->name, NULL);
-			}
-			else if(strcmp(node->name, "fun") == 0) {
-				node->symentry = sym_define(node->args_chain->name,
-					node->name, node->parent_node->symentry);
-			}
-			else if (strcmp(node->name, "if") == 0) {
-
-			}
-			else if (strcmp(node->name, "else") == 0) {
-
-			}
-
-			// FIXME: This error is reported else where anyway.
-			// We could just remove this so that we don't have any empty blocks.
-			else {
-				printf("ERROR: Unknown block used: %s\n", node->name);
-			}
-			break;
-		case AST_SYMBOL:
-			// FIXME: Do symbol lookup.
-			//node->symentry = sym_define(node->name, strdup("auto"), node->parent_node->symentry);
-			break;
-		case AST_FUNCTION_CALL:
-		case AST_DEFAULT_ARG:
-		case AST_NUMBER:
-		case AST_STRING:
-			break;
-		default:
-			printf("ERROR: Compiler error in switch number 3!, %d\n", node->ast_type);
-	}
-	if (node->args_chain != NULL) {
-		/* Args are children of the function call. */
-		node->args_chain->parent_node = node;
-		ast_make_sym_tree(node->args_chain);
-	}
-	if (node->args_next != NULL) {
-		/* Siblings share their parents. (^.^)*/
-		node->args_next->parent_node = node->parent_node;
-		ast_make_sym_tree(node->args_next);
-	}
-	if (node->body_first_child != NULL)
-		ast_make_sym_tree(node->body_first_child);
-	if (node->body_next_sibling != NULL)
-		ast_make_sym_tree(node->body_next_sibling);
-
-}
-
-extern int line_indent;
 
 void ast_auto_insert_node(ASTNode *node)
 {
@@ -212,6 +130,154 @@ void ast_insert_arg(ASTNode *target_node, ASTNode *target_arg)
 	target_arg->parent_node = target_node;
 }
 
+void ast_make_sym_tree(ASTNode *node)
+{
+	if (node->parent_node == NULL && node != ast_root_node) {
+		printf("ERROR: Compiler error: Node has no parent.\n");
+		abort();
+		return;
+	}
+
+	/* If this node has already created a symbol then we don't need to crate it. */
+	if (node->symentry == NULL)
+	{
+		switch(node->ast_type)
+		{
+			case AST_BLOCK:
+				if (strcmp(node->name, "class") == 0) {
+					node->symentry = sym_define(node->args_chain->string_value,
+						node->name, NULL);
+				}
+				else if(strcmp(node->name, "fun") == 0) {
+					node->symentry = sym_define(node->args_chain->name,
+						node->name, node->parent_node->symentry);
+
+					/* The return type is the second argument. */
+					char *return_type = node->args_chain->args_next->args_chain->name;
+					sym_add_info(node->symentry, return_type);
+				}
+				else if (strcmp(node->name, "if") == 0) {
+					node->symentry = sym_define("", "fun", node->parent_node->symentry);
+				}
+				else if (strcmp(node->name, "else") == 0) {
+					node->symentry = sym_define("", "else", node->parent_node->symentry);
+				}
+
+				// FIXME: This error is reported else where anyway.
+				// We could just remove this so that we don't have any empty blocks.
+				else {
+					printf("ERROR: Unknown block used: %s\n", node->name);
+				}
+				break;
+			case AST_SYMBOL:
+				// FIXME: Do symbol lookup.
+				//node->symentry = sym_define(node->name, strdup("auto"), node->parent_node->symentry);
+				node->symentry = sym_find(node->name, node->parent_node->symentry);
+				break;
+			case AST_TYPE_SPECIFIER:
+				node->symentry = sym_find(node->name, node->parent_node->symentry);
+				break;
+
+			/* Forward the symtable. */
+			case AST_TUPLE:
+			case AST_FUNCTION_CALL:
+			case AST_DEFAULT_ARG:
+			case AST_NUMBER:
+			case AST_STRING:
+				node->symentry = node->parent_node->symentry;
+				break;
+			default:
+				printf("ERROR: Compiler error in switch number 3!, %d\n", node->ast_type);
+				abort();
+		}
+	}
+
+	/* However, we might want to make sure that the parent_table is correct. Just in case. */
+	else if (node->parent_node != NULL){
+		node->symentry->parent_table = node->parent_node->symentry;
+	}
+
+	if (node->args_chain != NULL) {
+		/* Args are children of the function call. */
+		node->args_chain->parent_node = node;
+		ast_make_sym_tree(node->args_chain);
+	}
+	if (node->args_next != NULL) {
+		/* Siblings share their parents. (^.^)*/
+		node->args_next->parent_node = node->parent_node;
+		ast_make_sym_tree(node->args_next);
+	}
+	if (node->body_first_child != NULL)
+		ast_make_sym_tree(node->body_first_child);
+	if (node->body_next_sibling != NULL)
+		ast_make_sym_tree(node->body_next_sibling);
+
+}
+
+extern int line_indent;
+
+void ast_insert_node(ASTNode *node)
+{
+#ifdef DEBUG
+	printf("Inserting at indent: %d\n", line_indent);
+#endif
+
+	/* Descend. */
+	if (node->indent_level > ast_prev_node->indent_level) {
+		ASTNode **dest = &ast_prev_node->body_first_child;
+		while (*dest != NULL)
+			dest = &(*dest)->body_next_sibling;
+		*dest = node;
+		node->parent_node = ast_prev_node;
+	}
+
+	/* Stay. */
+	else if (ast_prev_node->indent_level == node->indent_level) {
+		ast_prev_node->body_next_sibling = node;
+		node->parent_node = ast_prev_node->parent_node;
+
+	}
+
+	/* Ascend. */
+	else {
+
+		/* Find the correct depth. */
+		ASTNode *parent = ast_prev_node->parent_node;
+		while (parent->indent_level >= node->indent_level)
+			parent = parent->parent_node;
+
+		/* Now add the node to the found result. */
+		ASTNode **dest = &parent->body_first_child;
+		while (*dest != NULL)
+			dest = &(*dest)->body_next_sibling;
+		*dest = node;
+		node->parent_node = parent;
+	}
+	ast_prev_node = node;
+	line_indent = 0;
+}
+
+void free_ast_node(ASTNode *target)
+{
+
+	/* Specific stuff. */
+	if (target->ast_type == AST_STRING)
+		free(target->string_value);
+
+	/* Generic stuff. */
+	if (target->name != NULL)
+		free(target->name);
+	if (target->args_chain != NULL)
+		free_ast_node(target->args_chain);
+	if (target->args_next != NULL)
+		free_ast_node(target->args_next);
+	if (target->body_next_sibling != NULL)
+		free_ast_node(target->body_next_sibling);
+	if (target->body_first_child != NULL)
+		free_ast_node(target->body_first_child);
+	free(target);
+}
+
 static ASTNode *init_ast_node(EAstType type)
 {
 	extern int yylineno;
@@ -230,11 +296,11 @@ static ASTNode *init_ast_node(EAstType type)
 	return target;
 }
 
-ASTNode *ast_make_root(char *classname)
+ASTNode *ast_make_root(char *class_name)
 {
 	ASTNode *target = init_ast_node(AST_BLOCK);
 	target->name = strdup("class");
-	target->args_chain = ast_make_string(classname);
+	target->args_chain = ast_make_string(class_name);
 	target->indent_level = -1;
 	//target->symentry = sym_define("root", "class", NULL);
 
@@ -253,9 +319,21 @@ ASTNode *ast_make_block(char *block_type)
 	return target;
 }
 
-ASTNode *ast_make_default_arg()
+ASTNode *ast_make_type_specifier(char *type_name)
 {
-	ASTNode *target = init_ast_node(AST_DEFAULT_ARG);
+	printf("Type: %s\n", type_name);
+	ASTNode *target = init_ast_node(AST_TYPE_SPECIFIER);
+	target->name = strdup(type_name);
+	return target;
+}
+
+ASTNode *ast_make_tuple(ASTNode *chain)
+{
+	ASTNode *target = init_ast_node(AST_TUPLE);
+	target->args_chain = chain;
+
+	// FIXME: Iterate through all chain links.
+	chain->parent_node = chain;
 	return target;
 }
 
@@ -266,6 +344,12 @@ ASTNode *ast_make_func_call(char *function_name)
 #endif
 	ASTNode *target = init_ast_node(AST_FUNCTION_CALL);
 	target->name = strdup(function_name);
+	return target;
+}
+
+ASTNode *ast_make_default_arg()
+{
+	ASTNode *target = init_ast_node(AST_DEFAULT_ARG);
 	return target;
 }
 
@@ -284,6 +368,13 @@ ASTNode *ast_make_string(char *value)
 	return target;
 }
 
+ASTNode *ast_make_symbol(char *symbol_name)
+{
+	ASTNode *target = init_ast_node(AST_SYMBOL);
+	target->name = strdup(symbol_name);
+	return target;
+}
+
 ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r)
 {
 #ifdef DEBUG
@@ -293,12 +384,5 @@ ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r)
 	target->name = strdup(op);
 	target->args_chain = l;
 	l->args_next = r;
-	return target;
-}
-
-ASTNode *ast_make_symbol(char *symbol_name)
-{
-	ASTNode *target = init_ast_node(AST_SYMBOL);
-	target->name = strdup(symbol_name);
 	return target;
 }
