@@ -89,6 +89,10 @@ extern int line_indent;
 	return TOKEN_ASSIGN;
 }
 
+"fun" {
+	return TOKEN_FUNCTION;
+}
+
 \( {
 	return TOKEN_LPAREN;
 }

@@ -7,4 +7,4 @@
 /**
  * Compiles an AST node and puts result on to the out file stream.
  */
-void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, int start_indent);
+void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_siblings, int start_indent);

@@ -10,7 +10,8 @@ typedef enum {
 	AST_NUMBER,
 	AST_STRING,
 	AST_BLOCK,
-	AST_DEFAULT_ARG
+	AST_DEFAULT_ARG,
+	AST_TUPLE,
 } EAstType;
 
 typedef struct ASTNode ASTNode;
@@ -53,7 +54,7 @@ void ast_make_sym_tree(ASTNode *node);
  * This function automatically places a statement nodes or a block nodes in the
  * right places.
  */
-void ast_insert_node(ASTNode *node);
+void ast_auto_insert_node(ASTNode *node);
 
 /**
  * Prints out the AST given in a tree format.
@@ -66,12 +67,21 @@ void debug_ast_node(ASTNode *node, bool in_expr, int indent);
  */
 void free_ast_node(ASTNode *target);
 
+void ast_insert_child_node(ASTNode *target_node, ASTNode *child_node);
+void ast_insert_arg(ASTNode *target_node, ASTNode *target_arg);
+
 /**
  * Creates a function call. Function arguments are added
  * later on.
- * Example:
+ * Example: FIXME
  */
 ASTNode *ast_make_func_call(char *function_name);
+
+/**
+ * Creates a tuple.
+ * Example: FIXME
+ */
+ASTNode *ast_make_tuple();
 
 /**
  * Creates a number.

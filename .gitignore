@@ -1,6 +1,7 @@
 # The build system.
 obj/
 cheri
+a.out
 
 # Swap.
 [._]*.s[a-v][a-z]

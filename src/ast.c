@@ -152,7 +152,7 @@ void ast_make_sym_tree(ASTNode *node)
 
 extern int line_indent;
 
-void ast_insert_node(ASTNode *node)
+void ast_auto_insert_node(ASTNode *node)
 {
 #ifdef DEBUG
 	printf("Inserting at indent: %d\n", line_indent);
@@ -160,11 +160,12 @@ void ast_insert_node(ASTNode *node)
 
 	/* Descend. */
 	if (node->indent_level > ast_prev_node->indent_level) {
-		ASTNode **dest = &ast_prev_node->body_first_child;
+		ast_insert_child_node(ast_prev_node, node);
+		/*ASTNode **dest = &ast_prev_node->body_first_child;
 		while (*dest != NULL)
 			dest = &(*dest)->body_next_sibling;
 		*dest = node;
-		node->parent_node = ast_prev_node;
+		node->parent_node = ast_prev_node;*/
 	}
 
 	/* Stay. */
@@ -183,14 +184,32 @@ void ast_insert_node(ASTNode *node)
 			parent = parent->parent_node;
 
 		/* Now add the node to the found result. */
-		ASTNode **dest = &parent->body_first_child;
-		while (*dest != NULL)
-			dest = &(*dest)->body_next_sibling;
-		*dest = node;
-		node->parent_node = parent;
+		ast_insert_child_node(parent, node);
 	}
 	ast_prev_node = node;
 	line_indent = 0;
+}
+
+void ast_insert_child_node(ASTNode *parent_node, ASTNode *child_node)
+{
+	ASTNode **dest = &parent_node->body_first_child;
+
+	/* Find an empty reference to link child_node into. */
+	while (*dest != NULL)
+		dest = &(*dest)->body_next_sibling;
+	*dest = child_node;
+	child_node->parent_node = parent_node;
+}
+
+void ast_insert_arg(ASTNode *target_node, ASTNode *target_arg)
+{
+	ASTNode **dest = &target_node->args_chain;
+
+	/* Find an empty reference to link target_arg into. */
+	while (*dest != NULL)
+		dest = &(*dest)->args_next;
+	*dest = target_arg;
+	target_arg->parent_node = target_node;
 }
 
 static ASTNode *init_ast_node(EAstType type)

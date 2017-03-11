@@ -32,13 +32,17 @@ int line_indent = 0;
 %type <tok_int_val> t_num_exp
 %type <tok_ast_node> t_any_exp
 %type <tok_ast_node> t_func_call
+%type <tok_ast_node> t_func_def
 %type <tok_ast_node> t_call_args
-%type <tok_ast_node> t_block
+%type <tok_ast_node> t_tuple_member
+%type <tok_ast_node> t_tuple_members
 
 /*
  * The order of these statements matter because they tell us in what order
  * to evluate & reduce tokens.
  */
+
+%nonassoc TOKEN_FUNCTION
 
 %nonassoc TOKEN_LPAREN TOKEN_RPAREN
 %nonassoc TOKEN_COLON
@@ -56,15 +60,71 @@ int line_indent = 0;
 
 /* A program consists of lines. */
 program:		%empty
-				| program line
+				| line program
 				;
 
 /* Each line could either be an expression or a block definition.*/
-line:			TOKEN_NEWLINE
-				| t_block TOKEN_COLON TOKEN_NEWLINE {ast_insert_node($1);}
-				| t_any_exp TOKEN_NEWLINE {ast_insert_node($1);}
+line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
+				| t_func_def TOKEN_COLON TOKEN_NEWLINE {$1->ast_type = AST_BLOCK; ast_auto_insert_node($1);}
+				| t_func_call TOKEN_NEWLINE {ast_auto_insert_node($1);}
+				| t_any_exp TOKEN_NEWLINE {ast_auto_insert_node($1);}
 				;
 
+/* A tuple member could have an assigned value. */
+t_tuple_member:	%empty {$$ = ast_make_default_arg();}
+				| TOKEN_SYMBOL {$$ = ast_make_symbol($1); free($1);}
+				| TOKEN_SYMBOL TOKEN_ASSIGN t_any_exp {
+					$$ = ast_make_symbol($1);
+					ast_insert_arg($$, $3);
+					free($1);
+				}
+				;
+
+/*
+ * Defines tuples members.
+ * Note that parentheses are not included.
+ */
+t_tuple_members:
+				t_tuple_member {$$ = $1;}
+ 				| t_tuple_members TOKEN_COMMA t_tuple_member {
+					$$->args_next = $3;
+				}
+				;
+
+/* A function has a name, arguments, and a return type. */
+t_func_def:		TOKEN_FUNCTION TOKEN_SYMBOL {
+					$$ = ast_make_block("fun");
+					ast_insert_arg($$, ast_make_symbol($2));
+					free($2);
+				}
+				| TOKEN_FUNCTION TOKEN_SYMBOL TOKEN_LPAREN t_tuple_members TOKEN_RPAREN {
+					$$ = ast_make_block("fun");
+					ast_insert_arg($$, ast_make_symbol($2));
+					ast_insert_arg($$, $4);
+					free($2);
+				}
+				;
+
+/* Tries to connect one arg with another. A function could have no arguments. */
+t_call_args:	%empty {$$ = ast_make_default_arg();}
+				| t_any_exp {$$ = $1;}
+				| t_call_args TOKEN_COMMA t_any_exp {$1->args_next = $3;}
+				;
+
+/*
+ * A basic function call.
+ * A function can be called with only one argument and paranthesesless.
+ * Or with multiple arguments using parantheses.
+ */
+t_func_call:	TOKEN_SYMBOL TOKEN_LPAREN t_call_args TOKEN_RPAREN {
+	   				$$ = ast_make_func_call($1);
+					$$->args_chain = $3;
+					free($1);}
+				| TOKEN_SYMBOL t_any_exp {
+					$$ = ast_make_func_call($1);
+					$$->args_chain = $2;
+					free($1);}
+	   			;
 
 /* Firstly, we simplify any expression only containing numbers. */
 t_num_exp:		TOKEN_INT_LITERAL { $$ = $1;}
@@ -90,30 +150,6 @@ t_any_exp:		TOKEN_SYMBOL {$$ = ast_make_symbol($1); free($1);}
 				| t_any_exp TOKEN_COMPARISON t_any_exp {$$ = ast_make_op("==", $1, $3);}
 				| TOKEN_LPAREN t_any_exp TOKEN_RPAREN {$$ = $2;}
 				| t_func_call {$$ = $1;}
-				;
-
-/* Blocks end with a colon. */
-t_block:		TOKEN_SYMBOL t_call_args {
-					$$ = ast_make_block($1);
-					$$->args_chain = $2;
-					free($1);}
-				;
-
-/* A basic function call. */
-t_func_call:	TOKEN_SYMBOL TOKEN_LPAREN t_call_args TOKEN_RPAREN {
-	   				$$ = ast_make_func_call($1);
-					$$->args_chain = $3;
-					free($1);}
-				| TOKEN_SYMBOL t_any_exp {
-					$$ = ast_make_func_call($1);
-					$$->args_chain = $2;
-					free($1);}
-	   			;
-
-/* Tries to connect one arg with another. A function could have no arguments. */
-t_call_args:	%empty {$$ = ast_make_default_arg();}
-				| t_any_exp {$$ = $1;}
-				| t_call_args TOKEN_COMMA t_any_exp {$1->args_next = $3;}
 				;
 
 %%

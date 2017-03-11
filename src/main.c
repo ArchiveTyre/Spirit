@@ -56,8 +56,14 @@ static int parse_file(char *filename, FILE *out)
 	/* Before we can compile we need to create the symbol tree. */
 	ast_make_sym_tree(ast_root_node);
 
+	// FIXME: Remove in the future.
+	fprintf(out, "#include <stdio.h>\n");
+
 	/* Then we can compile into a C/C++ file*/
-	compile_ast_to_cpp(ast_root_node, out, false, 0);
+	compile_ast_to_cpp(ast_root_node, out, false, false, 0);
+
+	/* As the main module, run self. */
+	fprintf(out, "int main() {auto start = new %s(); return 0;}\n", new_classname);
 
 	/* Free the AST and the symbol table. */
 	free_sym(ast_root_node->symentry);
@@ -67,6 +73,8 @@ static int parse_file(char *filename, FILE *out)
 	free(new_classname);
 
 	yylex_destroy();
+
+
 
 	printf("[DONE] Compiling: %s\n", filename);
 
