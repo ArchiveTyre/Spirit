@@ -114,7 +114,7 @@ extern int line_indent;
 	return TOKEN_COMMA;
 }
 
-[a-zA-Z0-9]+ {
+[a-zA-Z0-9_]+ {
 	yylval.tok_as_string = strdup(yytext);
 	return TOKEN_SYMBOL;
 }

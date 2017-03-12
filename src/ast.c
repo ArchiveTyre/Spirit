@@ -77,6 +77,13 @@ void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 		debug_ast_node(node->body_next_sibling, false, indent);
 }
 
+/*
+ASTNode *ast_get_arg_by_no(ASTNode *node, int arg_no)
+{
+
+}
+*/
+
 void ast_auto_insert_node(ASTNode *node)
 {
 #ifdef DEBUG
@@ -168,11 +175,7 @@ void ast_make_sym_tree(ASTNode *node)
 						first_arg = node->args_chain->args_next->args_next->args_chain;
 					while (first_arg != NULL) {
 						sym_add_info(node->symentry, first_arg->args_chain->name);
-						sym_add_info(node->symentry, " ");
 						sym_add_info(node->symentry, first_arg->name);
-						if (first_arg->args_next != NULL)
-							sym_add_info(node->symentry, ", ");
-
 						first_arg = first_arg->args_next;
 					}
 				}
@@ -314,6 +317,7 @@ static ASTNode *init_ast_node(EAstType type)
 	target->ast_type = type;
 	target->indent_level = line_indent;
 	target->line_no = yylineno;
+	target->is_infix = false;
 	target->args_next = NULL;
 	target->args_chain = NULL;
 	target->body_next_sibling = NULL;
@@ -422,6 +426,7 @@ ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r)
 	ASTNode *target = init_ast_node(AST_FUNCTION_CALL);
 	target->name = strdup(op);
 	target->args_chain = l;
+	target->is_infix = true;
 	l->args_next = r;
 	return target;
 }

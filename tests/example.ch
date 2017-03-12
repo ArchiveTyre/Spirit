@@ -1,10 +1,11 @@
-
 /* A very cute Hello World program. */
 fun construct:
-	BeKawaii(4, 9)
+	printf ("Hello %d", BeKawaii(4, 9))
 
 /* This function makes the class kawaii. */
-fun BeKawaii(int arg, int something) -> int:
-	var int a = 4
-	printf "Hello World (^.^)"
-	return 0
+fun BeKawaii(int a_number, int another_number) -> int:
+
+	var int the_sum = a_number + another_number
+	the_sum = the_sum + 12
+	printf "Hello World (^.^)\n"
+	return the_sum

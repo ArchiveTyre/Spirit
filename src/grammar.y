@@ -86,7 +86,6 @@ t_var_defs:		t_var_def {$$ = $1;}
 				| t_var_def TOKEN_COMMA t_var_defs {
 					$$ = $1;
 					$$->args_next = $3;
-					printf("Row row, chain some stuff! %s\n", $$->name);
 				}
 				;
 

@@ -15,11 +15,15 @@ static void compile_sym_to_cpp(SymbolTableEntry *sym, FILE *out, int indent)
 
 	if (strcmp("class", sym->symbol_type) == 0) {
 		fprintf(out, "class %s", sym->symbol_name);
+
+		/* Compile sub syms. */
 		if (sym->first_child != NULL) {
 			fprintf(out, " {\n");
 			compile_sym_to_cpp(sym->first_child, out, indent + 1);
 			fprintf(out, "};\n");
 		}
+
+		/* In the rare case that the class is empty. */
 		else {
 			fputs("{};\n", out);
 		}
@@ -43,11 +47,23 @@ static void compile_sym_to_cpp(SymbolTableEntry *sym, FILE *out, int indent)
 			}
 
 			fprintf(out, "%s %s(", return_type, function_name);
-			while(call_arguments != NULL) {
-				fprintf(out, "%s", call_arguments->info_text);
-				call_arguments = call_arguments->info_sibling;
-			}
+			if (call_arguments != NULL) {
 
+				/* The remaining arguments are types and names. */
+				fprintf(out, "%s %s", call_arguments->info_text, call_arguments->info_sibling->info_text);
+
+				/* We read two args at the same time so we skip two args too. */
+				call_arguments = call_arguments->info_sibling->info_sibling;
+
+				while (call_arguments != NULL) {
+
+					/* current and current + 1 make up one vairable definition. */
+					fprintf(out, ", %s %s", call_arguments->info_text, call_arguments->info_sibling->info_text);
+
+					/* We read two args at the same time so we skip two args too. */
+					call_arguments = call_arguments->info_sibling->info_sibling;
+				}
+			}
 			fputs(");\n", out);
 
 	}
@@ -118,30 +134,20 @@ static void compile_block_to_cpp(ASTNode *ast, FILE* out)
 	}
 }
 
-static bool compile_special_function(ASTNode *ast, FILE *out, bool in_expr) {
-	if (strcmp(ast->name, "=") == 0) {
-		compile_ast_to_cpp(ast->args_chain, out, true, true, 0);
-		fprintf(out, " = ");
-		compile_ast_to_cpp(ast->args_chain->args_next, out, true, true, 0);
-		return true;
-	}
-	else if (strcmp(ast->name, "") == 0) {
-		return true;
-	}
-	return false;
-}
-
 /**
  * Compiles any AST node into AST code.
  */
 void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_siblings, int indent_with)
 {
+#ifdef DEBUG
 	if (!in_expr)
 		for(int i = 1; i < indent_with; i++)
 			fputc('\t', out);
+#endif
 
 	switch (ast->ast_type) {
 		case AST_DEFAULT_ARG:
+			// FIXME: Replace with actual arg.
 			fputs("/* Default. */", out);
 			break;
 		case AST_SYMBOL:
@@ -156,9 +162,15 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 			fprintf(out, "\"%s\"", ast->string_value);
 			break;
 		case AST_FUNCTION_CALL:
+			/* In infix the function name is in the middle of the args. */
+			if (ast->is_infix) {
+				compile_ast_to_cpp(ast->args_chain, out, true, true, 0);
+				fprintf(out, " %s ", ast->name);
+				compile_ast_to_cpp(ast->args_chain->args_next, out, true, true, 0);
+			}
 
-			/* If we fail to compile a function the "special" way. We do it the normal way. */
-			if (!compile_special_function(ast, out, in_expr)) {
+			/* Compile function call the normal way. */
+			else {
 				fprintf(out, "%s(", ast->name);
 				compile_ast_to_cpp(ast->args_chain, out, true, false, 0);
 				fprintf(out, ")");
@@ -170,32 +182,42 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 		case AST_BLOCK:
 			compile_block_to_cpp(ast, out);
 			break;
-		case AST_TUPLE:
-			break;
-		case AST_TYPE_SPECIFIER:
-			break;
 		case AST_VAR_DEF:
 			{
 				char *var_type = ast->symentry->symbol_info->info_text;
 				char *var_name = ast->symentry->symbol_name;
 				fprintf(out, "%s %s", var_type, var_name);
+
+				if (ast->args_chain->args_next != NULL) {
+					fputs(" = ", out);
+					compile_ast_to_cpp(ast->args_chain->args_next, out, true, true, -1);
+				}
 				if (!in_expr)
 					fputc(';', out);
 			}
 			break;
+		case AST_TUPLE:
+		case AST_TYPE_SPECIFIER:
 		case AST_NONE:
 		default:
 			printf("ERROR: Compiler error in switch number 2!, %d\n", ast->ast_type);
 	}
 
+	/* Print child nodes. */
 	if (ast->body_first_child != NULL) {
-		if (ast->parent_node != NULL)
+
+		/* Skip extra braces for root nodes. */
+		if (ast != ast_root_node)
 			fputs(" {\n", out);
 
+		/* Do the compilation. Nodes indent themselves. */
 		compile_ast_to_cpp(ast->body_first_child, out, false, false, indent_with + 1);
-		if (ast->parent_node != NULL) {
+		if (ast != ast_root_node) {
+			/* Indent and add extra braces. */
+#ifdef DEBUG
 			for(int i = 1; i < indent_with; i++)
 				fputc('\t', out);
+#endif
 			fputs("}\n", out);
 		}
 	}
@@ -204,11 +226,15 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 	else if (!in_expr)
 		fputc('\n', out);
 
-	if (skip_siblings == false) {
+	/* Only if we are allowed to compile the siblings. */
+	if (!skip_siblings) {
+
+		/* Try to compile sibling. */
 		if (ast->body_next_sibling != NULL) {
 			compile_ast_to_cpp(ast->body_next_sibling, out, false, false, indent_with);
 		}
 
+		/* Try to compile next arg. */
 		if (ast->args_next != NULL) {
 			fputs(", ", out);
 			compile_ast_to_cpp(ast->args_next, out, true, false, 0);

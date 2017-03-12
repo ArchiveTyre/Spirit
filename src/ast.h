@@ -11,11 +11,13 @@ typedef enum {
 	/* Default args are replaced at compile time. */
 	AST_DEFAULT_ARG,
 
-	/*FIXME: Is this even needed? */
+	/* FIXME: Is this even needed? */
 	AST_FUNCTION_ARG,
 
 	/* Function call. Name = what to call, first arg = arguments. */
 	AST_FUNCTION_CALL,
+
+	// TODO: Add AST_FUNCTION_DEF
 
 	/* A simple number. */
 	AST_NUMBER,
@@ -61,6 +63,8 @@ struct ASTNode {
 	/* For AST_STRING. */
 	// FIXME: Use "name" instead.
 	char *string_value;
+
+	bool is_infix;
 
 
 };
