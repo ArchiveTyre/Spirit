@@ -4,20 +4,6 @@
 #include <assert.h>
 
 /**
- * Tries to compile a special case function.
- * If we do any compilation we return true.
- */
-static bool compile_special_sym_function(SymbolTableEntry *sym, FILE *out)
-{
-	if (strcmp(sym->symbol_name, "construct") == 0) {
-		// FIXME: Access modifiers must not look like this.
-		fprintf(out, "public: %s();\n", sym->parent_table->symbol_name);
-		return true;
-	}
-	return false;
-}
-
-/**
  * Compiles a symbol table recursively into C++ code.
  */
 static void compile_sym_to_cpp(SymbolTableEntry *sym, FILE *out, int indent)
@@ -29,25 +15,55 @@ static void compile_sym_to_cpp(SymbolTableEntry *sym, FILE *out, int indent)
 
 	if (strcmp("class", sym->symbol_type) == 0) {
 		fprintf(out, "class %s", sym->symbol_name);
-		if (sym->first_child == NULL)
+		if (sym->first_child != NULL) {
+			fprintf(out, " {\n");
+			compile_sym_to_cpp(sym->first_child, out, indent + 1);
+			fprintf(out, "};\n");
+		}
+		else {
 			fputs("{};\n", out);
+		}
 	}
 	else if (strcmp("fun", sym->symbol_type) == 0) {
-		if (!compile_special_sym_function(sym, out)) {
-
 			assert(sym->symbol_info != NULL);
 
-			char* return_type = sym->symbol_info->info_text;
-			fprintf(out, "%s %s();\n", return_type, sym->symbol_name);
+			char *return_type;
+			char *function_name;
+			SymbolInfo *call_arguments = sym->symbol_info->info_sibling;
+
+			if (strcmp(sym->symbol_name, "construct") == 0) {
+
+				// FIXME: This is a hack, should be moved to access modifier.
+				return_type = "public:";
+				function_name = sym->parent_table->symbol_name;
+			}
+			else {
+				return_type = sym->symbol_info->info_text;
+				function_name = sym->symbol_name;
+			}
+
+			fprintf(out, "%s %s(", return_type, function_name);
+			while(call_arguments != NULL) {
+				fprintf(out, "%s", call_arguments->info_text);
+				call_arguments = call_arguments->info_sibling;
+			}
+
+			fputs(");\n", out);
+
+	}
+	else if (strcmp("var", sym->symbol_type) == 0) {
+
+		if (strcmp(sym->parent_table->symbol_type, "tuple") != 0) {
+			char *var_type = sym->symbol_info->info_text;
+			char *var_name = sym->symbol_name;
+			fprintf(out, "%s %s;\n", var_type, var_name);
 		}
+	}
+	else if (strcmp("tuple", sym->symbol_type) == 0) {
+
 	}
 	else {
 		printf("ERROR: Undefined type: %s\n", sym->symbol_type);
-	}
-	if (sym->first_child != NULL) {
-		fprintf(out, " {\n");
-		compile_sym_to_cpp(sym->first_child, out, indent + 1);
-		fprintf(out, "};\n");
 	}
 	if (sym->next_sibling != NULL)
 		compile_sym_to_cpp(sym->next_sibling, out, indent);
@@ -74,21 +90,28 @@ static void compile_block_to_cpp(ASTNode *ast, FILE* out)
 	}
 	else if (strcmp(ast->name, "fun") == 0) {
 
+		char *function_name;
+		char *return_type;
+		char *class_name = ast->parent_node->symentry->symbol_name;
+		ASTNode *first_arg = NULL;
+
 		/* Override special function "construct. ". */
 		if (strcmp(ast->args_chain->name, "construct") == 0) {
-			char *class_name = ast->parent_node->args_chain->string_value;
-			fprintf(out, "%s::%s()", class_name, class_name);
+			return_type = "";
+			function_name = class_name;
 		}
-
-		/* Normal function declaration. */
 		else {
-
-			char *return_type = ast->symentry->symbol_info->info_text;
-			char *class_name = ast->parent_node->symentry->symbol_name;
-			char *function_name = ast->args_chain->name;
-
-			fprintf(out, "%s %s::%s()", return_type, class_name, function_name);
+			return_type = ast->symentry->symbol_info->info_text;
+			function_name = ast->args_chain->name;
 		}
+
+		if (ast->args_chain->args_next->args_next != NULL)
+			first_arg = ast->args_chain->args_next->args_next->args_chain;
+
+		fprintf(out, "%s %s::%s (", return_type, class_name, function_name);
+		if (first_arg != NULL)
+			compile_ast_to_cpp(first_arg, out, true, false, -1);
+		fputc(')', out);
 	}
 	else {
 		printf("ERROR: Unknown block used: %s\n", ast->name);
@@ -146,6 +169,19 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 			break;
 		case AST_BLOCK:
 			compile_block_to_cpp(ast, out);
+			break;
+		case AST_TUPLE:
+			break;
+		case AST_TYPE_SPECIFIER:
+			break;
+		case AST_VAR_DEF:
+			{
+				char *var_type = ast->symentry->symbol_info->info_text;
+				char *var_name = ast->symentry->symbol_name;
+				fprintf(out, "%s %s", var_type, var_name);
+				if (!in_expr)
+					fputc(';', out);
+			}
 			break;
 		case AST_NONE:
 		default:

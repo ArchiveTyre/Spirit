@@ -97,6 +97,10 @@ extern int line_indent;
 	return TOKEN_FUNCTION;
 }
 
+"var" {
+	return TOKEN_VARIABLE;
+}
+
 \( {
 	return TOKEN_LPAREN;
 }

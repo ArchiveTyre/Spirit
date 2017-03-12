@@ -31,6 +31,8 @@ int line_indent = 0;
 
 %type <tok_int_val> t_num_exp
 %type <tok_ast_node> t_any_exp
+%type <tok_ast_node> t_var_def
+%type <tok_ast_node> t_var_defs
 %type <tok_ast_node> t_func_return_type
 %type <tok_ast_node> t_func_call
 %type <tok_ast_node> t_func_def
@@ -45,6 +47,7 @@ int line_indent = 0;
 
 %nonassoc TOKEN_ARROW
 %nonassoc TOKEN_FUNCTION
+%nonassoc TOKEN_VARIABLE
 %nonassoc TOKEN_LPAREN TOKEN_RPAREN
 %nonassoc TOKEN_COLON
 %nonassoc TOKEN_SYMBOL
@@ -66,7 +69,25 @@ program:		%empty
 line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
 				| t_func_def TOKEN_COLON TOKEN_NEWLINE {$1->ast_type = AST_BLOCK; ast_auto_insert_node($1);}
 				| t_func_call TOKEN_NEWLINE {ast_auto_insert_node($1);}
+				| TOKEN_VARIABLE t_var_def TOKEN_NEWLINE {ast_auto_insert_node($2);}
 				| t_any_exp TOKEN_NEWLINE {ast_auto_insert_node($1);}
+				;
+
+t_var_def:		TOKEN_SYMBOL TOKEN_SYMBOL {
+					$$ = ast_make_var_def($2, $1);
+				}
+				| TOKEN_SYMBOL TOKEN_SYMBOL TOKEN_ASSIGN t_any_exp {
+					$$ = ast_make_var_def($2, $1);
+					ast_insert_arg($$, $4);
+				}
+				;
+
+t_var_defs:		t_var_def {$$ = $1;}
+				| t_var_def TOKEN_COMMA t_var_defs {
+					$$ = $1;
+					$$->args_next = $3;
+					printf("Row row, chain some stuff! %s\n", $$->name);
+				}
 				;
 
 /* A tuple member could have an assigned value. */
@@ -85,7 +106,8 @@ t_tuple_member:	%empty {$$ = ast_make_type_specifier("void");}
  */
 t_tuple_members:
 				t_tuple_member {$$ = $1;}
- 				| t_tuple_members TOKEN_COMMA t_tuple_member {
+ 				| t_tuple_member TOKEN_COMMA t_tuple_members {
+					$$ = $1;
 					$$->args_next = $3;
 				}
 				;
@@ -109,7 +131,7 @@ t_func_def:		TOKEN_FUNCTION TOKEN_SYMBOL t_func_return_type {
 
 					free($2);
 				}
-				| TOKEN_FUNCTION TOKEN_SYMBOL TOKEN_LPAREN t_tuple_members TOKEN_RPAREN t_func_return_type {
+				| TOKEN_FUNCTION TOKEN_SYMBOL TOKEN_LPAREN t_var_defs TOKEN_RPAREN t_func_return_type {
 					$$ = ast_make_block("fun");
 
 					/* Insert function name as first arg. */

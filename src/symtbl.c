@@ -40,6 +40,7 @@ void sym_add_info(SymbolTableEntry *sym, char *info)
 	SymbolInfo *new_info = malloc(sizeof(SymbolInfo));
 	new_info->info_no = 0;
 	new_info->info_text = strdup(info);
+	new_info->info_sibling = NULL;
 
 	/* Find a siblingless symbol_info to place self into. */
 	SymbolInfo **dest = &sym->symbol_info;

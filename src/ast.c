@@ -23,12 +23,19 @@ void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 		printf("->");
 	}
 
+	if (node->ast_type == AST_VAR_DEF) {
+		printf("var %s ", node->args_chain->name);
+	}
+
 	if (node->name != NULL)
 		printf("%s", node->name);
 
 	switch(node->ast_type) {
 		case AST_DEFAULT_ARG:
 			printf("default");
+			break;
+
+		case AST_VAR_DEF:
 			break;
 
 		case AST_TYPE_SPECIFIER:
@@ -155,6 +162,19 @@ void ast_make_sym_tree(ASTNode *node)
 					/* The return type is the second argument. */
 					char *return_type = node->args_chain->args_next->args_chain->name;
 					sym_add_info(node->symentry, return_type);
+
+					ASTNode *first_arg = NULL;
+					if (node->args_chain->args_next->args_next != NULL)
+						first_arg = node->args_chain->args_next->args_next->args_chain;
+					while (first_arg != NULL) {
+						sym_add_info(node->symentry, first_arg->args_chain->name);
+						sym_add_info(node->symentry, " ");
+						sym_add_info(node->symentry, first_arg->name);
+						if (first_arg->args_next != NULL)
+							sym_add_info(node->symentry, ", ");
+
+						first_arg = first_arg->args_next;
+					}
 				}
 				else if (strcmp(node->name, "if") == 0) {
 					node->symentry = sym_define("", "fun", node->parent_node->symentry);
@@ -169,9 +189,18 @@ void ast_make_sym_tree(ASTNode *node)
 					printf("ERROR: Unknown block used: %s\n", node->name);
 				}
 				break;
+			case AST_VAR_DEF:
+			{
+				char *var_type = node->args_chain->name;
+				char *var_name = node->name;
+				node->symentry = sym_define(var_name, "var", node->parent_node->symentry);
+				sym_add_info(node->symentry, var_type);
+			}
+			break;
+			case AST_TUPLE:
+				node->symentry = sym_define("", "tuple", node->parent_node->symentry);
+				break;
 			case AST_SYMBOL:
-				// FIXME: Do symbol lookup.
-				//node->symentry = sym_define(node->name, strdup("auto"), node->parent_node->symentry);
 				node->symentry = sym_find(node->name, node->parent_node->symentry);
 				break;
 			case AST_TYPE_SPECIFIER:
@@ -179,7 +208,6 @@ void ast_make_sym_tree(ASTNode *node)
 				break;
 
 			/* Forward the symtable. */
-			case AST_TUPLE:
 			case AST_FUNCTION_CALL:
 			case AST_DEFAULT_ARG:
 			case AST_NUMBER:
@@ -316,6 +344,17 @@ ASTNode *ast_make_block(char *block_type)
 #endif
 	ASTNode *target = init_ast_node(AST_BLOCK);
 	target->name = strdup(block_type);
+	return target;
+}
+
+ASTNode *ast_make_var_def(char *var_name, char *var_type)
+{
+#ifdef DEBUG
+	printf("Making var: %s of type: %s\n", var_name, var_type);
+#endif
+	ASTNode *target = init_ast_node(AST_VAR_DEF);
+	target->name = strdup(var_name);
+	ast_insert_arg(target, ast_make_type_specifier(var_type));
 	return target;
 }
 

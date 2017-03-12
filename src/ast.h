@@ -4,15 +4,36 @@
 
 typedef enum {
 	AST_NONE,
+
+	/* A block usually has child nodes. */
 	AST_BLOCK,
+
+	/* Default args are replaced at compile time. */
 	AST_DEFAULT_ARG,
+
+	/*FIXME: Is this even needed? */
 	AST_FUNCTION_ARG,
+
+	/* Function call. Name = what to call, first arg = arguments. */
 	AST_FUNCTION_CALL,
+
+	/* A simple number. */
 	AST_NUMBER,
+
+	/* A simple string. */
 	AST_STRING,
+
+	/* A simple variable name. */
 	AST_SYMBOL,
+
+	/* Contains multiple variables. */
 	AST_TUPLE,
+
+	/* Contains a reference to a type. */
 	AST_TYPE_SPECIFIER,
+
+	/* Name = variable name, first arg = type, (optional) second arg = init. */
+	AST_VAR_DEF,
 } EAstType;
 
 typedef struct ASTNode ASTNode;
@@ -86,6 +107,12 @@ ASTNode *ast_make_root();
 ASTNode *ast_make_block(char *block_type);
 
 /**
+ * Creates a variable definiton.
+ * Example: var
+ */
+ASTNode *ast_make_var_def(char *var_name, char *var_type);
+
+/**
  * Creates a type specifier.
  */
 ASTNode *ast_make_type_specifier(char *type_name);
@@ -124,8 +151,8 @@ ASTNode *ast_make_string(char *value);
 /**
  * Creates a symbol.
  * Symbols can be seen as variables for the most part.
- * Example: var
- *              ^
+ * Example: otonashi = new Person
+ *          ^
  */
 ASTNode *ast_make_symbol(char *symbol);
 
