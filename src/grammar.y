@@ -67,7 +67,7 @@ program:		%empty
 
 /* Each line could either be an expression or a block definition.*/
 line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
-				| t_func_def TOKEN_COLON TOKEN_NEWLINE {$1->ast_type = AST_BLOCK; ast_auto_insert_node($1);}
+				| t_func_def TOKEN_COLON TOKEN_NEWLINE {ast_auto_insert_node($1);}
 				| t_func_call TOKEN_NEWLINE {ast_auto_insert_node($1);}
 				| TOKEN_VARIABLE t_var_def TOKEN_NEWLINE {ast_auto_insert_node($2);}
 				| t_any_exp TOKEN_NEWLINE {ast_auto_insert_node($1);}
@@ -121,26 +121,11 @@ t_func_return_type:
 
 /* A function has a name, arguments, and a return type. */
 t_func_def:		TOKEN_FUNCTION TOKEN_SYMBOL t_func_return_type {
-					$$ = ast_make_block("fun");
-					/* Insert function name as first arg. */
-					ast_insert_arg($$, ast_make_symbol($2));
-
-					/* Insert function return type as second arg. */
-					ast_insert_arg($$, $3);
-
+					$$ = ast_make_func_def($2, $3, ast_make_tuple(NULL));
 					free($2);
 				}
 				| TOKEN_FUNCTION TOKEN_SYMBOL TOKEN_LPAREN t_var_defs TOKEN_RPAREN t_func_return_type {
-					$$ = ast_make_block("fun");
-
-					/* Insert function name as first arg. */
-					ast_insert_arg($$, ast_make_symbol($2));
-
-					/* Insert function return type as second arg. */
-					ast_insert_arg($$, $6);
-
-					/* Insert the function args chain at the end. */
-					ast_insert_arg($$, ast_make_tuple($4));
+					$$ = ast_make_func_def($2, $6, ast_make_tuple($4));
 					free($2);
 				}
 				;
@@ -200,7 +185,7 @@ int yyerror(char *str)
 	extern int yylineno;
 	extern char *yytext;
 
-	printf("ERROR(line: %d): %s at sym \"%s\"\n", yylineno, str, yytext);
+	printf("ERROR on line: %d: %s at sym \"%s\"\n", yylineno, str, yytext);
 	fflush(stdin);
 	extern void exit(int);
 	exit(1);

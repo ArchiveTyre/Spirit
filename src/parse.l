@@ -114,14 +114,14 @@ extern int line_indent;
 	return TOKEN_COMMA;
 }
 
-[a-zA-Z0-9_]+ {
-	yylval.tok_as_string = strdup(yytext);
-	return TOKEN_SYMBOL;
-}
-
 [0-9]+ {
 	yylval.tok_int_val = atoi(yytext);
 	return TOKEN_INT_LITERAL;
+}
+
+[a-zA-Z0-9_]+ {
+	yylval.tok_as_string = strdup(yytext);
+	return TOKEN_SYMBOL;
 }
 
 \n {

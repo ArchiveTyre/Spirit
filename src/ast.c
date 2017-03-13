@@ -8,7 +8,7 @@ extern int line_indent;
 void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 {
 	if (node == NULL) {
-		printf("null");
+		printf("NULL");
 		return;
 	}
 
@@ -37,7 +37,8 @@ void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
 
 		case AST_VAR_DEF:
 			break;
-
+		case AST_FUNCTION_DEF:
+			break;
 		case AST_TYPE_SPECIFIER:
 			break;
 
@@ -93,11 +94,6 @@ void ast_auto_insert_node(ASTNode *node)
 	/* Descend. */
 	if (node->indent_level > ast_prev_node->indent_level) {
 		ast_insert_child_node(ast_prev_node, node);
-		/*ASTNode **dest = &ast_prev_node->body_first_child;
-		while (*dest != NULL)
-			dest = &(*dest)->body_next_sibling;
-		*dest = node;
-		node->parent_node = ast_prev_node;*/
 	}
 
 	/* Stay. */
@@ -162,30 +158,12 @@ void ast_make_sym_tree(ASTNode *node)
 					node->symentry = sym_define(node->args_chain->string_value,
 						node->name, NULL);
 				}
-				else if(strcmp(node->name, "fun") == 0) {
-					node->symentry = sym_define(node->args_chain->name,
-						node->name, node->parent_node->symentry);
-
-					/* The return type is the second argument. */
-					char *return_type = node->args_chain->args_next->args_chain->name;
-					sym_add_info(node->symentry, return_type);
-
-					ASTNode *first_arg = NULL;
-					if (node->args_chain->args_next->args_next != NULL)
-						first_arg = node->args_chain->args_next->args_next->args_chain;
-					while (first_arg != NULL) {
-						sym_add_info(node->symentry, first_arg->args_chain->name);
-						sym_add_info(node->symentry, first_arg->name);
-						first_arg = first_arg->args_next;
-					}
-				}
 				else if (strcmp(node->name, "if") == 0) {
 					node->symentry = sym_define("", "fun", node->parent_node->symentry);
 				}
 				else if (strcmp(node->name, "else") == 0) {
 					node->symentry = sym_define("", "else", node->parent_node->symentry);
 				}
-
 				// FIXME: This error is reported else where anyway.
 				// We could just remove this so that we don't have any empty blocks.
 				else {
@@ -198,8 +176,33 @@ void ast_make_sym_tree(ASTNode *node)
 				char *var_name = node->name;
 				node->symentry = sym_define(var_name, "var", node->parent_node->symentry);
 				sym_add_info(node->symentry, var_type);
+				break;
 			}
-			break;
+			case AST_FUNCTION_DEF:
+			{
+				printf("Define function desu!\n");
+				node->symentry = sym_define(node->name,
+					"fun", node->parent_node->symentry);
+
+				/* The return type is the second argument. */
+				// FIXME: This is horrible against tuples...
+				char *return_type = node->args_chain->args_chain->name;
+				sym_add_info(node->symentry, return_type);
+
+				ASTNode *first_arg = NULL;
+
+				// FIXME: Replace with get_arg or something.
+				if (node->args_chain->args_next != NULL)
+					first_arg = node->args_chain->args_next->args_chain;
+
+				while (first_arg != NULL) {
+					sym_add_info(node->symentry, first_arg->args_chain->name);
+					sym_add_info(node->symentry, first_arg->name);
+					first_arg = first_arg->args_next;
+				}
+				break;
+			}
+
 			case AST_TUPLE:
 				node->symentry = sym_define("", "tuple", node->parent_node->symentry);
 				break;
@@ -373,10 +376,39 @@ ASTNode *ast_make_type_specifier(char *type_name)
 ASTNode *ast_make_tuple(ASTNode *chain)
 {
 	ASTNode *target = init_ast_node(AST_TUPLE);
-	target->args_chain = chain;
 
-	// FIXME: Iterate through all chain links.
-	chain->parent_node = chain;
+	/* There is nothing todo if the tuple isn't given anything. */
+	if (chain != NULL) {
+
+		/* Connect the chain. */
+		target->args_chain = chain;
+
+		/* Set the new parent. */
+		for (ASTNode *child = chain; child != NULL; child = child->args_chain) {
+			child->parent_node = target;
+		}
+	}
+
+	return target;
+}
+
+ASTNode *ast_make_func_def(char *func_name,
+	ASTNode *return_type,
+	ASTNode *first_call_arg)
+{
+#ifdef DEBUG
+	printf("Making function: %s\n", func_name);
+#endif
+	ASTNode *target = init_ast_node(AST_FUNCTION_DEF);
+
+	target->name = strdup(func_name);
+
+	/* Insert function return type as second arg. */
+	ast_insert_arg(target, return_type);
+
+	/* Insert function return type as second arg. */
+	ast_insert_arg(target, first_call_arg);
+
 	return target;
 }
 
@@ -425,8 +457,8 @@ ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r)
 #endif
 	ASTNode *target = init_ast_node(AST_FUNCTION_CALL);
 	target->name = strdup(op);
-	target->args_chain = l;
 	target->is_infix = true;
-	l->args_next = r;
+	ast_insert_arg(target, l);
+	ast_insert_arg(target, r);
 	return target;
 }

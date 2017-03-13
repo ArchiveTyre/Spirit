@@ -17,7 +17,8 @@ typedef enum {
 	/* Function call. Name = what to call, first arg = arguments. */
 	AST_FUNCTION_CALL,
 
-	// TODO: Add AST_FUNCTION_DEF
+	// TODO: Add
+	AST_FUNCTION_DEF,
 
 	/* A simple number. */
 	AST_NUMBER,
@@ -126,6 +127,14 @@ ASTNode *ast_make_type_specifier(char *type_name);
  * Example: FIXME
  */
  ASTNode *ast_make_tuple(ASTNode *chain);
+
+/**
+ * Defines a function.
+ * Example FIXME
+ */
+ ASTNode *ast_make_func_def(char *func_name,
+ 	ASTNode *return_type,
+ 	ASTNode *first_call_arg);
 
 /**
  * Creates a function call. Function arguments are added

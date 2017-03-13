@@ -150,6 +150,32 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 			// FIXME: Replace with actual arg.
 			fputs("/* Default. */", out);
 			break;
+		case AST_FUNCTION_DEF:
+		{
+			char *function_name;
+			char *return_type;
+			char *class_name = ast->parent_node->symentry->symbol_name;
+			ASTNode *first_arg = NULL;
+
+			/* Override special function "construct. ". */
+			if (strcmp(ast->name, "construct") == 0) {
+				return_type = "";
+				function_name = class_name;
+			}
+			else {
+				return_type = ast->symentry->symbol_info->info_text;
+				function_name = ast->name;
+			}
+
+			if (ast->args_chain->args_next != NULL)
+				first_arg = ast->args_chain->args_next->args_chain;
+
+			fprintf(out, "%s %s::%s (", return_type, class_name, function_name);
+			if (first_arg != NULL)
+				compile_ast_to_cpp(first_arg, out, true, false, -1);
+			fputc(')', out);
+			break;
+		}
 		case AST_SYMBOL:
 			// FIXME: Support name mangeling.
 			fprintf(out, "%s", ast->name);
