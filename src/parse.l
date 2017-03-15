@@ -53,6 +53,25 @@ extern int line_indent;
 	return TOKEN_STRING;
 }
 
+#inline(.)*#endinline {
+
+	/* Skip #include. */
+	char *text = yytext + strlen("#inline");
+
+	/* Cut the #endinline at the end of the string. */
+	char *end = text;
+
+	/* To do that we find the end of the string. s*/
+	while (*end++)
+    ;
+
+	/* And terminate it with a zero from the point where endinline begins. */
+	text[strlen(text) - strlen("#endinline")] = 0;
+	yylval.tok_as_string = strdup(text);
+
+	return TOKEN_INLINE;
+}
+
 \t {
 	// FIXME: If someone uses a tab after the sentence we'll have trouble!
 	++line_indent;
@@ -119,7 +138,7 @@ extern int line_indent;
 	return TOKEN_INT_LITERAL;
 }
 
-[a-zA-Z0-9_]+ {
+[a-zA-Z0-9_\.]+ {
 	yylval.tok_as_string = strdup(yytext);
 	return TOKEN_SYMBOL;
 }

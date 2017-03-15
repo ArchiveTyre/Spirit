@@ -214,6 +214,7 @@ void ast_make_sym_tree(ASTNode *node)
 				break;
 
 			/* Forward the symtable. */
+			case AST_INLINE:
 			case AST_FUNCTION_CALL:
 			case AST_DEFAULT_ARG:
 			case AST_NUMBER:
@@ -460,5 +461,15 @@ ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r)
 	target->is_infix = true;
 	ast_insert_arg(target, l);
 	ast_insert_arg(target, r);
+	return target;
+}
+
+ASTNode *ast_make_inline(char *inline_code)
+{
+#ifdef DEBUG
+	printf("Inline code: %s", inline_code);
+#endif
+	ASTNode *target = init_ast_node(AST_INLINE);
+	target->name = strdup(inline_code);
 	return target;
 }

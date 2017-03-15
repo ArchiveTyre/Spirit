@@ -222,6 +222,9 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 					fputc(';', out);
 			}
 			break;
+		case AST_INLINE:
+			fprintf(out, "/* INLINE */ %s /* ENDINLINE */", ast->name);
+			break;
 		case AST_TUPLE:
 		case AST_TYPE_SPECIFIER:
 		case AST_NONE:

@@ -22,6 +22,7 @@ int line_indent = 0;
 %token <tok_int_val> TOKEN_INT_LITERAL
 %token <tok_as_string> TOKEN_STRING
 %token <tok_as_string> TOKEN_SYMBOL;
+%token <tok_as_string> TOKEN_INLINE;
 
 %token TOKEN_NEWLINE
 %token TOKEN_COLON
@@ -65,14 +66,16 @@ program:		%empty
 				| line program
 				;
 
-/* Each line could either be an expression or a block definition.*/
+/* Each line could either be an expression, inline code or a block usage. */
 line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
 				| t_func_def TOKEN_COLON TOKEN_NEWLINE {ast_auto_insert_node($1);}
 				| t_func_call TOKEN_NEWLINE {ast_auto_insert_node($1);}
 				| TOKEN_VARIABLE t_var_def TOKEN_NEWLINE {ast_auto_insert_node($2);}
 				| t_any_exp TOKEN_NEWLINE {ast_auto_insert_node($1);}
+				| TOKEN_INLINE {ast_auto_insert_node(ast_make_inline($1)); free($1);}
 				;
 
+/* Variables could either be defined by just type. But also with an inital value. */
 t_var_def:		TOKEN_SYMBOL TOKEN_SYMBOL {
 					$$ = ast_make_var_def($2, $1);
 				}
@@ -82,6 +85,7 @@ t_var_def:		TOKEN_SYMBOL TOKEN_SYMBOL {
 				}
 				;
 
+/* Multiple variable definitions. */
 t_var_defs:		t_var_def {$$ = $1;}
 				| t_var_def TOKEN_COMMA t_var_defs {
 					$$ = $1;
@@ -90,6 +94,7 @@ t_var_defs:		t_var_def {$$ = $1;}
 				;
 
 /* A tuple member could have an assigned value. */
+/* TODO: Maybe we should rename this to return_arg? */
 t_tuple_member:	%empty {$$ = ast_make_type_specifier("void");}
 				| TOKEN_SYMBOL {$$ = ast_make_type_specifier($1); free($1);}
 				| TOKEN_SYMBOL TOKEN_ASSIGN t_any_exp {
@@ -113,7 +118,11 @@ t_tuple_members:
 
 /* Can either be emty. */
 t_func_return_type:
+
+				/* A function with not specified return type returns void. */
 				%empty {$$ = ast_make_tuple(ast_make_type_specifier("void"));}
+
+				/* Here the return type is specified. */
 				| TOKEN_ARROW t_tuple_members {
 					$$ = ast_make_tuple($2);
 				}

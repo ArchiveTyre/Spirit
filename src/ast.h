@@ -17,8 +17,15 @@ typedef enum {
 	/* Function call. Name = what to call, first arg = arguments. */
 	AST_FUNCTION_CALL,
 
-	// TODO: Add
+	/*
+	 * Function definition where:
+	 * 	Name = name of function.
+	 *	First arg = return val.
+	 *	Rest of the args  = call args.
+	 */
 	AST_FUNCTION_DEF,
+
+	AST_INLINE,
 
 	/* A simple number. */
 	AST_NUMBER,
@@ -37,6 +44,7 @@ typedef enum {
 
 	/* Name = variable name, first arg = type, (optional) second arg = init. */
 	AST_VAR_DEF,
+
 } EAstType;
 
 typedef struct ASTNode ASTNode;
@@ -174,3 +182,5 @@ ASTNode *ast_make_symbol(char *symbol);
  * Examples: +, -, /, *, etc.
  */
 ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r);
+
+ASTNode *ast_make_inline(char *inline_code);
