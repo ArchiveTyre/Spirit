@@ -1,0 +1,1 @@
+stdio.hello.world(w)

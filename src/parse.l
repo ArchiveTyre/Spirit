@@ -84,6 +84,10 @@ extern int line_indent;
 	return TOKEN_COLON;
 }
 
+"\." {
+	return TOKEN_ACCESS;
+}
+
 "->" {
 	return TOKEN_ARROW;
 }
@@ -138,7 +142,7 @@ extern int line_indent;
 	return TOKEN_INT_LITERAL;
 }
 
-[a-zA-Z0-9_\.]+ {
+[a-zA-Z0-9_]+ {
 	yylval.tok_as_string = strdup(yytext);
 	return TOKEN_SYMBOL;
 }

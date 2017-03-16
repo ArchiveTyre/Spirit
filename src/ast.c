@@ -5,79 +5,6 @@
 
 extern int line_indent;
 
-void debug_ast_node(ASTNode *node, bool in_expr,  int indent)
-{
-	if (node == NULL) {
-		printf("NULL");
-		return;
-	}
-
-	if (!in_expr)
-		printf("L:%03d,i%01d: ", node->line_no, node->indent_level);
-
-	if (indent != -1)
-		for(int i = 0; i < indent; i++)
-			putchar('\t');
-
-	if (node->ast_type == AST_TYPE_SPECIFIER) {
-		printf("->");
-	}
-
-	if (node->ast_type == AST_VAR_DEF) {
-		printf("var %s ", node->args_chain->name);
-	}
-
-	if (node->name != NULL)
-		printf("%s", node->name);
-
-	switch(node->ast_type) {
-		case AST_DEFAULT_ARG:
-			printf("default");
-			break;
-
-		case AST_VAR_DEF:
-			break;
-		case AST_FUNCTION_DEF:
-			break;
-		case AST_TYPE_SPECIFIER:
-			break;
-
-		case AST_TUPLE:
-		case AST_FUNCTION_CALL:
-			printf("(");
-			debug_ast_node(node->args_chain, true, -1);
-			printf(")");
-			break;
-		case AST_BLOCK:
-			printf(" ");
-			debug_ast_node(node->args_chain, true, -1);
-			putchar(':');
-			break;
-		case AST_SYMBOL:
-			break;
-		case AST_NUMBER:
-			printf("%d", node->number_value);
-			break;
-		case AST_STRING:
-			printf("\"%s\"", node->string_value);
-			break;
-		default:
-			printf("ERROR: Compiler error switch number 0!, %d\n", node->ast_type);
-	}
-
-	if (node->args_next != NULL) {
-		printf(", ");
-		debug_ast_node(node->args_next, true, -1);
-	}
-
-	if (indent != -1)
-		putchar('\n');
-	if (node->body_first_child != NULL)
-		debug_ast_node(node->body_first_child, false, indent+1);
-	if (node->body_next_sibling != NULL)
-		debug_ast_node(node->body_next_sibling, false, indent);
-}
-
 /*
 ASTNode *ast_get_arg_by_no(ASTNode *node, int arg_no)
 {
@@ -249,49 +176,6 @@ void ast_make_sym_tree(ASTNode *node)
 
 }
 
-extern int line_indent;
-
-void ast_insert_node(ASTNode *node)
-{
-#ifdef DEBUG
-	printf("Inserting at indent: %d\n", line_indent);
-#endif
-
-	/* Descend. */
-	if (node->indent_level > ast_prev_node->indent_level) {
-		ASTNode **dest = &ast_prev_node->body_first_child;
-		while (*dest != NULL)
-			dest = &(*dest)->body_next_sibling;
-		*dest = node;
-		node->parent_node = ast_prev_node;
-	}
-
-	/* Stay. */
-	else if (ast_prev_node->indent_level == node->indent_level) {
-		ast_prev_node->body_next_sibling = node;
-		node->parent_node = ast_prev_node->parent_node;
-
-	}
-
-	/* Ascend. */
-	else {
-
-		/* Find the correct depth. */
-		ASTNode *parent = ast_prev_node->parent_node;
-		while (parent->indent_level >= node->indent_level)
-			parent = parent->parent_node;
-
-		/* Now add the node to the found result. */
-		ASTNode **dest = &parent->body_first_child;
-		while (*dest != NULL)
-			dest = &(*dest)->body_next_sibling;
-		*dest = node;
-		node->parent_node = parent;
-	}
-	ast_prev_node = node;
-	line_indent = 0;
-}
-
 void free_ast_node(ASTNode *target)
 {
 
@@ -413,13 +297,14 @@ ASTNode *ast_make_func_def(char *func_name,
 	return target;
 }
 
-ASTNode *ast_make_func_call(char *function_name)
+ASTNode *ast_make_func_call(ASTNode *function_symbol, ASTNode *first_call_arg)
 {
 #ifdef DEBUG
-	printf("Function call to: %s\n", function_name);
+	printf("Function call to: %s\n", function_symbol->name);
 #endif
 	ASTNode *target = init_ast_node(AST_FUNCTION_CALL);
-	target->name = strdup(function_name);
+	ast_insert_arg(target, function_symbol);
+	ast_insert_arg(target, first_call_arg);
 	return target;
 }
 
@@ -457,8 +342,8 @@ ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r)
 	printf("Creating OP: %s\n", op);
 #endif
 	ASTNode *target = init_ast_node(AST_FUNCTION_CALL);
-	target->name = strdup(op);
 	target->is_infix = true;
+	ast_insert_arg(target, ast_make_symbol(op));
 	ast_insert_arg(target, l);
 	ast_insert_arg(target, r);
 	return target;

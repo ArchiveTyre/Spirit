@@ -137,7 +137,7 @@ static void compile_block_to_cpp(ASTNode *ast, FILE* out)
 /**
  * Compiles any AST node into AST code.
  */
-void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_siblings, int indent_with)
+void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool do_next, int indent_with)
 {
 #ifdef DEBUG
 	if (!in_expr)
@@ -172,7 +172,7 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 
 			fprintf(out, "%s %s::%s (", return_type, class_name, function_name);
 			if (first_arg != NULL)
-				compile_ast_to_cpp(first_arg, out, true, false, -1);
+				compile_ast_to_cpp(first_arg, out, true, true, 0);
 			fputc(')', out);
 			break;
 		}
@@ -190,16 +190,19 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 		case AST_FUNCTION_CALL:
 			/* In infix the function name is in the middle of the args. */
 			if (ast->is_infix) {
-				compile_ast_to_cpp(ast->args_chain, out, true, true, 0);
-				fprintf(out, " %s ", ast->name);
-				compile_ast_to_cpp(ast->args_chain->args_next, out, true, true, 0);
+				compile_ast_to_cpp(ast->args_chain->args_next, out, true, false, 0);
+				fputc (' ', out);
+				compile_ast_to_cpp(ast->args_chain, out, true, false, 0);
+				fputc (' ', out);
+				compile_ast_to_cpp(ast->args_chain->args_next->args_next, out, true, false, 0);
 			}
 
 			/* Compile function call the normal way. */
 			else {
-				fprintf(out, "%s(", ast->name);
 				compile_ast_to_cpp(ast->args_chain, out, true, false, 0);
-				fprintf(out, ")");
+				fputc('(', out);
+				compile_ast_to_cpp(ast->args_chain->args_next, out, true, true, 0);
+				fputc(')', out);
 			}
 			if (!in_expr)
 				fputc(';', out);
@@ -216,7 +219,7 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 
 				if (ast->args_chain->args_next != NULL) {
 					fputs(" = ", out);
-					compile_ast_to_cpp(ast->args_chain->args_next, out, true, true, -1);
+					compile_ast_to_cpp(ast->args_chain->args_next, out, true, true, 0);
 				}
 				if (!in_expr)
 					fputc(';', out);
@@ -240,7 +243,7 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 			fputs(" {\n", out);
 
 		/* Do the compilation. Nodes indent themselves. */
-		compile_ast_to_cpp(ast->body_first_child, out, false, false, indent_with + 1);
+		compile_ast_to_cpp(ast->body_first_child, out, false, true, indent_with + 1);
 		if (ast != ast_root_node) {
 			/* Indent and add extra braces. */
 #ifdef DEBUG
@@ -256,17 +259,17 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool skip_sibling
 		fputc('\n', out);
 
 	/* Only if we are allowed to compile the siblings. */
-	if (!skip_siblings) {
+	if (do_next) {
 
 		/* Try to compile sibling. */
 		if (ast->body_next_sibling != NULL) {
-			compile_ast_to_cpp(ast->body_next_sibling, out, false, false, indent_with);
+			compile_ast_to_cpp(ast->body_next_sibling, out, false, true, indent_with);
 		}
 
 		/* Try to compile next arg. */
 		if (ast->args_next != NULL) {
 			fputs(", ", out);
-			compile_ast_to_cpp(ast->args_next, out, true, false, 0);
+			compile_ast_to_cpp(ast->args_next, out, true, true, 0);
 		}
 	}
 }

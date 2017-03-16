@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "grammar.tab.h"
 #include "ast.h"
+#include "debug/ast_debug.h"
 #include "symtbl.h"
 #include "cpp_backend.h"
 
@@ -50,7 +51,7 @@ static int parse_file(char *filename, FILE *out)
 	printf("[DONE] Parsed: %d lines!\n", yylineno - 1);
 
 #if DEBUG
-	debug_ast_node(ast_root_node, false, 0);
+	debug_ast_node(ast_root_node, false, true, 0);
 #endif
 
 	/* Before we can compile we need to create the symbol tree. */

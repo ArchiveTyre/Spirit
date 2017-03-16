@@ -46,17 +46,30 @@ int line_indent = 0;
  * to evluate & reduce tokens.
  */
 
-%nonassoc TOKEN_ARROW
+
 %nonassoc TOKEN_FUNCTION
 %nonassoc TOKEN_VARIABLE
-%nonassoc TOKEN_LPAREN TOKEN_RPAREN
+%nonassoc TOKEN_ARROW
 %nonassoc TOKEN_COLON
-%nonassoc TOKEN_SYMBOL
+
+
+%nonassoc TOKEN_LPAREN TOKEN_RPAREN
+
+
+
+%right TOKEN_ASSIGN
 %nonassoc TOKEN_COMPARISON
-%left TOKEN_ASSIGN
+
+
 %left TOKEN_MINUS TOKEN_PLUS
+/* TODO: Add modulus. */
 %left TOKEN_MULTIPLY TOKEN_DIVIDE
 
+%nonassoc TOKEN_SYMBOL
+%right TOKEN_ACCESS
+%nonassoc TOKEN_COMMA
+
+/* The program starts in the proram state. */
 %start program
 
 %%
@@ -69,7 +82,7 @@ program:		%empty
 /* Each line could either be an expression, inline code or a block usage. */
 line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
 				| t_func_def TOKEN_COLON TOKEN_NEWLINE {ast_auto_insert_node($1);}
-				| t_func_call TOKEN_NEWLINE {ast_auto_insert_node($1);}
+				/*| t_func_call TOKEN_NEWLINE {ast_auto_insert_node($1);}*/
 				| TOKEN_VARIABLE t_var_def TOKEN_NEWLINE {ast_auto_insert_node($2);}
 				| t_any_exp TOKEN_NEWLINE {ast_auto_insert_node($1);}
 				| TOKEN_INLINE {ast_auto_insert_node(ast_make_inline($1)); free($1);}
@@ -129,12 +142,12 @@ t_func_return_type:
 				;
 
 /* A function has a name, arguments, and a return type. */
-t_func_def:		TOKEN_FUNCTION TOKEN_SYMBOL t_func_return_type {
-					$$ = ast_make_func_def($2, $3, ast_make_tuple(NULL));
+t_func_def:		TOKEN_FUNCTION TOKEN_SYMBOL[name] t_func_return_type[return_type] {
+					$$ = ast_make_func_def($name, $return_type, ast_make_tuple(NULL));
 					free($2);
 				}
-				| TOKEN_FUNCTION TOKEN_SYMBOL TOKEN_LPAREN t_var_defs TOKEN_RPAREN t_func_return_type {
-					$$ = ast_make_func_def($2, $6, ast_make_tuple($4));
+				| TOKEN_FUNCTION TOKEN_SYMBOL[name] TOKEN_LPAREN t_var_defs[args] TOKEN_RPAREN t_func_return_type[return_type] {
+					$$ = ast_make_func_def($name, $return_type, ast_make_tuple($args));
 					free($2);
 				}
 				;
@@ -150,14 +163,12 @@ t_call_args:	%empty {$$ = ast_make_default_arg();}
  * A function can be called with only one argument and paranthesesless.
  * Or with multiple arguments using parantheses.
  */
-t_func_call:	TOKEN_SYMBOL TOKEN_LPAREN t_call_args TOKEN_RPAREN {
-	   				$$ = ast_make_func_call($1);
-					$$->args_chain = $3;
-					free($1);}
-				| TOKEN_SYMBOL t_any_exp {
-					$$ = ast_make_func_call($1);
-					$$->args_chain = $2;
-					free($1);}
+t_func_call:	t_any_exp[name] TOKEN_LPAREN t_call_args[args] TOKEN_RPAREN {
+					printf("L&R paren style!\n");
+	   				$$ = ast_make_func_call($name, $args);}
+				| t_any_exp[name] t_any_exp[args] {
+					printf("Paranthesesless call!\n");
+					$$ = ast_make_func_call($name, $args);}
 	   			;
 
 /* Firstly, we simplify any expression only containing numbers. */
@@ -171,6 +182,7 @@ t_num_exp:		TOKEN_INT_LITERAL { $$ = $1;}
 
 /* t_any_exp is any expression. Strings, numbers, function calls, etc */
 t_any_exp:		TOKEN_SYMBOL {$$ = ast_make_symbol($1); free($1);}
+				| t_func_call {$$ = $1;}
 				| TOKEN_STRING {
 					$1[strlen($1) - 1] = 0;
 					$$ = ast_make_string($1+1);
@@ -182,8 +194,8 @@ t_any_exp:		TOKEN_SYMBOL {$$ = ast_make_symbol($1); free($1);}
 				| t_any_exp TOKEN_DIVIDE t_any_exp {$$ = ast_make_op("/", $1, $3);}
 				| t_any_exp TOKEN_ASSIGN t_any_exp {$$ = ast_make_op("=", $1, $3);}
 				| t_any_exp TOKEN_COMPARISON t_any_exp {$$ = ast_make_op("==", $1, $3);}
+				| t_any_exp TOKEN_ACCESS t_any_exp {$$ = ast_make_op(".", $1, $3);}
 				| TOKEN_LPAREN t_any_exp TOKEN_RPAREN {$$ = $2;}
-				| t_func_call {$$ = $1;}
 				;
 
 %%

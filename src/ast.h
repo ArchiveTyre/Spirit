@@ -96,11 +96,6 @@ void ast_insert_child_node(ASTNode *target_node, ASTNode *child_node);
 void ast_insert_arg(ASTNode *target_node, ASTNode *target_arg);
 
 /**
- * Prints out the AST given in a tree format.
- */
-void debug_ast_node(ASTNode *node, bool in_expr, int indent);
-
-/**
  * Frees the target node along with it's siblings, children
  * and function call chain.
  */
@@ -149,7 +144,7 @@ ASTNode *ast_make_type_specifier(char *type_name);
  * later on.
  * Example: FIXME
  */
-ASTNode *ast_make_func_call(char *function_name);
+ASTNode *ast_make_func_call(ASTNode *function_symbol, ASTNode *first_call_arg);
 
 /**
  * Default args should be replaced at compile time.
