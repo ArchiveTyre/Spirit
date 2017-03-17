@@ -1,6 +1,7 @@
 # The build system.
 obj/
 cheri
+out
 a.out
 
 # Swap.
@@ -23,3 +24,4 @@ tags
 
 # Some other stuff
 personal_notes
+vgcore.*

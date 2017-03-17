@@ -7,6 +7,7 @@
 #include "debug/ast_debug.h"
 #include "symtbl.h"
 #include "cpp_backend.h"
+#include "compile.h"
 
 /**
  * Just prints the help information. (^.^)
@@ -15,75 +16,9 @@ static void help()
 {
 	printf("Usage: cheri [options] files...\n");
 	printf("Options:\n");
-	printf("\t--help\t\tDispays this help section.\n");
-	printf("\t-o\t\tSpecifies where to place output.\n");
-}
-
-/**
- * Parses one file and creates an AST for it.
- */
-static int parse_file(char *filename, FILE *out)
-{
-	/* Call lexer. */
-	extern int yylineno;
-	extern FILE *yyin;
-	extern void yylex_destroy();
-
-	/* Get the class name based of the basnemae of the filename. */
-	// FIXME: Add error checking here.
-	char *simple_filename_free = strdup(filename);
-	char *simple_filename = basename(simple_filename_free);
-
-	/* Finds the first occurance of "." and copies everything up until that point. */
-	char *new_class_name = strndup(simple_filename,
-		strchr(simple_filename, '.') - simple_filename);
-	printf("Compiling class: %s\n", new_class_name);
-
-	/* The parse needs somewhere to put the AST into. */
-	ast_root_node = ast_make_root(new_class_name);
-	ast_prev_node = ast_root_node;
-
-	/* Do the parsing. */
-	yyin = fopen(filename, "r");
-	// FIXME: Check result of function for errors.
-	yyparse();
-	fclose(yyin);
-	printf("[DONE] Parsed: %d lines!\n", yylineno - 1);
-
-#if DEBUG
-	debug_ast_node(ast_root_node, false, true, 0);
-#endif
-
-	/* Before we can compile we need to create the symbol tree. */
-	ast_make_sym_tree(ast_root_node);
-
-	// FIXME: Remove in the future.
-	fprintf(out, "#include <stdio.h>\n");
-
-	/* Then we can compile into a C/C++ file*/
-	compile_ast_to_cpp(ast_root_node, out, false, false, 0);
-
-	/* As the main module, run self. */
-	fprintf(out, "int main() {auto start = new %s(); return 0;}\n", new_class_name);
-
-	/* Free the AST and the symbol table. */
-	free_sym(ast_root_node->symentry);
-	free_ast_node(ast_root_node);
-
-	free(simple_filename_free);
-	free(new_class_name);
-
-	yylex_destroy();
-
-
-
-	printf("[DONE] Compiling: %s\n", filename);
-
-#if DEBUG
-	printf("Cake delicious desu. You must eait it ~desu.\n");
-#endif
-	return 0;
-
+	printf("\t--help        Dispays this help section.\n");
+	printf("\t-o            Specifies where to place output binary.\n");
+	printf("\t--out-dir     Specifies where to place build files.\n");
 }
 
 int main(int argc, char *args[])
@@ -108,6 +43,13 @@ int main(int argc, char *args[])
 				output_filename = args[arg_index];
 			}
 
+
+			/* Set the output dir. */
+			else if (strcmp(arg_to_parse, "--out-dir") == 0) {
+				arg_index++;
+				out_dir = args[arg_index];
+			}
+
 			/* The help option. */
 			else if (strcmp(arg_to_parse, "-h") == 0 || strcmp(arg_to_parse, "--help") == 0) {
 				help();
@@ -123,7 +65,11 @@ int main(int argc, char *args[])
 
 		/* If this wasn't an option than we append to list of files to compile. */
 		else {
-			files_list = &(FilesList){files_list, arg_to_parse};
+			/* Append to list. */
+			FilesList* f = malloc(sizeof(FilesList));
+			f->filename = arg_to_parse;
+			f->prev = files_list;
+			files_list = f;
 		}
 	}
 #ifdef DEBUG
@@ -131,7 +77,7 @@ int main(int argc, char *args[])
 #endif
 
 	/* Open the output file. If none specified use the stdout. */
-	FILE *output_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
+	out_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
 
 
 	/* Parse each file given as input. */
@@ -139,8 +85,11 @@ int main(int argc, char *args[])
 #if DEBUG
 		printf("Parsing: %s\n", files_list->filename);
 #endif
-		parse_file(files_list->filename, output_file);
+		compile_file(files_list->filename);
+		FilesList *old = files_list;
 		files_list = files_list->prev;
+		free(old);
+
 	}
 
 	return 0;

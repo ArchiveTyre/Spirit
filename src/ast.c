@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "compile.h"
 
 extern int line_indent;
 
@@ -19,14 +20,14 @@ void ast_auto_insert_node(ASTNode *node)
 #endif
 
 	/* Descend. */
-	if (node->indent_level > ast_prev_node->indent_level) {
-		ast_insert_child_node(ast_prev_node, node);
+	if (node->indent_level > current_compile_result->ast_prev_node->indent_level) {
+		ast_insert_child_node(current_compile_result->ast_prev_node, node);
 	}
 
 	/* Stay. */
-	else if (ast_prev_node->indent_level == node->indent_level) {
-		ast_prev_node->body_next_sibling = node;
-		node->parent_node = ast_prev_node->parent_node;
+	else if (current_compile_result->ast_prev_node->indent_level == node->indent_level) {
+		current_compile_result->ast_prev_node->body_next_sibling = node;
+		node->parent_node = current_compile_result->ast_prev_node->parent_node;
 
 	}
 
@@ -34,14 +35,14 @@ void ast_auto_insert_node(ASTNode *node)
 	else {
 
 		/* Find the correct depth. */
-		ASTNode *parent = ast_prev_node->parent_node;
+		ASTNode *parent = current_compile_result->ast_prev_node->parent_node;
 		while (parent->indent_level >= node->indent_level)
 			parent = parent->parent_node;
 
 		/* Now add the node to the found result. */
 		ast_insert_child_node(parent, node);
 	}
-	ast_prev_node = node;
+	current_compile_result->ast_prev_node = node;
 	line_indent = 0;
 }
 
@@ -69,7 +70,7 @@ void ast_insert_arg(ASTNode *target_node, ASTNode *target_arg)
 
 void ast_make_sym_tree(ASTNode *node)
 {
-	if (node->parent_node == NULL && node != ast_root_node) {
+	if (node->parent_node == NULL && node != current_compile_result->ast_root_node) {
 		printf("ERROR: Compiler error: Node has no parent.\n");
 		abort();
 		return;
@@ -225,7 +226,7 @@ ASTNode *ast_make_root(char *class_name)
 	//target->symentry = sym_define("root", "class", NULL);
 
 	/* When a root node is created it's always the newest one. */
-	ast_prev_node = target;
+	current_compile_result->ast_prev_node = target;
 	return target;
 }
 

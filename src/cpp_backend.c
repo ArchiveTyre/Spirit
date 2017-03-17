@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include "compile.h"
 
 /**
  * Compiles a symbol table recursively into C++ code.
@@ -239,12 +240,12 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool do_next, int
 	if (ast->body_first_child != NULL) {
 
 		/* Skip extra braces for root nodes. */
-		if (ast != ast_root_node)
+		if (ast != current_compile_result->ast_root_node)
 			fputs(" {\n", out);
 
 		/* Do the compilation. Nodes indent themselves. */
 		compile_ast_to_cpp(ast->body_first_child, out, false, true, indent_with + 1);
-		if (ast != ast_root_node) {
+		if (ast != current_compile_result->ast_root_node) {
 			/* Indent and add extra braces. */
 #ifdef DEBUG
 			for(int i = 1; i < indent_with; i++)

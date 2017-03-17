@@ -1,2 +1,3 @@
 -Iobj/src
 -Wno-pragma-once-outside-header
+-DDEBUG

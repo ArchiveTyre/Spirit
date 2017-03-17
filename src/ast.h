@@ -78,9 +78,6 @@ struct ASTNode {
 
 };
 
-ASTNode *ast_root_node;
-ASTNode *ast_prev_node;
-
 /**
  * Gives a symbol entry to all child nodes.
  */
