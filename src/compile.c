@@ -83,16 +83,22 @@ CompileResult *compile_file(char *file_name)
 	char *simple_filename = basename(simple_filename_free);
 
 	/* Finds the first occurance of "." and copies everything up until that point. */
-	char *new_class_name = strndup(simple_filename,
-		strchr(simple_filename, '.') - simple_filename);
+	char *new_class_name = strndup(simple_filename, strchr(simple_filename, '.') - simple_filename);
 	printf("Compiling class: %s\n", new_class_name);
 	target->class_name = new_class_name;
 
-	/*** CREATE OUT FILE NAME ***/
+	/*** CREATE OUT & SYM FILE NAME ***/
 	#define format_string "%s/%s.cpp"
 	int size_needed = snprintf(NULL, 0, format_string, out_dir, file_name);
 	target->out_file_name = malloc(size_needed + 1);
 	sprintf(target->out_file_name, format_string, out_dir, file_name);
+	#undef format_string
+
+	#define format_string "%s/%s.sym"
+	int size_needed_2 = snprintf(NULL, 0, format_string, out_dir, file_name);
+	char *symbol_file_name = malloc(size_needed_2 + 1);
+	sprintf(symbol_file_name, format_string, out_dir, file_name);
+	#undef format_string
 
 	/*** CHECK IF NEEDS RECOMPILATION. ***/
 	if (needs_recompile(file_name, target->out_file_name)) {
@@ -136,6 +142,14 @@ CompileResult *compile_file(char *file_name)
 		/* Then we can compile into a C/C++ file*/
 		// FIXME: Support multiple backends.
 		compile_ast_to_cpp(target->ast_root_node, target->out_file, false, false, 0);
+
+		/*** SAVE SYMBOL TABLE ***/
+		FILE *symbol_file = fopen(symbol_file_name, "w");
+
+		sym_save_to_file(target->sym_entry, symbol_file);
+
+		fclose(symbol_file);
+
 	}
 
 	/*** IN CASE THE CLASS IS ALREADY COMPILED ***/
@@ -144,8 +158,13 @@ CompileResult *compile_file(char *file_name)
 		target->ast_prev_node = NULL;
 		target->ast_root_node = NULL;
 		target->out_file = NULL;
-		target->sym_entry = NULL; // FIXME: Load symfile here!
+
+		/* Load symbol file. */
+		FILE *symbol_file = fopen(symbol_file_name, "r");
+		target->sym_entry = sym_load_from_file(symbol_file);
+		fclose(symbol_file);
 	}
+
 	target->success = true;
 
 	/*** FREE STRINGS ***/

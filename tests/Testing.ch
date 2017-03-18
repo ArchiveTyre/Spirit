@@ -1,1 +1,2 @@
-stdio.hello.world(w)
+fun construct:
+	stdio.hello.world(w)

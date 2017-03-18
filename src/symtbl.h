@@ -1,4 +1,5 @@
 #pragma once
+#include <stdio.h>
 
 /*
  * You can access the global symbol table by accessing ast_root_node->symentry.
@@ -23,7 +24,6 @@ struct SymbolTableEntry {
 	SymbolInfo *symbol_info;
 };
 
-//SymbolTableEntry *global_symbol_table;
 SymbolTableEntry *newest_symbol_table;
 
 /**
@@ -42,5 +42,15 @@ SymbolTableEntry *sym_find(char *symbol_name, SymbolTableEntry *perspective);
  * Frees a node. Baka.
  */
  void free_sym(SymbolTableEntry *node);
+
+/**
+ * Loads a symbol from a file.
+ */
+SymbolTableEntry *sym_load_from_file(FILE *file);
+
+/**
+ * Saves the symbol's children (no recursion) into a file.
+ */
+void sym_save_to_file(SymbolTableEntry *symbol, FILE *file);
 
 //SymbolTableEntry *sym_name_mangle

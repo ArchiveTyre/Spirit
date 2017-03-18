@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 SymbolTableEntry *sym_define(char *symbol_name, char *symbol_type, SymbolTableEntry *parent)
 {
@@ -89,4 +90,68 @@ void free_sym(SymbolTableEntry *node)
 	free(node->symbol_name);
 	free(node->symbol_type);
 	free(node);
+}
+
+SymbolTableEntry *sym_load_from_file(FILE *file)
+{
+	int r;
+	int line_no = 0;
+	SymbolTableEntry *target = sym_define("", "class", NULL);
+	SymbolTableEntry *parsing;
+
+    for(;;) {
+        line_no++;
+		char *sym_type;
+		char *sym_name;
+		int parse_type;
+
+		r = fscanf(file, "%d %ms %ms\n", &parse_type, &sym_type, &sym_name);
+        if (r == 3) {
+
+			switch (parse_type) {
+				case 0:
+					break;
+				case 1:
+					parsing = sym_define(sym_name, sym_type, target);
+					break;
+				case 2:
+					assert(parsing != NULL);
+					sym_add_info(parsing, sym_name);
+					break;
+				default:
+					printf ("ERROR: on line %d. Unknown parse type!\n", line_no);
+			}
+
+        }
+		else if (r == EOF)
+			break;
+        else
+            printf ("ERROR: on line %d. Corrupt file!\n", line_no);
+		free(sym_type);
+		free(sym_name);
+
+    }
+
+	return target;
+
+}
+
+void sym_save_to_file(SymbolTableEntry *symbol, FILE *file)
+{
+
+	/* Iterate through child symbols and save them. */
+	SymbolTableEntry *iterator = symbol->first_child;
+	while (iterator != NULL) {
+
+		fprintf(file, "1 %s %s\n", iterator->symbol_type, iterator->symbol_name);
+
+		/* Iterate through symbol info and save them. */
+		SymbolInfo *symbol_info_iterator = iterator->symbol_info;
+		while(symbol_info_iterator != NULL) {
+			fprintf(file, "2 _info %s\n", symbol_info_iterator->info_text);
+			symbol_info_iterator = symbol_info_iterator->info_sibling;
+		}
+
+		iterator = iterator->next_sibling;
+	}
 }
