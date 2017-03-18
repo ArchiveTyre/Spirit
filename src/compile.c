@@ -9,6 +9,7 @@
 #include <errno.h>
 #include "grammar.tab.h"
 #include "debug/ast_debug.h"
+#include "analyse.h"
 
 /*** C BACKEND ***/
 #include "backend/cpp_backend.h"
@@ -139,6 +140,9 @@ CompileResult *compile_file(char *file_name)
 		ast_make_sym_tree(target->ast_root_node);
 		target->sym_entry = target->ast_root_node->symentry;
 
+		/* Analyse and fix the AST before compiling it out. */
+		analyse_and_fix_class(target);
+
 		/* Then we can compile into a C/C++ file*/
 		// FIXME: Support multiple backends.
 		compile_ast_to_cpp(target->ast_root_node, target->out_file, false, false, 0);
@@ -175,9 +179,6 @@ CompileResult *compile_file(char *file_name)
 
 void free_compile_result(CompileResult *target)
 {
-	printf("Delete yourself senpai!");
-	/* Free the AST and the symbol table. */
-
 	free(target->class_name);
 	free(target->file_name);
 	free(target->out_file_name);

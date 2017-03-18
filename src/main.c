@@ -96,11 +96,8 @@ int main(int argc, char *args[])
 
 	/* Free compile results. */
 	while (current_compile_result != NULL) {
-		printf("Cleanup!\n");
-
 		CompileResult *old = current_compile_result;
 		current_compile_result = current_compile_result->prev_result;
-
 		free_compile_result(old);
 	}
 

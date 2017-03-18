@@ -1,3 +1,5 @@
+import Something.Somewhere
+
 var string hello = "Nyaa~ no value has been set!"
 
 fun construct:

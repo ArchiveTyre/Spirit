@@ -78,6 +78,9 @@ void debug_ast_node(ASTNode *node, bool in_expr, bool do_next, int indent)
 		case AST_STRING:
 			printf("\"%s\"", node->string_value);
 			break;
+
+		case AST_NONE:
+			printf("(COMPILER ERROR)");
 		default:
 			printf("ERROR: Compiler error switch number 0!, %d\n", node->ast_type);
 	}

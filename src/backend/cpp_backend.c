@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "compile.h"
+#include "../compile.h"
 
 /**
  * Compiles a symbol table recursively into C++ code.
@@ -229,9 +229,11 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool do_next, int
 		case AST_INLINE:
 			fprintf(out, "/* INLINE */ %s /* ENDINLINE */", ast->name);
 			break;
+		case AST_NONE:
+			/* Skip compilation of removed nodes. */
+			break;
 		case AST_TUPLE:
 		case AST_TYPE_SPECIFIER:
-		case AST_NONE:
 		default:
 			printf("ERROR: Compiler error in switch number 2!, %d\n", ast->ast_type);
 	}
