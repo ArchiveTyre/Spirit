@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <sys/stat.h>
 #include "grammar.tab.h"
 #include "debug/ast_debug.h"
 
@@ -24,6 +25,12 @@ CompileResult *compile_file(char *file_name)
 	CompileResult *target = malloc(sizeof(CompileResult));
 	current_compile_result = target;
 	target->file_name = strdup(file_name);
+
+	/*** ASSURE THT THE OUT DIR EXISTS ***/
+	struct stat dir_stat = {0};
+	if (stat(out_dir, &dir_stat) == -1) {
+    	mkdir(out_dir, 0755);
+	}
 
 	/*** FIND AND SET CLASS NAME ***/
 	/* Get the class name based of the basnemae of the filename. */
