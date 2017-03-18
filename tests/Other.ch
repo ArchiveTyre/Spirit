@@ -5,4 +5,4 @@ fun construct:
 
 fun greet:
 	printf("Tihi. %s", hello)
-	(world.stdio.printf("Hi")) + world.stdio.printf("World!")
+	(world.stdio.printf("Hai desu")) + world.stdio.printf("World!")

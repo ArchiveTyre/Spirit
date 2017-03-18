@@ -15,6 +15,8 @@ struct CompileResult {
 
 	FILE* out_file;
 	char *out_file_name;
+
+	CompileResult *prev_result;
 };
 
 CompileResult *current_compile_result;

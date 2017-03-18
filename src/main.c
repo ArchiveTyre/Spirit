@@ -6,7 +6,6 @@
 #include "ast.h"
 #include "debug/ast_debug.h"
 #include "symtbl.h"
-#include "cpp_backend.h"
 #include "compile.h"
 
 /**
@@ -16,9 +15,9 @@ static void help()
 {
 	printf("Usage: cheri [options] files...\n");
 	printf("Options:\n");
-	printf("\t--help        Dispays this help section.\n");
-	printf("\t-o            Specifies where to place output binary.\n");
-	printf("\t--out-dir     Specifies where to place build files.\n");
+	printf("    --help        Dispays this help section.\n");
+	printf("    -o            Specifies where to place output binary.\n");
+	printf("    --out-dir     Specifies where to place build files.\n");
 }
 
 int main(int argc, char *args[])
@@ -32,7 +31,8 @@ int main(int argc, char *args[])
 	FilesList *files_list = NULL;
 	char* output_filename = NULL;
 
-	/* Parse the arguments. */
+	// FIXME: Add a separate file for this.
+	/*** PARSE ARGUMENTS ***/
 	for(int arg_index = 1; arg_index < argc; arg_index++) {
 		char* arg_to_parse = args[arg_index];
 		if (arg_to_parse[0] == '-') {
@@ -80,7 +80,7 @@ int main(int argc, char *args[])
 	out_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
 
 
-	/* Parse each file given as input. */
+	/*** PARSE EACH FILE GIVEN AS INPUT ***/
 	while(files_list != NULL) {
 #if DEBUG
 		printf("Parsing: %s\n", files_list->filename);
@@ -90,6 +90,25 @@ int main(int argc, char *args[])
 		files_list = files_list->prev;
 		free(old);
 
+	}
+
+	/*** CLEAN UP ***/
+
+	/* Free compile results. */
+	while (current_compile_result != NULL) {
+		printf("Cleanup!\n");
+
+		CompileResult *old = current_compile_result;
+		current_compile_result = current_compile_result->prev_result;
+
+		free_compile_result(old);
+	}
+
+	/* Destroy parser. */
+	extern int yylex_destroy();
+	int result_yylex_destroy = yylex_destroy();
+	if (result_yylex_destroy != 0) {
+		printf("ERROR: Could not destroy yylex. %d\n", result_yylex_destroy);
 	}
 
 	return 0;

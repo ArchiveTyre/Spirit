@@ -91,10 +91,15 @@ line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
 /* Variables could either be defined by just type. But also with an inital value. */
 t_var_def:		TOKEN_SYMBOL TOKEN_SYMBOL {
 					$$ = ast_make_var_def($2, $1);
+					free($1);
+					free($2);
 				}
 				| TOKEN_SYMBOL TOKEN_SYMBOL TOKEN_ASSIGN t_any_exp {
 					$$ = ast_make_var_def($2, $1);
 					ast_insert_arg($$, $4);
+
+					free($1);
+					free($2);
 				}
 				;
 

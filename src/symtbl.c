@@ -72,13 +72,10 @@ SymbolTableEntry *sym_find(char *symbol_name, SymbolTableEntry *perspective)
 
 void free_sym(SymbolTableEntry *node)
 {
-	free(node->symbol_name);
-	free(node->symbol_type);
 	if (node->first_child != NULL)
-		free(node->first_child);
+		free_sym(node->first_child);
 	if (node->next_sibling != NULL)
-		free(node->next_sibling);
-	free(node);
+		free_sym(node->next_sibling);
 
 	/* Iterate through symbol info and free them. */
 	SymbolInfo *symbol_info_iterator = node->symbol_info;
@@ -88,4 +85,8 @@ void free_sym(SymbolTableEntry *node)
 		free(symbol_info_iterator);
 		symbol_info_iterator = next;
 	}
+
+	free(node->symbol_name);
+	free(node->symbol_type);
+	free(node);
 }
