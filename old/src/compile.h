@@ -20,6 +20,7 @@ struct CompileResult {
 };
 
 CompileResult *current_compile_result;
+CompileResult *newest_compile_result;
 
 CompileResult *compile_file(char *file_name);
 void free_compile_result(CompileResult *target);

@@ -7,6 +7,13 @@
 #include "debug/ast_debug.h"
 #include "symtbl.h"
 #include "compile.h"
+#include "types.h"
+
+static void print_version()
+{
+	printf("Cheri v0.0.1\n");
+	printf("© 2017 TYREREXUS ALL RIGHTS RESERVED\n");
+}
 
 /**
  * Just prints the help information. (^.^)
@@ -16,6 +23,7 @@ static void help()
 	printf("Usage: cheri [options] files...\n");
 	printf("Options:\n");
 	printf("    --help        Dispays this help section.\n");
+	printf("    -v            Prints out the version\n");
 	printf("    -o            Specifies where to place output binary.\n");
 	printf("    --out-dir     Specifies where to place build files.\n");
 }
@@ -43,6 +51,12 @@ int main(int argc, char *args[])
 				output_filename = args[arg_index];
 			}
 
+			else if (strcmp(arg_to_parse, "-v") == 0) {
+				print_version();
+
+				// FIXME: Do proper clean-up maybe...
+				return 0;
+			}
 
 			/* Set the output dir. */
 			else if (strcmp(arg_to_parse, "--out-dir") == 0) {
@@ -79,6 +93,9 @@ int main(int argc, char *args[])
 	/* Open the output file. If none specified use the stdout. */
 	out_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
 
+	/*** INIT THE COMPILER ***/
+	global_symbol_table = sym_define("global", NULL, SYM_NONE, NULL);
+	init_types();
 
 	/*** PARSE EACH FILE GIVEN AS INPUT ***/
 	while(files_list != NULL) {
@@ -93,7 +110,6 @@ int main(int argc, char *args[])
 	}
 
 	/*** CLEAN UP ***/
-
 	/* Free compile results. */
 	while (current_compile_result != NULL) {
 		CompileResult *old = current_compile_result;

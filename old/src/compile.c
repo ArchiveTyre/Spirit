@@ -9,6 +9,7 @@
 #include <errno.h>
 #include "grammar.tab.h"
 #include "debug/ast_debug.h"
+#include "debug/sym_debug.h"
 #include "analyse.h"
 
 /*** C BACKEND ***/
@@ -16,6 +17,7 @@
 
 const char *out_dir = "out";
 CompileResult *current_compile_result = NULL;
+CompileResult *newest_compile_result = NULL;
 
 static bool needs_recompile(char *src_file, char *backend_out_file)
 {
@@ -23,7 +25,7 @@ static bool needs_recompile(char *src_file, char *backend_out_file)
 
 	/* If src file does not exist we have a problem in the compiler code. */
     if (stat(src_file, &src_stat) != 0) {
-        printf("ERROR: Could not get stat for src file: %s", src_file);
+        printf("ERROR: Could not get stat for src file: %s\n", src_file);
 		abort();
         return 1;
     }
@@ -68,8 +70,10 @@ CompileResult *compile_file(char *file_name)
 
 	/*** CREATE RESULT STRUCT ***/
 	CompileResult *target = malloc(sizeof(CompileResult));
-	target->prev_result = current_compile_result;
-	current_compile_result = target;
+	target->prev_result = newest_compile_result;
+	newest_compile_result = target;
+	CompileResult *previous_result = current_compile_result;
+	current_compile_result = newest_compile_result;
 	target->file_name = strdup(file_name);
 
 	/*** ASSURE THT THE OUT DIR EXISTS ***/
@@ -119,6 +123,7 @@ CompileResult *compile_file(char *file_name)
 		/*** PARSE THE FILE INTO AST ***/
 		/* Open up the file. */
 		yyrestart(fopen(file_name, "r"));
+		yylineno = 1;
 
 		/* Compile the file. */
 		int parse_result = yyparse();
@@ -169,7 +174,12 @@ CompileResult *compile_file(char *file_name)
 		fclose(symbol_file);
 	}
 
+#ifdef DEBUG
+	debug_symbol(current_compile_result->sym_entry, 0);
+#endif
+
 	target->success = true;
+	current_compile_result = previous_result;
 
 	/*** FREE STRINGS ***/
 	free(simple_filename_free);

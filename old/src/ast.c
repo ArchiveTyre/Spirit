@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "compile.h"
+#include "types.h"
 
 extern int line_indent;
 
@@ -83,14 +84,14 @@ void ast_make_sym_tree(ASTNode *node)
 		{
 			case AST_BLOCK:
 				if (strcmp(node->name, "class") == 0) {
-					node->symentry = sym_define(node->args_chain->string_value,
-						node->name, NULL);
+					node->symentry = sym_define(current_compile_result->class_name,
+						TYPE_CLASS, SYM_TYPE, global_symbol_table);
 				}
 				else if (strcmp(node->name, "if") == 0) {
-					node->symentry = sym_define("", "fun", node->parent_node->symentry);
+					node->symentry = sym_define("if", NULL, SYM_NONE, node->parent_node->symentry);
 				}
 				else if (strcmp(node->name, "else") == 0) {
-					node->symentry = sym_define("", "else", node->parent_node->symentry);
+					node->symentry = sym_define("else", NULL, SYM_NONE, node->parent_node->symentry);
 				}
 				// FIXME: This error is reported else where anyway.
 				// We could just remove this so that we don't have any empty blocks.
@@ -102,7 +103,13 @@ void ast_make_sym_tree(ASTNode *node)
 			{
 				char *var_type = node->args_chain->name;
 				char *var_name = node->name;
-				node->symentry = sym_define(var_name, "var", node->parent_node->symentry);
+				SymbolTableEntry *type_entry = sym_find(var_type, node->parent_node->symentry);
+				if (type_entry == NULL) {
+					printf("ERROR: Unknown type: %s\n", var_type);
+					/* stop-compiling. */
+					return;
+				}
+				node->symentry = sym_define(var_name, type_entry, SYM_MEMBER, node->parent_node->symentry);
 				sym_add_info(node->symentry, var_type);
 				break;
 			}
@@ -110,7 +117,7 @@ void ast_make_sym_tree(ASTNode *node)
 			{
 				printf("Define function desu!\n");
 				node->symentry = sym_define(node->name,
-					"fun", node->parent_node->symentry);
+					TYPE_FUN, SYM_MEMBER, node->parent_node->symentry);
 
 				/* The return type is the second argument. */
 				// FIXME: This is horrible against tuples...
@@ -132,7 +139,7 @@ void ast_make_sym_tree(ASTNode *node)
 			}
 
 			case AST_TUPLE:
-				node->symentry = sym_define("", "tuple", node->parent_node->symentry);
+				node->symentry = sym_define("tuple", TYPE_TUPLE, SYM_NONE, node->parent_node->symentry);
 				break;
 			case AST_SYMBOL:
 				node->symentry = sym_find(node->name, node->parent_node->symentry);
@@ -352,9 +359,6 @@ ASTNode *ast_make_op(char *op, ASTNode *l, ASTNode *r)
 
 ASTNode *ast_make_inline(char *inline_code)
 {
-#ifdef DEBUG
-	printf("Inline code: %s", inline_code);
-#endif
 	ASTNode *target = init_ast_node(AST_INLINE);
 	target->name = strdup(inline_code);
 	return target;

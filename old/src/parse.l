@@ -4,12 +4,13 @@
  * "yylineno" is self-explanatory.
  */
 
+// FIXME Remove.
 #include <stdio.h>
 
 /* Generated from "grammar.y". */
-#include "grammar.tab.hpp"
+#include "grammar.tab.h"
 
-extern void yyerror(char *str);
+extern int yyerror(char *str);
 extern int line_indent;
 
 char *inline_buffer;
@@ -17,13 +18,11 @@ int inline_buffer_write;
 int inline_buffer_allocated_size;
 %}
 
-
 %option stack
 %option yylineno
 %option nounput
 %option noyy_top_state
 %option noinput
-%option noyywrap
 
 %x comment_state
 %x inline_state
@@ -60,7 +59,7 @@ int inline_buffer_allocated_size;
 #inline {
 	/* Allocate a new buffer.*/
 	inline_buffer_allocated_size = 1;
-	inline_buffer = (char*)malloc(inline_buffer_allocated_size);
+	inline_buffer = malloc(inline_buffer_allocated_size);
 	inline_buffer_write = 0;
 
 	/* Null teminate it. */
@@ -79,7 +78,7 @@ int inline_buffer_allocated_size;
 	.|\n {
 		if (inline_buffer_write >= inline_buffer_allocated_size) {
 			inline_buffer_allocated_size = inline_buffer_allocated_size * 2;
-			inline_buffer = (char*)realloc(inline_buffer, inline_buffer_allocated_size);
+			inline_buffer = realloc(inline_buffer, inline_buffer_allocated_size);
 			// FIXME: Check for ERROR...
 		}
 
@@ -178,9 +177,7 @@ int inline_buffer_allocated_size;
 }
 
 . {
-	char error[80];
-	snprintf(error, 80, "Unexpected symbol: %s", yytext);
-	yyerror(error);
+	yyerror("Unexpected symbol");
 }
 
 %%

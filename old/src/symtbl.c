@@ -1,14 +1,19 @@
 #include "symtbl.h"
+#include "types.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
 
-SymbolTableEntry *sym_define(char *symbol_name, char *symbol_type, SymbolTableEntry *parent)
+SymbolTableEntry *global_symbol_table = NULL;
+
+SymbolTableEntry *sym_define(char *symbol_name, const SymbolTableEntry *symbol_type, ESymType type_type, SymbolTableEntry *parent)
 {
+	printf("Defineing: %s\n", symbol_name);
 	SymbolTableEntry *target = malloc(sizeof(SymbolTableEntry));
 	target->symbol_name = strdup(symbol_name);
-	target->symbol_type = strdup(symbol_type);
+	target->symbol_type = symbol_type;
+	target->symbol_type_type = type_type;
 	target->first_child = NULL;
 	target->next_sibling = NULL;
 	target->symbol_info = NULL;
@@ -54,6 +59,8 @@ void sym_add_info(SymbolTableEntry *sym, char *info)
 
 SymbolTableEntry *sym_find(char *symbol_name, SymbolTableEntry *perspective)
 {
+	printf("Finding: %s\n", symbol_name);
+
 	// FIXME: Use a hashmap or something.
 	if (perspective == NULL) {
 		printf("ERROR: perspective is null!\n");
@@ -71,7 +78,7 @@ SymbolTableEntry *sym_find(char *symbol_name, SymbolTableEntry *perspective)
 	return NULL;
 }
 
-void free_sym(SymbolTableEntry *node)
+void free_sym(const SymbolTableEntry *node)
 {
 	if (node->first_child != NULL)
 		free_sym(node->first_child);
@@ -86,17 +93,17 @@ void free_sym(SymbolTableEntry *node)
 		free(symbol_info_iterator);
 		symbol_info_iterator = next;
 	}
-
 	free(node->symbol_name);
-	free(node->symbol_type);
-	free(node);
+	if (node->symbol_type != NULL)
+		free_sym(node->symbol_type);
+	free((SymbolTableEntry*)node);
 }
 
 SymbolTableEntry *sym_load_from_file(FILE *file)
 {
 	int r;
 	int line_no = 0;
-	SymbolTableEntry *target = sym_define("", "class", NULL);
+	SymbolTableEntry *target = sym_define("", TYPE_CLASS, SYM_TYPE, NULL);
 	SymbolTableEntry *parsing;
 
     for(;;) {
@@ -112,7 +119,7 @@ SymbolTableEntry *sym_load_from_file(FILE *file)
 				case 0:
 					break;
 				case 1:
-					parsing = sym_define(sym_name, sym_type, target);
+					parsing = sym_define(sym_name, sym_find(sym_type, global_symbol_table), SYM_MEMBER, target);
 					break;
 				case 2:
 					assert(parsing != NULL);
@@ -142,8 +149,7 @@ void sym_save_to_file(SymbolTableEntry *symbol, FILE *file)
 	/* Iterate through child symbols and save them. */
 	SymbolTableEntry *iterator = symbol->first_child;
 	while (iterator != NULL) {
-
-		fprintf(file, "1 %s %s\n", iterator->symbol_type, iterator->symbol_name);
+		fprintf(file, "1 %s %s\n", iterator->symbol_type->symbol_name, iterator->symbol_name);
 
 		/* Iterate through symbol info and save them. */
 		SymbolInfo *symbol_info_iterator = iterator->symbol_info;

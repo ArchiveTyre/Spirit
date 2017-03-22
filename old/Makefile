@@ -67,10 +67,10 @@ SRCDIRS=src
 #
 
 # Colors
-export ccred:=$(shell tput setaf 1)
-export ccgreen:=$(shell tput setaf 2)
-export ccyellow:=$(shell tput setaf 3)
-export ccend:=$(shell tput sgr0)
+export ccred=$(shell tput setaf 1)
+export ccgreen=$(shell tput setaf 2)
+export ccyellow=$(shell tput setaf 3)
+export ccend=$(shell tput sgr0)
 
 # If debug is set then there are some additional flags.
 ifdef DEBUG
@@ -130,11 +130,8 @@ DIRECTORIES=$(addprefix $(OBJDIR)/, $(SUBSRCDIRS))
 LD_FLAGS+=$(addprefix -l,$(LIBS))
 
 # Add the SRCDIRS to the include path.
-C_FLAGS+=$(foreach dir,$(SRCDIRS),-I$(dir) )
-C_FLAGS+=$(foreach dir,$(DIRECTORIES),-I$(dir) )
-
-CPP_FLAGS+=$(foreach dir,$(SRCDIRS),-I$(dir) )
-CPP_FLAGS+=$(foreach dir,$(DIRECTORIES),-I$(dir) )
+C_FLAGS+=$(foreach dir,$(SRCDIRS),-I $(dir) )
+C_FLAGS+=$(foreach dir,$(DIRECTORIES),-I $(dir) )
 
 # The goal is to get the executable.
 all: $(EXEC)
@@ -164,12 +161,12 @@ help:
 # The executable needs the object files.
 # To create the executable we execute the linker
 $(EXEC): $(DIRECTORIES) $(ALL_OBJECTS)
-	$(LD) $(ALL_OBJECTS) $(LD_FLAGS) -o $@
+	$(LD) -lfl $(ALL_OBJECTS) $(LD_FLAGS) -o $@
 	@echo "$(ccgreen)DONE: Linking executable."
 	@echo "$(ccend)"
 
 $(TEST_EXEC): $(DIRECTORIES) $(ALL_OBJECTS)
-	$(LD) $(ALL_OBJECTS) $(LD_FLAGS) -o $(OBJDIR)/$@
+	$(LD) -lfl $(ALL_OBJECTS) $(LD_FLAGS) -o $(OBJDIR)/$@
 
 # Automatic dependency graph generation
 -include $(C_OBJECTS:.o=.d)
@@ -183,11 +180,11 @@ $(OBJDIR)/%.o: %.cpp
 $(OBJDIR)/%.o: %.c
 	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.d,$@) $< -o $@
 $(OBJDIR)/%.o: %.y
-	bison $(BISON_FLAGS) --defines=$(patsubst %.o,%.tab.hpp,$@) --output=$(patsubst %.o,%.tab.cpp,$@) $<
-	$(CPP_COMPILER) $(CPP_FLAGS) -Wno-writable-strings -c -MMD -MT $@ -MF $(patsubst %.o,%.y.d,$@) $(patsubst %.o,%.tab.cpp,$@) -o $@
+	bison $(BISON_FLAGS) --defines=$(patsubst %.o,%.tab.h,$@) --output=$(patsubst %.o,%.tab.c,$@) $<
+	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.y.d,$@) $(patsubst %.o,%.tab.c,$@) -o $@
 $(OBJDIR)/%.o: %.l
-	flex $(FLEX_FLAGS) --outfile=$(patsubst %.o,%.yy.cpp,$@) $<
-	$(CPP_COMPILER) $(CPP_FLAGS) -Wno-writable-strings -c -MMD -MT $@ -MF $(patsubst %.o,%.l.d,$@) $(patsubst %.o,%.yy.cpp,$@) -o $@
+	flex $(FLEX_FLAGS) --outfile=$(patsubst %.o,%.yy.c,$@) $<
+	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.l.d,$@) $(patsubst %.o,%.yy.c,$@) -o $@
 
 
 # Make sure the sub-folders in src/ exists in obj/.

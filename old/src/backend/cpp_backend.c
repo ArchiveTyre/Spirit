@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include "../types.h"
 #include "../compile.h"
 
 /**
@@ -9,17 +10,24 @@
  */
 static void compile_sym_to_cpp(SymbolTableEntry *sym, FILE *out, int indent)
 {
+	if (sym->symbol_type == TYPE_CLASS && sym->parent_table != NULL) {
+		return;
+	}
+
 	#ifdef DEBUG
 			for(int i = 0; i < indent; i++)
 				fputc('\t', out);
 	#endif
 
-	if (strcmp("class", sym->symbol_type) == 0) {
+	if (sym->symbol_type == TYPE_CLASS) {
 		fprintf(out, "class %s", sym->symbol_name);
 
 		/* Compile sub syms. */
 		if (sym->first_child != NULL) {
 			fprintf(out, " {\n");
+
+			/* Just to be sure... */
+			sym->first_child->parent_table = sym;
 			compile_sym_to_cpp(sym->first_child, out, indent + 1);
 			fprintf(out, "};\n");
 		}
@@ -29,7 +37,7 @@ static void compile_sym_to_cpp(SymbolTableEntry *sym, FILE *out, int indent)
 			fputs("{};\n", out);
 		}
 	}
-	else if (strcmp("fun", sym->symbol_type) == 0) {
+	else if (sym->symbol_type == TYPE_FUN) {
 			assert(sym->symbol_info != NULL);
 
 			char *return_type;
@@ -68,22 +76,26 @@ static void compile_sym_to_cpp(SymbolTableEntry *sym, FILE *out, int indent)
 			fputs(");\n", out);
 
 	}
-	else if (strcmp("var", sym->symbol_type) == 0) {
+	else if (sym->symbol_type == TYPE_VAR) {
 
-		if (strcmp(sym->parent_table->symbol_type, "tuple") != 0) {
+		if (sym->parent_table->symbol_type != TYPE_TUPLE) {
 			char *var_type = sym->symbol_info->info_text;
 			char *var_name = sym->symbol_name;
 			fprintf(out, "%s %s;\n", var_type, var_name);
 		}
 	}
-	else if (strcmp("tuple", sym->symbol_type) == 0) {
+	else if (sym->symbol_type == TYPE_TUPLE) {
 
 	}
 	else {
-		printf("ERROR: Undefined type: %s\n", sym->symbol_type);
+		printf("ERROR: Undefined type: %s\n", sym->symbol_type->symbol_name);
 	}
-	if (sym->next_sibling != NULL)
+	if (sym->next_sibling != NULL) {
+
+		/* FIXME: Just to be sure... */
+		sym->next_sibling->parent_table = sym->parent_table;
 		compile_sym_to_cpp(sym->next_sibling, out, indent);
+	}
 
 }
 
@@ -196,6 +208,15 @@ void compile_ast_to_cpp(ASTNode *ast, FILE* out, bool in_expr, bool do_next, int
 				compile_ast_to_cpp(ast->args_chain, out, true, false, 0);
 				fputc (' ', out);
 				compile_ast_to_cpp(ast->args_chain->args_next->args_next, out, true, false, 0);
+			}
+
+			/* If call to constructor. */
+			else if (ast->args_chain->name != NULL
+				&& strcmp(ast->args_chain->name, "new") == 0) {
+
+				// FIXME: Add explanation.
+				fputs("new ", out);
+				compile_ast_to_cpp(ast->args_chain->args_next, out, true, false, 0);
 			}
 
 			/* Compile function call the normal way. */
