@@ -6,14 +6,19 @@ A little compiler.
 > Nothing special. Just a little compiler that compiles to C++ code for portability.
 
 ##### What is implemented?
-> Right now, only parsing the file into an AST.
-I'll start with the C/C++ backend now.
+> Currently we can compile source into C++ code. Next step is import source files
+
+A list of things that are implemented:
+* Source to AST
+* AST to C++
+* Compiling multiple files
+* A symbol table.
 
 ##### Why?
 > Why not? (^.^)
 
 ## How to compile
-just type `make` from the project directory and see the magic as it happens ;).
+Just type `make` from the project directory and see the magic as it happens ;).
 
 ## What do I need to compile this?
 * clang
