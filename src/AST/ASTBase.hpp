@@ -11,8 +11,9 @@ class ASTBase {
 		/*** METHODS ***/
 		static void importSymFromStream(ASTBase *dest, std::istream& input);
 		
-		virtual void exportSymToStream(std::ostream& output);
 		virtual bool compileToBackend(ClassCompile *compile_dest) = 0;
+		virtual void exportSymToStream(std::ostream& output);
+		virtual bool compileToBackendHeader(ClassCompile *compile_dest);
 		virtual void debugSelf();
 		
 		ASTBase();	

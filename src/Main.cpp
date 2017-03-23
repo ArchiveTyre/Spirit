@@ -83,7 +83,9 @@ int main(int argc, char *args[])
 	/* Open the output file. If none specified use the stdout. */
 	//out_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
 
-	/*** PARSE EACH FILE GIVEN AS INPUT ***/
+	/*** COMPILE STUFF ***/
+	
+	/* Parse each file that were given as input. */
 	for(string filename : files_list) {
 		ClassCompile compiler (filename);
 		compiler.compileFile();

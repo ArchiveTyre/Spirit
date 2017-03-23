@@ -30,10 +30,12 @@ bool ASTWithArgs::compileToBackend(ClassCompile *compile_dest)
 
 	compile_dest->output_stream << '(';	
 	for (ASTBase* arg : arg_nodes) {
-		arg->compileToBackend(compile_dest);
+		if (!arg->compileToBackend(compile_dest))
+			return false;
 		if (arg != arg_nodes.back()) {
 			compile_dest->output_stream << ", ";
 		}
 	}
 	compile_dest->output_stream << ')';
+	return true;
 }

@@ -9,6 +9,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "ClassCompile.hpp"
+#include "AST/ASTNumber.hpp"
+#include "AST/ASTFunctionCall.hpp"
 
 /* Incremented in parse.l. */
 int line_indent = 0;
@@ -34,7 +37,6 @@ extern int yylex(void);
 	char *tok_as_string;
 
 	ASTBase *tok_ast_node;
-
 }
 
 %token <tok_int_val> TOKEN_INT_LITERAL
@@ -91,11 +93,19 @@ program:		%empty
 
 /* Each line could either be an expression, inline code or a block usage. */
 line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
-				| t_func_def TOKEN_COLON TOKEN_NEWLINE {/*ast_auto_insert_node($1);*/}
-				/*| t_func_call TOKEN_NEWLINE {ast_auto_insert_node($1);}*/
-				| TOKEN_VARIABLE t_var_def TOKEN_NEWLINE {/*ast_auto_insert_node($2);*/}
-				| t_any_exp TOKEN_NEWLINE {/*ast_auto_insert_node($1);*/}
-				| TOKEN_INLINE {/*ast_auto_insert_node(ast_make_inline($1)); free($1);*/}
+				| t_func_def[node] TOKEN_COLON TOKEN_NEWLINE {
+					ClassCompile::active_compilation->class_ast.insertNewCode($node);
+				}
+				| TOKEN_VARIABLE t_var_def[node] TOKEN_NEWLINE {
+					ClassCompile::active_compilation->class_ast.insertNewCode($node);
+				}
+				| t_any_exp[node] TOKEN_NEWLINE {
+					ClassCompile::active_compilation->class_ast.insertNewCode($node);
+				}
+				| TOKEN_INLINE[node] {
+					//ClassCompile::active_compilation->class_ast.insertNewCode($node);
+					// FIXME: Re-add support.
+				}
 				;
 
 /* Variables could either be defined by just type. But also with an inital value. */
@@ -179,11 +189,13 @@ t_call_args:	%empty {/*$$ = ast_make_default_arg();*/}
  * Or with multiple arguments using parantheses.
  */
 t_func_call:	t_any_exp[name] TOKEN_LPAREN t_call_args[args] TOKEN_RPAREN {
-					/*printf("L&R paren style!\n");
-				$$ = ast_make_func_call($name, $args);*/}
+					printf("L&R paren style!\n");
+					printf("TUPLES!!!");
+				}
 				| t_any_exp[name] t_any_exp[args] {
-					/*printf("Paranthesesless call!\n");
-					$$ = ast_make_func_call($name, $args);*/}
+					printf("Paranthesesless call!\n");
+					printf("TUPLES!!!");
+				}
 	   			;
 
 /* Firstly, we simplify any expression only containing numbers. */
@@ -197,19 +209,61 @@ t_num_exp:		TOKEN_INT_LITERAL {/*$$ = $1;*/}
 
 /* t_any_exp is any expression. Strings, numbers, function calls, etc */
 t_any_exp:		TOKEN_SYMBOL {/*$$ = ast_make_symbol($1); free($1);*/}
-				| t_func_call {/*$$ = $1;*/}
+				| t_func_call {$$ = $1;}
 				| TOKEN_STRING {/*
 					$1[strlen($1) - 1] = 0;
 					$$ = ast_make_string($1+1);
 					free($1);*/}
-				| t_num_exp {/*$$ = ast_make_number($1);*/}
-				| t_any_exp TOKEN_PLUS t_any_exp {/*$$ = ast_make_op("+", $1, $3);*/}
-				| t_any_exp TOKEN_MINUS t_any_exp {/*$$ = ast_make_op("-", $1, $3);*/}
-				| t_any_exp TOKEN_MULTIPLY t_any_exp {/*$$ = ast_make_op("*", $1, $3);*/}
-				| t_any_exp TOKEN_DIVIDE t_any_exp {/*$$ = ast_make_op("/", $1, $3);*/}
-				| t_any_exp TOKEN_ASSIGN t_any_exp {/*$$ = ast_make_op("=", $1, $3);*/}
-				| t_any_exp TOKEN_COMPARISON t_any_exp {/*$$ = ast_make_op("==", $1, $3);*/}
-				| t_any_exp TOKEN_ACCESS t_any_exp {/*$$ = ast_make_op(".", $1, $3);*/}
+				| t_num_exp {$$ = new ASTNumber($1);}
+				| t_any_exp TOKEN_PLUS t_any_exp {
+					auto r = new ASTFunctionCall("+");
+					r->is_infix = true;
+					r->insertArg($1);
+					r->insertArg($3);
+					$$ = r;
+				}
+				| t_any_exp TOKEN_MINUS t_any_exp {
+					auto r = new ASTFunctionCall("-");
+					r->is_infix = true;
+					r->insertArg($1);
+					r->insertArg($3);
+					$$ = r;
+				}
+				| t_any_exp TOKEN_MULTIPLY t_any_exp {
+					auto r = new ASTFunctionCall("*");
+					r->is_infix = true;
+					r->insertArg($1);
+					r->insertArg($3);
+					$$ = r;
+				}
+				| t_any_exp TOKEN_DIVIDE t_any_exp {
+					auto r = new ASTFunctionCall("/");
+					r->is_infix = true;
+					r->insertArg($1);
+					r->insertArg($3);
+					$$ = r;
+				}
+				| t_any_exp TOKEN_ASSIGN t_any_exp {
+					auto r = new ASTFunctionCall("=");
+					r->is_infix = true;
+					r->insertArg($1);
+					r->insertArg($3);
+					$$ = r;
+				}
+				| t_any_exp TOKEN_COMPARISON t_any_exp {
+					auto r = new ASTFunctionCall("==");
+					r->is_infix = true;
+					r->insertArg($1);
+					r->insertArg($3);
+					$$ = r;
+				}
+				| t_any_exp TOKEN_ACCESS t_any_exp {
+					auto r = new ASTFunctionCall(".");
+					r->is_infix = true;
+					r->insertArg($1);
+					r->insertArg($3);
+					$$ = r;
+				}
 				| TOKEN_LPAREN t_any_exp TOKEN_RPAREN {$$ = $2;}
 				;
 

@@ -8,6 +8,7 @@ class ASTNumber : public ASTBase {
 		int value;
 
 		/*** METHODS ***/
+		ASTNumber(int value);
 		bool compileToBackend(ClassCompile *compile_dest) override;
 		void debugSelf() override;
 };

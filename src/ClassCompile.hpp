@@ -5,6 +5,8 @@
 
 class ClassCompile {
 	public:
+		
+		static ClassCompile *active_compilation;
 
 		/*** METHODS ***/
 		bool compileFile();
@@ -13,9 +15,11 @@ class ClassCompile {
 		/*** MEBMER VARIABLES ***/
 		std::string out_dir;
 		std::ostringstream output_stream;
+		std::ostringstream output_header_stream;
 
 		std::string class_name;
 		std::string out_file_path;
+		std::string out_header_file_path;
 		std::string in_file_path;
 
 

@@ -24,7 +24,9 @@ bool ASTFunctionCall::compileToBackend(ClassCompile *compile_dest)
 		ASTNamed::compileToBackend(compile_dest);
 		ASTWithArgs::compileToBackend(compile_dest);
 	}
+	return true;
 }
+
 
 void ASTFunctionCall::exportSymToStream(std::ostream& output)
 {

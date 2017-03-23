@@ -7,6 +7,7 @@
 #include <time.h>
 #include <string.h>
 #include <libgen.h>
+#include "grammar.tab.hpp"
 #include "AST/ASTWithArgs.hpp"
 
 using std::string;
@@ -14,6 +15,7 @@ using std::cout;
 using std::endl;
 
 string ClassCompile::default_out_dir = "out";
+ClassCompile *ClassCompile::active_compilation = nullptr;
 
 /*** HELPER FUNCTIONS ***/
 
@@ -61,25 +63,57 @@ bool ClassCompile::needsRecompile()
 }
 
 bool ClassCompile::compileFile () {
+	
+	ClassCompile *suspended_compilation = ClassCompile::active_compilation;
+	active_compilation = this;
+	
 	cout << "Compiling class: " << class_name << " to: " << out_file_path <<endl;
 
 	
 	/* Test if we should compile from source. */
 	if (needsRecompile()) {
-		/* Open the file for writing. */
-		std::ofstream file;
-		file.open(out_file_path);
 		
+		/*** EXTERNS ***/
+		extern int yylineno;
+		extern FILE *yyin;
+		extern void yyrestart(FILE *file);
+		
+		/** PARSE THE FILE INTO AST **/
+		/* Open up the file. */
+		yyrestart(fopen(this->in_file_path.c_str(), "r"));
+		yylineno = 1;
+		
+		/* Compile the file. */
+		int parse_result = yyparse();
+		if (parse_result != 0) {
+			printf("ERROR: Unrecoverable error: %d.\n", parse_result);
+		}
+		
+		/* Close the file. */
+		fclose(yyin);
+		
+		/** COMPILE THE FILE **/
+		this->class_ast.compileToBackend(this);
+		this->class_ast.debugSelf();
+
+		/** SAVE THE OUTPUT **/
 		/* Assure the existance of the out dir. */
 		char *dir_name = (char *)alloca(out_file_path.length() + 1);
 		strcpy(dir_name, out_file_path.c_str());
 		mkpath(dirname(dir_name), 0777);
-
-
-		/* Write, flush and close. */
+		/* Open the file for writing. */
+		std::ofstream file;
+		std::ofstream header_file;
+		file.open(out_file_path);
+		header_file.open(out_header_file_path);
 		file << this->output_stream.rdbuf();
+		/* Write, flush and close. */
 		file.flush();
 		file.close();
+		header_file << this->output_header_stream.rdbuf();
+		header_file.flush();
+		header_file.close();
+		
 	}
 
 	/* Or just load from cached symbol table. */
@@ -88,7 +122,11 @@ bool ClassCompile::compileFile () {
 		std::ifstream file(out_file_path.append(".sym"));
 		ASTBase::importSymFromStream(static_cast<ASTBase*>(static_cast<ASTNamed*>(&class_ast)), file);
 	}
-	return false;
+	
+	/* Continue old compilation. */
+	active_compilation = suspended_compilation;
+	
+	return true;
 }
 
 /* Extract class name from file_path arg and set it.*/
@@ -111,6 +149,7 @@ ClassCompile::ClassCompile(std::string file_path)
 	/* Set out dir to default out dir. */
 	this->out_dir = ClassCompile::default_out_dir;
 
-	this->out_file_path = out_dir.append(1, '/').append(file_path).append(".ch");
+	this->out_file_path = out_dir.append(1, '/').append(file_path).append(".cpp");
+	this->out_header_file_path = out_dir.append(1, '/').append(file_path).append(".hpp");
 	this->in_file_path = file_path;
 }

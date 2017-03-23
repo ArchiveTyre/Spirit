@@ -191,7 +191,8 @@ t_any_exp:		TOKEN_SYMBOL {$$ = ast_make_symbol($1); free($1);}
 				| TOKEN_STRING {
 					$1[strlen($1) - 1] = 0;
 					$$ = ast_make_string($1+1);
-					free($1);}
+					free($1);
+				}
 				| t_num_exp {$$ = ast_make_number($1);}
 				| t_any_exp TOKEN_PLUS t_any_exp {$$ = ast_make_op("+", $1, $3);}
 				| t_any_exp TOKEN_MINUS t_any_exp {$$ = ast_make_op("-", $1, $3);}

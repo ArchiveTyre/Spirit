@@ -178,14 +178,14 @@ $(TEST_EXEC): $(DIRECTORIES) $(ALL_OBJECTS)
 -include $(FLEX_OBJECTS:.o=.l.d)
 
 # Here we compile a object file using it's c file partner.
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp $(BISON_OBJECTS)
 	$(CPP_COMPILER) $(CPP_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.d,$@) $< -o $@
-$(OBJDIR)/%.o: %.c
+$(OBJDIR)/%.o: %.c $(BISON_OBJECTS)
 	$(C_COMPILER) $(C_FLAGS) -c -MMD -MT $@ -MF $(patsubst %.o,%.d,$@) $< -o $@
 $(OBJDIR)/%.o: %.y
 	bison $(BISON_FLAGS) --defines=$(patsubst %.o,%.tab.hpp,$@) --output=$(patsubst %.o,%.tab.cpp,$@) $<
 	$(CPP_COMPILER) $(CPP_FLAGS) -Wno-writable-strings -c -MMD -MT $@ -MF $(patsubst %.o,%.y.d,$@) $(patsubst %.o,%.tab.cpp,$@) -o $@
-$(OBJDIR)/%.o: %.l
+$(OBJDIR)/%.o: %.l $(BISON_OBJECTS)
 	flex $(FLEX_FLAGS) --outfile=$(patsubst %.o,%.yy.cpp,$@) $<
 	$(CPP_COMPILER) $(CPP_FLAGS) -Wno-writable-strings -c -MMD -MT $@ -MF $(patsubst %.o,%.l.d,$@) $(patsubst %.o,%.yy.cpp,$@) -o $@
 
