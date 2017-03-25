@@ -1,4 +1,7 @@
 #pragma once
+#ifndef AST_BASE_HPP
+#define AST_BASE_HPP
+
 #include <stack>
 #include <iostream>
 
@@ -23,3 +26,4 @@ class ASTBase {
 		int line_no;
 		int indentation_level;
 };
+#endif

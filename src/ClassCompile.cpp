@@ -67,7 +67,7 @@ bool ClassCompile::compileFile () {
 	ClassCompile *suspended_compilation = ClassCompile::active_compilation;
 	active_compilation = this;
 	
-	cout << "Compiling class: " << class_name << " to: " << out_file_path <<endl;
+	cout << "[INFO] Compiling class: " << class_name << " to: " << out_file_path <<endl;
 
 	
 	/* Test if we should compile from source. */
@@ -113,11 +113,13 @@ bool ClassCompile::compileFile () {
 		header_file << this->output_header_stream.rdbuf();
 		header_file.flush();
 		header_file.close();
-		
 	}
 
 	/* Or just load from cached symbol table. */
 	else {
+		
+		cout << "[INFO] Class already compiled!" << endl;
+		
 		/* Cached symbols are saved in .ch.sym files. */
 		std::ifstream file(out_file_path.append(".sym"));
 		ASTBase::importSymFromStream(static_cast<ASTBase*>(static_cast<ASTNamed*>(&class_ast)), file);

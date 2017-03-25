@@ -21,7 +21,7 @@ void ASTWithArgs::debugSelf()
 
 void ASTWithArgs::exportSymToStream(std::ostream& output)
 {
-	// FIXME: Implement later.
+	output << "";
 	return;
 }
 

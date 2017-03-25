@@ -6,13 +6,17 @@ using std::string;
 
 void ASTClass::debugSelf()
 {
+	std::cout << "CLASS: ";
 	ASTNamed::debugSelf();
+	std::cout << std::endl;
 	ASTBlock::debugSelf();
 }
 
-ASTClass::ASTClass(std::string class_name)
+ASTClass::ASTClass(std::string class_name) : ASTNamed(class_name), ASTBlock()
 {
-	this->ast_name = class_name;
+	ASTBlock::indentation_level = -1;
+	ASTNamed::indentation_level = -1;
+	newly_inserted_node = static_cast<ASTBlock*>(this);
 }
 
 void ASTClass::insertNewCode(ASTBase* new_code)
@@ -22,7 +26,7 @@ void ASTClass::insertNewCode(ASTBase* new_code)
 	extern int line_indent;
 	
 	#ifdef DEBUG
-	printf("Inserting at indent: %d\n", line_indent);
+		printf("Inserting at indent: %d\n", line_indent);
 	#endif
 	
 	/* Descend. */
@@ -88,9 +92,6 @@ bool ASTClass::compileToBackendHeader(ClassCompile *compile_dest)
 	ASTNamed::compileToBackendHeader(compile_dest);
 	compile_dest->output_header_stream << " ";
 	ASTBlock::compileToBackendHeader(compile_dest);
-	
 	compile_dest->output_header_stream << ";";
-	
-	
 	return true;
 }

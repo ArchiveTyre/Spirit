@@ -92,8 +92,11 @@ program:		%empty
 				;
 
 /* Each line could either be an expression, inline code or a block usage. */
-line:			TOKEN_NEWLINE {extern int line_indent; line_indent = 0;}
+line:			TOKEN_NEWLINE {
+					extern int line_indent; line_indent = 0;
+				}
 				| t_func_def[node] TOKEN_COLON TOKEN_NEWLINE {
+					// Set this to block.
 					ClassCompile::active_compilation->class_ast.insertNewCode($node);
 				}
 				| TOKEN_VARIABLE t_var_def[node] TOKEN_NEWLINE {

@@ -1,5 +1,5 @@
-#include "ASTBlock.hpp"
 #include "../ClassCompile.hpp"
+#include "ASTClass.hpp"
 
 void ASTBlock::insertChild(ASTBase *node)
 {
@@ -28,3 +28,14 @@ bool ASTBlock::compileToBackendHeader(ClassCompile* compile_dest)
 	compile_dest->output_header_stream << "}" << std::endl;
 	return true;
 }
+
+void ASTBlock::debugSelf()
+{
+	for (auto child : child_nodes) {
+		for (int i = -1; i < child->indentation_level; i++)
+			std::cout << "    ";
+		child->debugSelf();
+		std::cout << std::endl;
+	}
+}
+

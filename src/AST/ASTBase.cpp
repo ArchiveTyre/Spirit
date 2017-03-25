@@ -38,4 +38,7 @@ ASTBase::ASTBase()
 
 	this->line_no = yylineno;
 	this->indentation_level = line_indent;
+	this->parent_node = nullptr;
+	
+	std::cout << "Calling BASE constructor" << std::endl;
 }

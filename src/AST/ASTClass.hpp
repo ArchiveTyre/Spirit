@@ -11,8 +11,8 @@ class ASTClass : virtual public ASTNamed, virtual public ASTBlock {
 		void insertNewCode(ASTBase *new_code);
 		bool compileToBackend(ClassCompile *compile_dest) override;
 		bool compileToBackendHeader(ClassCompile *compile_dest) override;
-		void exportSymToStream(std::ostream& output) override;
 		void debugSelf() override;
+		void exportSymToStream(std::ostream& output) override;
 		
 	private:
 		

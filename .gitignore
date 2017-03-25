@@ -12,6 +12,7 @@ a.out
 [._]sw[a-p]
 Session.vim
 *.kdev4
+*.kate-swp
 
 
 # Temporary.

@@ -13,7 +13,8 @@ bool ASTNumber::compileToBackend(ClassCompile *compile_dest)
 	return true;
 }
 
-ASTNumber::ASTNumber(int value)
+ASTNumber::ASTNumber(int value) : ASTBase()
 {
+	std::cout << "Creating number of value: " << value << std::endl;
 	this->value = value;
 }

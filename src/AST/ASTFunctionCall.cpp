@@ -1,8 +1,8 @@
 #include "ASTFunctionCall.hpp"
 
-ASTFunctionCall::ASTFunctionCall(std::string function_name)
+ASTFunctionCall::ASTFunctionCall(std::string function_name) : ASTNamed(function_name)
 {
-	ast_name = function_name;
+	std::cout << "Creating funciton call" << std::endl;
 }
 
 void ASTFunctionCall::debugSelf()

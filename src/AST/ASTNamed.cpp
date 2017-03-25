@@ -16,3 +16,8 @@ void ASTNamed::debugSelf()
 {
 	std::cout << this->ast_name;
 }
+
+ASTNamed::ASTNamed(std::string new_name) : ASTBase()
+{
+	this->ast_name = new_name;
+}
