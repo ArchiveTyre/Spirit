@@ -12,6 +12,7 @@
 #include "ClassCompile.hpp"
 #include "AST/ASTNumber.hpp"
 #include "AST/ASTFunctionCall.hpp"
+#include "AST/ASTSymbol.hpp"
 
 /* Incremented in parse.l. */
 int line_indent = 0;
@@ -211,7 +212,7 @@ t_num_exp:		TOKEN_INT_LITERAL {/*$$ = $1;*/}
 				;
 
 /* t_any_exp is any expression. Strings, numbers, function calls, etc */
-t_any_exp:		TOKEN_SYMBOL {/*$$ = ast_make_symbol($1); free($1);*/}
+t_any_exp:		TOKEN_SYMBOL {$$ = new ASTSymbol($1); free($1);}
 				| t_func_call {$$ = $1;}
 				| TOKEN_STRING {/*
 					$1[strlen($1) - 1] = 0;

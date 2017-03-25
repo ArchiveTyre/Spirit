@@ -5,16 +5,16 @@
 #include "ASTBase.hpp"
 
 class ASTNumber : public ASTBase {
-	public:
+public:
 
-		/*** MEMBER VARIABLES ***/
-		/* The integer value of the number. */
-		int value;
+	/*** MEMBER VARIABLES ***/
+	/* The integer value of the number. */
+	int value;
 
-		/*** METHODS ***/
-		ASTNumber(int value);
-		bool compileToBackend(ClassCompile *compile_dest) override;
-		void debugSelf() override;
+	/*** METHODS ***/
+	ASTNumber(int value);
+	bool compileToBackend(ClassCompile *compile_dest) override;
+	void debugSelf() override;
 };
 
 #endif

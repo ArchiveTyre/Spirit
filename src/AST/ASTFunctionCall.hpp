@@ -7,16 +7,16 @@
 #include "../ClassCompile.hpp"
 
 class ASTFunctionCall : virtual public ASTNamed, virtual public ASTWithArgs {
-	public:
+public:
 
-		/*** METHODS ***/
-		ASTFunctionCall(std::string function_name);
-		bool compileToBackend(ClassCompile *compile_dest) override;
-		void debugSelf() override;
-		void exportSymToStream(std::ostream& output) override;
+	/*** METHODS ***/
+	ASTFunctionCall(std::string function_name);
+	bool compileToBackend(ClassCompile *compile_dest) override;
+	void debugSelf() override;
+	void exportSymToStream(std::ostream& output) override;
 
-		/*** MEMBER VARIABLES ***/
-		bool is_infix = false;
+	/*** MEMBER VARIABLES ***/
+	bool is_infix = false;
 };		
 
 #endif
