@@ -1,3 +1,12 @@
+/**
+ * @class ASTFunctionCall
+ * 
+ * Defines a function call to another function.
+ * 
+ * @author Tyrerexus
+ * @date 25 March 2017
+ */
+
 #pragma once
 #ifndef AST_FUNCTION_CALL_HPP
 #define AST_FUNCTION_CALL_HPP

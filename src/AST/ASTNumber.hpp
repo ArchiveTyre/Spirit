@@ -1,3 +1,12 @@
+/**
+ * @class ASTNumber
+ * 
+ * Defines a number as an AST
+ * 
+ * @author Tyrerexus
+ * @date 25 March 2017
+ */
+
 #pragma once
 #ifndef AST_NUMBER_HPP
 #define AST_NUMBER_HPP

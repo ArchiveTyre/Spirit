@@ -25,3 +25,6 @@ tags
 # Some other stuff
 personal_notes
 vgcore.*
+
+# Doxygen
+doxygen_out

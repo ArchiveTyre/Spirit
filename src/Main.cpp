@@ -1,8 +1,9 @@
 #include <vector>
 #include <string>
-#include "grammar.tab.hpp"
+#include <string.h>
 #include "AST/ASTBase.hpp"
 #include "ClassCompile.hpp"
+#include "Lexer.hpp"
 
 using std::string;
 
@@ -79,28 +80,32 @@ int main(int argc, char *args[])
 	#ifdef DEBUG
 		printf("Output: %s\n", output_filename);
 	#endif
+		
+	Lexer::unitTest();
+
 
 	/* Open the output file. If none specified use the stdout. */
 	//out_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
 
 	/*** COMPILE STUFF ***/
-	
+#if 0
+
 	/* Parse each file that were given as input. */
 	for(string filename : files_list) {
 		ClassCompile compiler (filename);
 		compiler.compileFile();
 		std::cout << "[DONE] Parsing: " << filename << std::endl;
 	}
-
-
+	
 	/*** CLEAN UP ***/
-
+	
 	/* Destroy parser. */
 	extern int yylex_destroy();
 	int result_yylex_destroy = yylex_destroy();
 	if (result_yylex_destroy != 0) {
 		printf("ERROR: Could not destroy yylex. %d\n", result_yylex_destroy);
 	}
+#endif
 
 	return 0;
 }

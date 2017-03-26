@@ -1,3 +1,12 @@
+/**
+ * @class ClassCompile
+ * 
+ * A class for compiling ASTClasses.
+ * 
+ * @author Tyrerexus
+ * @date 26 March 2017
+ */
+
 #pragma once
 #ifndef CLASS_COMPILE_HPP
 #define CLASS_COMPILE_HPP

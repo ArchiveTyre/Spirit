@@ -40,16 +40,18 @@ extern int yylex(void);
 	ASTBase *tok_ast_node;
 }
 
-%token <tok_int_val> TOKEN_INT_LITERAL
-%token <tok_as_string> TOKEN_STRING
-%token <tok_as_string> TOKEN_SYMBOL;
-%token <tok_as_string> TOKEN_INLINE;
-
+%token TOKEN_LPAREN TOKEN_RPAREN
 %token TOKEN_NEWLINE
 %token TOKEN_COLON
 %token TOKEN_ASSIGN
 %token TOKEN_INDENT
 %token TOKEN_COMMA
+%token TOKEN_VARIABLE
+
+%token <tok_int_val> TOKEN_INT_LITERAL
+%token <tok_as_string> TOKEN_STRING
+%token <tok_as_string> TOKEN_SYMBOL;
+%token <tok_as_string> TOKEN_INLINE;
 
 %type <tok_int_val> t_num_exp
 %type <tok_ast_node> t_any_exp
@@ -67,18 +69,41 @@ extern int yylex(void);
  * to evluate & reduce tokens.
  */
 
+ 
+ /*
+%right TOKEN_ASSIGN
+%left TOKEN_ASSIGN
 
 %nonassoc TOKEN_FUNCTION
 %nonassoc TOKEN_VARIABLE
 %nonassoc TOKEN_ARROW
 %nonassoc TOKEN_COLON
 %nonassoc TOKEN_LPAREN TOKEN_RPAREN
-%right TOKEN_ASSIGN
+
+
+
 %nonassoc TOKEN_COMPARISON
+%nonassoc TOKEN_INT_LITERAL
+
 %left TOKEN_MINUS TOKEN_PLUS
+
+*/
+
+%nonassoc TOKEN_LPAREN TOKEN_RPAREN
+%nonassoc TOKEN_INT_LITERAL TOKEN_SYMBOL
+%right TOKEN_ASSIGN TOKEN_COMPARISON
+%left  TOKEN_PLUS TOKEN_MINUS
+%left  TOKEN_MULTIPLY TOKEN_DIVIDE
+
 /* TODO: Add modulus and other operators. */
-%left TOKEN_MULTIPLY TOKEN_DIVIDE
-%nonassoc TOKEN_SYMBOL
+//%left TOKEN_MULTIPLY TOKEN_DIVIDE
+
+
+//%nonassoc TOKEN_SYMBOL
+%right TOKEN_ARROW
+%right TOKEN_FUNCTION
+%nonassoc TOKEN_COLON
+
 %right TOKEN_ACCESS
 %nonassoc TOKEN_COMMA
 
@@ -96,19 +121,19 @@ program:		%empty
 line:			TOKEN_NEWLINE {
 					extern int line_indent; line_indent = 0;
 				}
-				| t_func_def[node] TOKEN_COLON TOKEN_NEWLINE {
+				/*| t_func_def[node] TOKEN_COLON TOKEN_NEWLINE {
 					// Set this to block.
 					ClassCompile::active_compilation->class_ast.insertNewCode($node);
 				}
 				| TOKEN_VARIABLE t_var_def[node] TOKEN_NEWLINE {
 					ClassCompile::active_compilation->class_ast.insertNewCode($node);
 				}
-				| t_any_exp[node] TOKEN_NEWLINE {
-					ClassCompile::active_compilation->class_ast.insertNewCode($node);
-				}
 				| TOKEN_INLINE[node] {
 					//ClassCompile::active_compilation->class_ast.insertNewCode($node);
 					// FIXME: Re-add support.
+				}*/
+				| t_any_exp[node] TOKEN_NEWLINE {
+					ClassCompile::active_compilation->class_ast.insertNewCode($node);
 				}
 				;
 
@@ -203,22 +228,25 @@ t_func_call:	t_any_exp[name] TOKEN_LPAREN t_call_args[args] TOKEN_RPAREN {
 	   			;
 
 /* Firstly, we simplify any expression only containing numbers. */
-t_num_exp:		TOKEN_INT_LITERAL {/*$$ = $1;*/}
+t_num_exp:		TOKEN_INT_LITERAL {$$ = $1;}
 				| t_num_exp TOKEN_PLUS t_num_exp { $$ = $1 + $3;}
 				| t_num_exp TOKEN_MINUS t_num_exp { $$ = $1 - $3;}
 				| t_num_exp TOKEN_MULTIPLY t_num_exp { $$ = $1 * $3;}
 				| t_num_exp TOKEN_DIVIDE t_num_exp { $$ = $1 / $3;}
-				| TOKEN_LPAREN t_num_exp TOKEN_RPAREN { $$ = $2;}
+				| TOKEN_LPAREN t_num_exp TOKEN_RPAREN { $$ = $2; std::cout << "Num paren: " << $2 << std::endl;}
 				;
 
 /* t_any_exp is any expression. Strings, numbers, function calls, etc */
 t_any_exp:		TOKEN_SYMBOL {$$ = new ASTSymbol($1); free($1);}
-				| t_func_call {$$ = $1;}
+				/*| t_func_call {$$ = $1;}*/
 				| TOKEN_STRING {/*
 					$1[strlen($1) - 1] = 0;
 					$$ = ast_make_string($1+1);
 					free($1);*/}
 				| t_num_exp {$$ = new ASTNumber($1);}
+				| TOKEN_INT_LITERAL {
+					$$ = new ASTNumber($1);
+				}
 				| t_any_exp TOKEN_PLUS t_any_exp {
 					auto r = new ASTFunctionCall("+");
 					r->is_infix = true;
@@ -253,6 +281,7 @@ t_any_exp:		TOKEN_SYMBOL {$$ = new ASTSymbol($1); free($1);}
 					r->insertArg($1);
 					r->insertArg($3);
 					$$ = r;
+					std::cout << "Assign!" << std::endl;
 				}
 				| t_any_exp TOKEN_COMPARISON t_any_exp {
 					auto r = new ASTFunctionCall("==");
@@ -268,7 +297,7 @@ t_any_exp:		TOKEN_SYMBOL {$$ = new ASTSymbol($1); free($1);}
 					r->insertArg($3);
 					$$ = r;
 				}
-				| TOKEN_LPAREN t_any_exp TOKEN_RPAREN {$$ = $2;}
+				| TOKEN_LPAREN t_any_exp TOKEN_RPAREN {$$ = $2; std::cout << "Paren" << std::endl;}
 				;
 
 %%

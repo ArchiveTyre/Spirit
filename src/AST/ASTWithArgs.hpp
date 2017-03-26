@@ -1,3 +1,13 @@
+/**
+ * @class ASTWithArgs
+ * 
+ * Defines an abstract class for any
+ * AST with arguments.
+ * 
+ * @author Tyrerexus
+ * @date 25 March 2017
+ */
+
 #pragma once
 #ifndef AST_WITH_ARGS_HPP
 #define AST_WITH_ARGS_HPPq
