@@ -19,7 +19,14 @@ class ASTFunctionCall : virtual public ASTNamed, virtual public ASTWithArgs {
 public:
 
 	/*** METHODS ***/
+	
+	/** Creates a function call to an AST node.
+	 * @param function_name The name of the function that this AST wants to call.
+	 */
 	ASTFunctionCall(std::string function_name);
+	
+	/*** OVERRIDES ***/
+	
 	bool compileToBackend(ClassCompile *compile_dest) override;
 	void debugSelf() override;
 	void exportSymToStream(std::ostream& output) override;

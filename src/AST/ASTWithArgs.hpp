@@ -17,13 +17,22 @@
 
 class ASTWithArgs : virtual public ASTBase {
 public:
+	
 	/*** METHODS ***/
+	
+	/** Inserts one arguments into this AST.
+	 * @arg Argument to insert.
+	 */
 	void insertArg(ASTBase *arg);
+	
+	/*** OVERRIDES ***/
+	
 	virtual void exportSymToStream(std::ostream& output) override;
 	virtual bool compileToBackend(ClassCompile *compile_dest) override;
 	virtual void debugSelf() override;
 
 	/*** MEMBERS VARIABLES ***/
+	
 	/** The arguments of this node. **/
 	std::list<ASTBase *> arg_nodes;
 };

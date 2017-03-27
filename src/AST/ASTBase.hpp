@@ -53,6 +53,7 @@ public:
 	 */
 	ASTBase();	
 
+	
 	/*** MEMBER VARIABLES ***/
 	
 	/** The node that contains this node. */

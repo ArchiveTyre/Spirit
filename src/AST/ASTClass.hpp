@@ -30,6 +30,9 @@ public:
 	 */
 	void insertNewCode(ASTBase *new_code);
 	
+	
+	/*** MEMBERS ***/
+	
 	bool compileToBackend(ClassCompile *compile_dest) override;
 	bool compileToBackendHeader(ClassCompile *compile_dest) override;
 	void debugSelf() override;

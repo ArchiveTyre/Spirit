@@ -33,11 +33,9 @@ void ASTBase::debugSelf()
 
 ASTBase::ASTBase()
 {
-	extern int yylineno;
-	extern int line_indent;
 
-	this->line_no = yylineno;
-	this->indentation_level = line_indent;
+	this->line_no = -1;
+	this->indentation_level = -1;
 	this->parent_node = nullptr;
 	
 	std::cout << "Calling BASE constructor" << std::endl;

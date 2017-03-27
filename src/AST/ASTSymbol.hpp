@@ -17,6 +17,10 @@
 class ASTSymbol : public ASTNamed
 {
 public:
+	
+	/** Creates a symbol with a name.
+	 * @param name The name of this symbol.
+	 */
 	ASTSymbol(std::string name);
 };
 

@@ -20,6 +20,8 @@
  */
 class Token {
 public:
+	
+	/** An enum that defines the type of a token. */
 	typedef enum {
 		TOKEN_INTEGER,
 		TOKEN_STRING,
@@ -27,6 +29,9 @@ public:
 		TOKEN_OPERATOR,
 		TOKEN_LPAREN,
 		TOKEN_RPAREN,
+		TOKEN_NEW_LINE,
+		TOKEN_INDENT,
+		TOKEN_EOF,
 	} TOKEN_TYPE; 
 	
 	/** The type of this token. */
@@ -61,13 +66,19 @@ public:
 		
 		/** Creates basic lexer.
 		 * @param input_stream Where the lexer should read from.
+		 * @param file_name_on_error The filename that should be shown if an syntax error occures.
 		 */
-		Lexer(std::istream& input_stream);
+		Lexer(std::istream& input_stream, std::string file_name_on_error);
 		
 		/** Get one token from the input stream.
 		 * @return The token that was parsed. Is null on failure.
 		 */
 		Token * lexToken();
+		
+		
+		/*** MEMBER VARIABLES ***/
+		
+		std::string file_name_on_error;
 private:
 	
 		/*** MEMBER VARIABLES ***/
@@ -85,8 +96,11 @@ private:
 		 */
 		void ungetChar(char c);
 		
-		int line_no;
-		int column_no;
+		/** Current line number. */
+		int line_no = 0;
+		
+		/** Current column number. */
+		int column_no = 0;
 		
 		/** Store the old column_no in case we undo a newline. */
 		int old_column_no;

@@ -4,6 +4,11 @@
 #include "AST/ASTBase.hpp"
 #include "ClassCompile.hpp"
 #include "Lexer.hpp"
+#include "Parser.hpp"
+
+#ifdef DEBUG
+#include "Tests.hpp"
+#endif
 
 using std::string;
 
@@ -81,9 +86,14 @@ int main(int argc, char *args[])
 		printf("Output: %s\n", output_filename);
 	#endif
 		
-	Lexer::unitTest();
+	#ifdef DEBUG
+		Lexer::unitTest();
+		Parser::unitTest();
 
-
+		Tests test1("Test 1");
+		test1.testParser("A = 32", "s");
+	#endif
+		
 	/* Open the output file. If none specified use the stdout. */
 	//out_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
 

@@ -12,7 +12,8 @@ void ASTClass::debugSelf()
 	ASTBlock::debugSelf();
 }
 
-ASTClass::ASTClass(std::string class_name) : ASTNamed(class_name), ASTBlock()
+ASTClass::ASTClass(std::string class_name) 
+: ASTNamed(class_name), ASTBlock()
 {
 	ASTBlock::indentation_level = -1;
 	ASTNamed::indentation_level = -1;
@@ -22,11 +23,8 @@ ASTClass::ASTClass(std::string class_name) : ASTNamed(class_name), ASTBlock()
 void ASTClass::insertNewCode(ASTBase* new_code)
 {
 	
-	/* Made in parse.l. */
-	extern int line_indent;
-	
 	#ifdef DEBUG
-		printf("Inserting at indent: %d\n", line_indent);
+		printf("Inserting at indent: %d\n", new_code->indentation_level);
 	#endif
 	
 	/* Descend. */
@@ -67,8 +65,6 @@ void ASTClass::insertNewCode(ASTBase* new_code)
 	}
 	
 	newly_inserted_node = new_code;
-	
-	line_indent = 0;
 }
 
 

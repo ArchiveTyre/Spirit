@@ -7,7 +7,6 @@
 #include <time.h>
 #include <string.h>
 #include <libgen.h>
-#include "grammar.tab.hpp"
 #include "AST/ASTWithArgs.hpp"
 
 using std::string;
@@ -73,24 +72,11 @@ bool ClassCompile::compileFile () {
 	/* Test if we should compile from source. */
 	if (needsRecompile()) {
 		
-		/*** EXTERNS ***/
-		extern int yylineno;
-		extern FILE *yyin;
-		extern void yyrestart(FILE *file);
-		
 		/** PARSE THE FILE INTO AST **/
 		/* Open up the file. */
-		yyrestart(fopen(this->in_file_path.c_str(), "r"));
-		yylineno = 1;
 		
 		/* Compile the file. */
-		int parse_result = yyparse();
-		if (parse_result != 0) {
-			printf("ERROR: Unrecoverable error: %d.\n", parse_result);
-		}
 		
-		/* Close the file. */
-		fclose(yyin);
 		
 		/** COMPILE THE FILE **/
 		this->class_ast.compileToBackend(this);

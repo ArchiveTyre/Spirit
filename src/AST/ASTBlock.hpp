@@ -17,6 +17,7 @@
 
 class ASTBlock : public ASTBase {
 public:
+	
 	/*** METHODS ***/
 	
 	/** Inserts code into a block.
@@ -24,12 +25,14 @@ public:
 	 */
 	void insertChild(ASTBase *node);
 	
-	virtual bool compileToBackend(ClassCompile *compile_dest) override;
 	
+	/*** OVERRIDES ***/
+	
+	virtual bool compileToBackend(ClassCompile *compile_dest) override;	
 	virtual bool compileToBackendHeader(ClassCompile *compile_dest) override;
-	
 	virtual void debugSelf() override;
 
+	
 	/*** MEMBER VARIABLES ***/
 	
 	/** All nodes contained in this block */

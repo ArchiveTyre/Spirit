@@ -17,11 +17,19 @@ class ASTNumber : public ASTBase {
 public:
 
 	/*** MEMBER VARIABLES ***/
-	/* The integer value of the number. */
+	
+	/** The integer value of the number. */
 	int value;
 
 	/*** METHODS ***/
+	
+	/** Creates an AST number.
+	 * @param value The value of this ASTNumber.
+	 */
 	ASTNumber(int value);
+	
+	/*** OVERRIDES ***/
+	
 	bool compileToBackend(ClassCompile *compile_dest) override;
 	void debugSelf() override;
 };

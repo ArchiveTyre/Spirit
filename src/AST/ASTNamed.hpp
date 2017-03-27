@@ -17,13 +17,19 @@
 class ASTNamed : virtual public ASTBase {
 public:
 	
+	/*** MEMBER VARIABLES ***/
+	
 	/** The name of this AST. */
 	std::string ast_name;
 	
+	/*** METHODS ***/
+	
 	/** Creates a named AST by name 
-	 *
+	 * @param new_name Defines an AST by name.
 	 */
 	ASTNamed(std::string new_name);
+	
+	/*** OVERRIDES ***/
 	
 	virtual void exportSymToStream(std::ostream& output) override;
 	virtual bool compileToBackend(ClassCompile *compile_dest) override;

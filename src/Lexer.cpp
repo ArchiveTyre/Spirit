@@ -1,6 +1,7 @@
 #include "Lexer.hpp"
 #include <sstream>
 #include <iostream>
+#include <string>
 
 using std::string;
 using std::stringstream;
@@ -40,7 +41,9 @@ void Lexer::ungetChar(char c)
 	input.unget();
 }
 
-Lexer::Lexer(std::istream& input_stream) : input(input_stream)
+Lexer::Lexer(std::istream& input_stream, string file_name) 
+: file_name_on_error(file_name)
+, input(input_stream)
 {
 	
 }
@@ -52,14 +55,26 @@ Token * Lexer::lexToken()
 	char c = readChar();
 	
 	if (c == -1)
-		return nullptr;
+		return new Token(Token::TOKEN_TYPE::TOKEN_EOF, "", column_no, line_no);
 	
 	/* If character was space char then skip until it's not. */
-	while (c == ' ' || c == '\n')
+	while (c == ' ')
 		c = readChar();
 	
+	if (c == '\n')
+		return new Token(Token::TOKEN_TYPE::TOKEN_NEW_LINE, "\n", column_no, line_no);
+	
+	else if (c == '\t')
+		return new Token(Token::TOKEN_TYPE::TOKEN_INDENT, "\t", column_no, line_no);
+
+	else if (c == '(')
+		return new Token(Token::TOKEN_TYPE::TOKEN_LPAREN, "(", column_no, line_no);
+	
+	else if (c == ')')
+		return new Token(Token::TOKEN_TYPE::TOKEN_RPAREN, ")", column_no, line_no);
+	
 	/* Check if first char is digit. */
-	if (isdigit(c)) {
+	else if (isdigit(c)) {
 		stringstream string_builder;
 		
 		/* If so then the rest of the digit make an integer. */
@@ -94,8 +109,8 @@ Token * Lexer::lexToken()
 	else {
 		stringstream string_builder;
 		
-		/* Anything non alpha numeric is an operator. */
-		while (!isalnum(c) && c != -1) {
+		/* Anything non alpha numeric is an operator. Excluding spaces and EOF. */
+		while (!isalnum(c) && c != ' ' && c != '\t' && c != -1) {
 			string_builder << c;
 			c = readChar();
 			if (!input)
@@ -103,17 +118,18 @@ Token * Lexer::lexToken()
 		}
 		ungetChar(c);
 		
-		return new Token(Token::TOKEN_TYPE::TOKEN_SYMBOL, string_builder.str(), column_no, line_no);
+		return new Token(Token::TOKEN_TYPE::TOKEN_OPERATOR, string_builder.str(), column_no, line_no);
 	}
 }
 
 void Lexer::unitTest()
 {
 		std::istringstream input("A = 12 + f1");
-		Lexer test(input);
+		Lexer test(input, "Test.ch");
 		
-		for (Token * token = test.lexToken(); token != nullptr; token = test.lexToken()) {
+		for (Token *token = test.lexToken(); token->token_type != Token::TOKEN_TYPE::TOKEN_EOF; token = test.lexToken()) {
 			std::cout << " type: " << token->token_type << " token: " << token->value << std::endl;
+			std::cout << " line: " << token->line_no << " column: " << token->column_no << std::endl;
 			delete token;
 		}
 		
