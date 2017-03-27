@@ -38,5 +38,7 @@ ASTBase::ASTBase()
 	this->indentation_level = -1;
 	this->parent_node = nullptr;
 	
-	std::cout << "Calling BASE constructor" << std::endl;
+#	ifdef DEBUG
+		std::cout << "Calling BASE constructor" << std::endl;
+#	endif
 }

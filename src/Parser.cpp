@@ -57,18 +57,15 @@ ASTBase * Parser::parseExpression()
 				return operator_call;
 			}
 			else {
-				//std::cout << "ICHI ERROR DESU!" << std::endl;
 				return nullptr;
 			}
 		}
+		
+		/** Check if this is the last token in this expression. */
 		else if (look_ahead->token_type == Token::TOKEN_TYPE::TOKEN_NEW_LINE || 
-				 look_ahead->token_type == Token::TOKEN_TYPE::TOKEN_EOF ||
-				 look_ahead->token_type == Token::TOKEN_TYPE::TOKEN_RPAREN) {
-			std::cout << "No operator: " << look_ahead->value << std::endl;
+				 look_ahead->token_type == Token::TOKEN_TYPE::TOKEN_RPAREN ||
+				 look_ahead->token_type == Token::TOKEN_TYPE::TOKEN_EOF ) {
 			return left;
-		}
-		else if (look_ahead == nullptr) {
-			return nullptr;
 		}
 		else {
 			syntaxError("(, int, symbol");

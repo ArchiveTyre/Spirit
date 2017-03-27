@@ -6,10 +6,6 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 
-#ifdef DEBUG
-#include "Tests.hpp"
-#endif
-
 using std::string;
 
 static void print_version()
@@ -32,9 +28,12 @@ static void help()
 	printf("    --out-dir     Specifies where to place build files.\n");
 }
 
-int main(int argc, char *args[])
-{
+/** If we are testing then main is defined in @file Test.cpp. */
+#ifndef TEST
 
+int main(int argc, char *args[])
+{	
+	
 	std::vector<string> files_list;
 	char* output_filename = NULL;
 
@@ -82,17 +81,9 @@ int main(int argc, char *args[])
 		}
 	}
 
-	#ifdef DEBUG
+#	ifdef DEBUG
 		printf("Output: %s\n", output_filename);
-	#endif
-		
-	#ifdef DEBUG
-		Lexer::unitTest();
-		Parser::unitTest();
-
-		Tests test1("Test 1");
-		test1.testParser("A = 32", "s");
-	#endif
+#	endif
 		
 	/* Open the output file. If none specified use the stdout. */
 	//out_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
@@ -109,13 +100,8 @@ int main(int argc, char *args[])
 	
 	/*** CLEAN UP ***/
 	
-	/* Destroy parser. */
-	extern int yylex_destroy();
-	int result_yylex_destroy = yylex_destroy();
-	if (result_yylex_destroy != 0) {
-		printf("ERROR: Could not destroy yylex. %d\n", result_yylex_destroy);
-	}
 #endif
 
 	return 0;
 }
+#endif

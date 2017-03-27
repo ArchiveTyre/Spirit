@@ -31,3 +31,19 @@ bool Tests::testParser(std::string in, std::string out)
 	
 }
 
+#ifdef TEST
+int main() {
+	Tests::testAll();
+}
+#endif TEST
+
+void Tests::testAll()
+{
+	Lexer::unitTest();
+	Parser::unitTest();
+
+	Tests test1("Test 1");
+	test1.testParser("A = 32", "{\nA=32}\n");
+}
+
+

@@ -23,9 +23,9 @@ ASTClass::ASTClass(std::string class_name)
 void ASTClass::insertNewCode(ASTBase* new_code)
 {
 	
-	#ifdef DEBUG
+#	ifdef DEBUG
 		printf("Inserting at indent: %d\n", new_code->indentation_level);
-	#endif
+#	endif
 	
 	/* Descend. */
 	if (new_code->indentation_level > newly_inserted_node->indentation_level) {

@@ -23,6 +23,9 @@ public:
 	
 	bool testParser(std::string in, std::string out);
 	
+	/** Tests a lot of small tests.
+	 */
+	static void testAll();
 	
 	/*** MEMBER VARIABLES ***/
 	
