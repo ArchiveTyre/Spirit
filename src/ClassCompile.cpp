@@ -8,6 +8,8 @@
 #include <string.h>
 #include <libgen.h>
 #include "AST/ASTWithArgs.hpp"
+#include "Parser.hpp"
+#include "Lexer.hpp"
 
 using std::string;
 using std::cout;
@@ -15,6 +17,7 @@ using std::endl;
 
 string ClassCompile::default_out_dir = "out";
 ClassCompile *ClassCompile::active_compilation = nullptr;
+ASTClass ClassCompile::root_class(nullptr, "_root");
 
 /*** HELPER FUNCTIONS ***/
 
@@ -71,49 +74,80 @@ bool ClassCompile::compileFile () {
 	
 	/* Test if we should compile from source. */
 	if (needsRecompile()) {
-		
+
 		/** PARSE THE FILE INTO AST **/
-		/* Open up the file. */
-		
+
+		/* Parse. */
+		std::ifstream input(this->in_file_path);
+		Lexer lexer(&input, this->in_file_path);
+		Parser parser(lexer);
+		parser.parseInput(&this->class_ast);
+
 		/* Compile the file. */
-		
-		
+
+
 		/** COMPILE THE FILE **/
+
 		this->class_ast.compileToBackend(this);
+		this->class_ast.compileToBackendHeader(this);
 		this->class_ast.debugSelf();
 
+
 		/** SAVE THE OUTPUT **/
+
 		/* Assure the existance of the out dir. */
 		char *dir_name = (char *)alloca(out_file_path.length() + 1);
 		strcpy(dir_name, out_file_path.c_str());
 		mkpath(dirname(dir_name), 0777);
+
+
 		/* Open the file for writing. */
-		std::ofstream file;
-		std::ofstream header_file;
-		file.open(out_file_path);
-		header_file.open(out_header_file_path);
-		file << this->output_stream.rdbuf();
-		/* Write, flush and close. */
-		file.flush();
-		file.close();
-		header_file << this->output_header_stream.rdbuf();
-		header_file.flush();
-		header_file.close();
+
+		std::ofstream file(out_file_path);
+		if (file.is_open()) {
+			
+			file << "#include " << '"' << std::string(class_name).append(".ch.hpp") << '"' << std::endl;
+			
+			file << this->output_stream.rdbuf();
+			
+			// FIXME: Replace with some constant value.
+			file << "/* Compiled with: Cheri v0.1 */" << std::endl;
+			file.flush();
+			file.close();
+		}
+		else {
+			cout << "ERROR: Could not open file: " << out_file_path << std::endl;
+		}
+		
+		std::ofstream header_file(out_header_file_path);
+		if (header_file.is_open()) {
+			
+			header_file << "#pragma once" << std::endl;
+			
+			header_file << this->output_header_stream.rdbuf();
+			header_file << "/* Compiled with: */" << std::endl;
+			header_file.flush();
+			header_file.close();
+		}
+		else {
+			cout << "ERROR: Could not open file: " << out_header_file_path << std::endl;
+		}
+		std::cout << "Write to headers and files. " << std::endl;
 	}
 
 	/* Or just load from cached symbol table. */
 	else {
-		
+
 		cout << "[INFO] Class already compiled!" << endl;
-		
+
 		/* Cached symbols are saved in .ch.sym files. */
 		std::ifstream file(out_file_path.append(".sym"));
 		ASTBase::importSymFromStream(static_cast<ASTBase*>(static_cast<ASTNamed*>(&class_ast)), file);
 	}
-	
+
 	/* Continue old compilation. */
 	active_compilation = suspended_compilation;
-	
+
 	return true;
 }
 
@@ -122,13 +156,13 @@ static string get_class_name(std::string file_path)
 {
 	char *old_path = strdup(file_path.c_str());
 	string file_name = string(basename(old_path));
-	string class_name = file_name.substr(0, file_name.find_first_of('0'));
+	string class_name = file_name.substr(0, file_name.find_first_of('.'));
 	free(old_path);
 	return class_name;
 }
 
 ClassCompile::ClassCompile(std::string file_path)
-: class_ast(get_class_name(file_path))
+: class_ast(dynamic_cast<ASTBlock*>(&root_class), get_class_name(file_path))
 {
 
 	/* Set the class name to the ASTClass's class name. */
@@ -137,7 +171,10 @@ ClassCompile::ClassCompile(std::string file_path)
 	/* Set out dir to default out dir. */
 	this->out_dir = ClassCompile::default_out_dir;
 
-	this->out_file_path = out_dir.append(1, '/').append(file_path).append(".cpp");
-	this->out_header_file_path = out_dir.append(1, '/').append(file_path).append(".hpp");
+	
+	this->out_header_file_path = string(out_dir).append(1, '/').append(file_path).append(".hpp");
+	
+	this->out_file_path = string(out_dir).append(1, '/').append(file_path).append(".cpp");
+	
 	this->in_file_path = file_path;
 }

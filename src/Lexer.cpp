@@ -18,7 +18,7 @@ char Lexer::readChar()
 {
 	
 	++column_no;
-	char c = input.get();
+	char c = input->get();
 	
 	if (c == '\n') {
 		
@@ -38,10 +38,10 @@ void Lexer::ungetChar(char c)
 		--line_no;
 		column_no = old_column_no;
 	}
-	input.unget();
+	input->unget();
 }
 
-Lexer::Lexer(std::istream& input_stream, string file_name) 
+Lexer::Lexer(std::istream* input_stream, string file_name) 
 : file_name_on_error(file_name)
 , input(input_stream)
 {
@@ -125,7 +125,7 @@ Token * Lexer::lexToken()
 void Lexer::unitTest()
 {
 		std::istringstream input("A = 12 + f1");
-		Lexer test(input, "Test.ch");
+		Lexer test(&input, "Test.ch");
 		
 		for (Token *token = test.lexToken(); token->token_type != Token::TOKEN_TYPE::TOKEN_EOF; token = test.lexToken()) {
 			std::cout << " type: " << token->token_type << " token: " << token->value << std::endl;

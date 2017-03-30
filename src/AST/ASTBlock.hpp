@@ -20,10 +20,7 @@ public:
 	
 	/*** METHODS ***/
 	
-	/** Inserts code into a block.
-	 * @param node Child node that should be inserted into this block.
-	 */
-	void insertChild(ASTBase *node);
+	ASTBlock(ASTBase *parent);
 	
 	
 	/*** OVERRIDES ***/
@@ -37,6 +34,11 @@ public:
 	
 	/** All nodes contained in this block */
 	std::list<ASTBase *> child_nodes;
+	
+	
+protected:
+	
+	virtual ASTBase *findSymbolScan(std::string name) override;
 };
 
 #endif

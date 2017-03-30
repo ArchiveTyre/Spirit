@@ -36,10 +36,10 @@ public:
 	std::string out_dir;
 	
 	/** The opened stream for the backend generated file. */
-	std::ostringstream output_stream;
+	std::stringstream output_stream;
 	
 	/** The opened stream for the backend header generated file. */
-	std::ostringstream output_header_stream;
+	std::stringstream output_header_stream;
 
 	/** The class name. */
 	std::string class_name;
@@ -63,6 +63,9 @@ public:
 	
 	/** The default output dir. */
 	static std::string default_out_dir;
+	
+	/** The root class. */
+	static ASTClass root_class;
 
 private:
 	

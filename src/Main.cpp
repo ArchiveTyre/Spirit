@@ -5,6 +5,7 @@
 #include "ClassCompile.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
+#include "Builtins.hpp"
 
 using std::string;
 
@@ -82,14 +83,15 @@ int main(int argc, char *args[])
 	}
 
 #	ifdef DEBUG
-		printf("Output: %s\n", output_filename);
+		printf("[DEBUG] Output: %s\n", output_filename);
 #	endif
 		
+	Builtins::install_types();
+	
 	/* Open the output file. If none specified use the stdout. */
 	//out_file = output_filename != NULL ? fopen(output_filename, "w") : stdout;
 
 	/*** COMPILE STUFF ***/
-#if 0
 
 	/* Parse each file that were given as input. */
 	for(string filename : files_list) {
@@ -98,9 +100,8 @@ int main(int argc, char *args[])
 		std::cout << "[DONE] Parsing: " << filename << std::endl;
 	}
 	
-	/*** CLEAN UP ***/
 	
-#endif
+	/*** CLEAN UP ***/
 
 	return 0;
 }

@@ -66,8 +66,8 @@ private:
 	bool match(std::string value);
 	bool match(Token::TOKEN_TYPE type);
 	
-	ASTBase * parseLine();
-	ASTBase * parseExpression();
+	ASTBase * parseLine(ASTClass *class_dest);
+	ASTBase * parseExpression(ASTBase *parent);
 };
 
 #endif

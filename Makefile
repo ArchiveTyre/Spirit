@@ -12,7 +12,7 @@ LD=clang++
 LIBS= pthread
 
 # Uncomment if release build.
-DEBUG= true
+#DEBUG= true
 
 # Flags to be passed on to the C compiler.
 COMMON_FLAGS= -Wall -I.
@@ -136,17 +136,24 @@ C_FLAGS+=$(foreach dir,$(DIRECTORIES),-I$(dir) )
 CPP_FLAGS+=$(foreach dir,$(SRCDIRS),-I$(dir) )
 CPP_FLAGS+=$(foreach dir,$(DIRECTORIES),-I$(dir) )
 
-# The goal is to get the executable.
-all: $(EXEC)
-	@echo "$(ccgreen)Done!$(ccend)"
+# Build release version.
+release:
+	$(MAKE) all DEBUG=false OBJDIR=$(OBJDIR)/release
+	
+# Build debug version.
+debug:
+	$(MAKE) all DEBUG=true OBJDIR=$(OBJDIR)/debug
 
 # The test rule works by calling the makefile again
 # but with a custom flag and obj dir.
 # We later call the executable created.
 test:
-	make $(TEST_EXEC) COMMON_FLAGS="-DTEST" OBJDIR="obj/test"
+	$(MAKE) $(TEST_EXEC) COMMON_FLAGS="-DTEST" OBJDIR="$(OBJDIR)/test"
 	./$(OBJDIR)/test/$(TEST_EXEC)
-
+	
+# The goal is to get the executable.
+all: $(EXEC)
+	@echo "$(ccgreen)Done!$(ccend)"
 
 # To clean we simply remove everything that is generated.
 clean:
@@ -154,8 +161,12 @@ clean:
 
 # Self explanatory.
 help:
-	@echo "Type: 'make all'"
-	@echo "	To build everthing."
+	@echo "Type: 'make release'"
+	@echo "	To build release version."
+	@echo "Type: 'make debug'"
+	@echo " To build debug version."
+	@echo "Type 'make test'"
+	@echo " To automatically test the project."
 	@echo "Type: 'make clean'"
 	@echo "	To clean after build"
 	@echo "Type: 'make help'"

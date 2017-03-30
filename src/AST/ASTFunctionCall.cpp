@@ -1,9 +1,15 @@
 #include "ASTFunctionCall.hpp"
+#include "../Builtins.hpp"
 
-ASTFunctionCall::ASTFunctionCall(std::string function_name) : ASTNamed(function_name)
+ASTFunctionCall::ASTFunctionCall(ASTBase *parent, std::string function_name)
+: ASTBase(parent)
+, ASTNamed(parent, function_name)
+, ASTWithArgs(parent)
 {
 	std::cout << "Creating funciton call" << std::endl;
 }
+
+
 
 void ASTFunctionCall::debugSelf()
 {
@@ -27,8 +33,29 @@ bool ASTFunctionCall::compileToBackend(ClassCompile *compile_dest)
 	return true;
 }
 
-
 void ASTFunctionCall::exportSymToStream(std::ostream& output)
 {
 	return;
+}
+
+ASTBase * ASTFunctionCall::findSymbolScan(std::string name)
+{
+	return nullptr;
+}
+
+ASTType * ASTFunctionCall::getExpressionType()
+{
+		if (is_infix) {
+			if (arg_nodes.front()->getExpressionType() == &Builtins::type_integer
+				&& arg_nodes.back()->getExpressionType() == &Builtins::type_integer
+			) {
+				return &Builtins::type_integer;
+			}
+		}
+		return nullptr;
+}
+
+ASTFunctionCall::~ASTFunctionCall()
+{
+
 }

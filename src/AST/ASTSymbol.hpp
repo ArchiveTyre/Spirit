@@ -12,16 +12,23 @@
 #ifndef AST_SYMBOL_HPP
 #define AST_SYMBOL_HPP
 
+#include "ASTDefineVariable.hpp"
 #include "ASTNamed.hpp"
 
 class ASTSymbol : public ASTNamed
 {
 public:
 	
+	ASTDefineVariable *definition;
+	
 	/** Creates a symbol with a name.
 	 * @param name The name of this symbol.
 	 */
-	ASTSymbol(std::string name);
+	ASTSymbol(ASTBase *parent, std::string name);
+	
+	/*** OVERRIDES ***/
+	
+	virtual ASTType * getExpressionType();
 };
 
 #endif

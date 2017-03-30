@@ -21,14 +21,16 @@ public:
 	/*** METHODS ***/
 	
 	/** Defines a class by name
+	 * @param parent The parent of this class.
 	 * @param class_name The name of the class.
 	 */
-	ASTClass(std::string class_name);
+	ASTClass(ASTBase *parent, std::string class_name);
 	
 	/** Automatically finds the correct place for new AST nodes in this class.
-	 * @param new_code The new AST node that should be inserted.
+	 * @param line_indent The indentation of the code.
+	 * @return The parent for the new code.
 	 */
-	void insertNewCode(ASTBase *new_code);
+	ASTBase * getParentForNewCode(int line_indent);
 	
 	
 	/*** MEMBERS ***/
@@ -37,13 +39,6 @@ public:
 	bool compileToBackendHeader(ClassCompile *compile_dest) override;
 	void debugSelf() override;
 	void exportSymToStream(std::ostream& output) override;
-	
-private:
-	
-	/*** MEMBER VARIABLES ***/
-	
-	/** The node that was inserted last time by insertNewCode() */
-	ASTBase *newly_inserted_node;
 };
 
 #endif

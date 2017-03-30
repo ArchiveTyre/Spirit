@@ -26,12 +26,13 @@ public:
 	/** Creates an AST number.
 	 * @param value The value of this ASTNumber.
 	 */
-	ASTNumber(int value);
+	ASTNumber(ASTBase *parent, int value);
 	
 	/*** OVERRIDES ***/
 	
 	bool compileToBackend(ClassCompile *compile_dest) override;
 	void debugSelf() override;
+	ASTType * getExpressionType() override;
 };
 
 #endif

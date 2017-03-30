@@ -68,7 +68,7 @@ public:
 		 * @param input_stream Where the lexer should read from.
 		 * @param file_name_on_error The filename that should be shown if an syntax error occures.
 		 */
-		Lexer(std::istream& input_stream, std::string file_name_on_error);
+		Lexer(std::istream* input_stream, std::string file_name_on_error);
 		
 		/** Get one token from the input stream.
 		 * @return The token that was parsed. Is null on failure.
@@ -84,7 +84,7 @@ private:
 		/*** MEMBER VARIABLES ***/
 		
 		/** Where the lexer is reading from. */
-		std::istream& input;
+		std::istream* input;
 		
 		/*** METHODS ***/
 		

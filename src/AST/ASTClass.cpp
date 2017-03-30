@@ -12,35 +12,47 @@ void ASTClass::debugSelf()
 	ASTBlock::debugSelf();
 }
 
-ASTClass::ASTClass(std::string class_name) 
-: ASTNamed(class_name), ASTBlock()
+ASTClass::ASTClass(ASTBase *parent, std::string class_name) 
+: ASTBase (parent)
+, ASTNamed(parent, class_name)
+, ASTBlock(parent)
 {
 	ASTBlock::indentation_level = -1;
 	ASTNamed::indentation_level = -1;
-	newly_inserted_node = static_cast<ASTBlock*>(this);
 }
 
-void ASTClass::insertNewCode(ASTBase* new_code)
+ASTBase * ASTClass::getParentForNewCode(int line_indent)
 {
 	
+	ASTBase *newly_inserted_node = child_nodes.back();
+	if (newly_inserted_node == nullptr)
+		newly_inserted_node = static_cast<ASTBlock*>(this);
+	
 #	ifdef DEBUG
-		printf("Inserting at indent: %d\n", new_code->indentation_level);
+		std::cout << "Inserting at indent:" << line_indent << std::endl;
 #	endif
 	
 	/* Descend. */
-	if (new_code->indentation_level > newly_inserted_node->indentation_level) {
+	if (line_indent > newly_inserted_node->indentation_level) {
 		if (auto new_parent = dynamic_cast<ASTBlock*>(newly_inserted_node)) {
-			new_parent->insertChild(new_code);
+			return new_parent;
+		}
+		else {
+			std::cerr << "COMPILER ERROR: You can not insert child nodes into anything other than a block." << std::endl;
+			abort();
+			return nullptr;
 		}
 	}
 	
 	/* Stay. Previous node and new node share the same parent. */
-	else if (newly_inserted_node->indentation_level == new_code->indentation_level) {
+	else if (line_indent == newly_inserted_node->indentation_level) {
 		if (auto new_parent = dynamic_cast<ASTBlock*>(newly_inserted_node->parent_node)) {
-			new_parent->insertChild(new_code);
+			return new_parent;
 		}
 		else {
 			std::cerr << "COMPILER ERROR: You can not insert child nodes into anything other than a block." << std::endl;
+			abort();
+			return nullptr;
 		}
 		
 	}
@@ -52,19 +64,18 @@ void ASTClass::insertNewCode(ASTBase* new_code)
 		ASTBase *parent = newly_inserted_node->parent_node;
 		
 		/* While the parent his deeper indented than the child node, set parent to grandparent. */
-		while (parent != nullptr && parent->indentation_level >= new_code->indentation_level)
+		while (parent != nullptr && parent->indentation_level >= line_indent)
 			parent = parent->parent_node;
 		
 		/* Now add the node to the found result. */
 		if (auto correct_parent = dynamic_cast<ASTBlock*>(parent)) {
-			correct_parent->insertChild(new_code);
+			return correct_parent;
 		}
 		else {
 			std::cerr << "COMPILER ERROR: Could not find a parent for code." << std::endl;
+			return nullptr;
 		}
 	}
-	
-	newly_inserted_node = new_code;
 }
 
 
@@ -76,7 +87,11 @@ void ASTClass::exportSymToStream(std::ostream& output)
 
 bool ASTClass::compileToBackend(ClassCompile *compile_dest)
 {
-	ASTBlock::compileToBackend(compile_dest);
+	for (auto child : child_nodes) {
+		if (!child->compileToBackend(compile_dest))
+			return false;
+		compile_dest->output_stream << ';' << std::endl;
+	}
 	return true;
 }
 
@@ -87,7 +102,13 @@ bool ASTClass::compileToBackendHeader(ClassCompile *compile_dest)
 	compile_dest->output_header_stream << "class ";
 	ASTNamed::compileToBackendHeader(compile_dest);
 	compile_dest->output_header_stream << " ";
-	ASTBlock::compileToBackendHeader(compile_dest);
-	compile_dest->output_header_stream << ";";
+	compile_dest->output_header_stream << "{" << std::endl;
+	compile_dest->output_header_stream << "public: " << std::endl;
+	for (auto child : child_nodes) {
+		if (!child->compileToBackendHeader(compile_dest))
+			return false;
+		compile_dest->output_header_stream << ';' << std::endl;
+	}
+	compile_dest->output_header_stream << "};" << std::endl;
 	return true;
 }

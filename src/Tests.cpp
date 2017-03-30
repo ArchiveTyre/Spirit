@@ -10,10 +10,10 @@ Tests::Tests(std::string new_test_name) : test_name(new_test_name)
 bool Tests::testParser(std::string in, std::string out)
 {
 	std::istringstream stream_in(in);	
-	Lexer lexer(stream_in, test_name);	
+	Lexer lexer(&stream_in, test_name);	
 	Parser parser(lexer);	
 	ClassCompile compile_dest(test_name.append(".ch"));
-	compile_dest.output_stream = std::ostringstream();
+	compile_dest.output_stream = std::stringstream();
 	
 	bool step1 = parser.parseInput(&compile_dest.class_ast);
 	bool step2 = compile_dest.class_ast.compileToBackend(&compile_dest);
@@ -35,7 +35,7 @@ bool Tests::testParser(std::string in, std::string out)
 int main() {
 	Tests::testAll();
 }
-#endif TEST
+#endif
 
 void Tests::testAll()
 {
@@ -43,7 +43,13 @@ void Tests::testAll()
 	Parser::unitTest();
 
 	Tests test1("Test 1");
-	test1.testParser("A = 32", "{\nA=32}\n");
+	bool t1 = test1.testParser("var A = 32", "{\nA=32}\n");
+	
+	Tests test2("Test 2");
+	bool t2 = test2.testParser("var A = 32\nA= A+ A", "{\nA=32+A}\n");
+	
+	exit(t1 && t2 != 1);
+		
 }
 
 

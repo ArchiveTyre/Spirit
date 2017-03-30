@@ -23,16 +23,24 @@ public:
 	/** Creates a function call to an AST node.
 	 * @param function_name The name of the function that this AST wants to call.
 	 */
-	ASTFunctionCall(std::string function_name);
+	ASTFunctionCall(ASTBase *parent, std::string function_name);
+	virtual ~ASTFunctionCall();
 	
 	/*** OVERRIDES ***/
 	
 	bool compileToBackend(ClassCompile *compile_dest) override;
 	void debugSelf() override;
 	void exportSymToStream(std::ostream& output) override;
+	virtual ASTType * getExpressionType() override;
+	
 
 	/*** MEMBER VARIABLES ***/
 	bool is_infix = false;
+	
+	
+protected:
+	
+	virtual ASTBase * findSymbolScan(std::string name) override;
 };		
 
 #endif

@@ -1,6 +1,7 @@
 #include "ASTNumber.hpp"
-#include "../ClassCompile.hpp"
 #include <iostream>
+#include "../ClassCompile.hpp"
+#include "../Builtins.hpp"
 
 void ASTNumber::debugSelf()
 {
@@ -13,8 +14,14 @@ bool ASTNumber::compileToBackend(ClassCompile *compile_dest)
 	return true;
 }
 
-ASTNumber::ASTNumber(int value) : ASTBase()
+ASTNumber::ASTNumber(ASTBase *parent, int value) : ASTBase(parent)
 {
 	std::cout << "Creating number of value: " << value << std::endl;
 	this->value = value;
+}
+
+ASTType * ASTNumber::getExpressionType()
+{
+	std::cout << "Getting expression type." << std::endl;
+	return &Builtins::type_integer;
 }

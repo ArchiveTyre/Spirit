@@ -5,6 +5,7 @@
 #include "AST/ASTNumber.hpp"
 #include "AST/ASTFunctionCall.hpp"
 #include "AST/ASTSymbol.hpp"
+#include "AST/ASTDefineVariable.hpp"
 
 using std::vector;
 using std::string;
@@ -16,7 +17,7 @@ Parser::Parser(Lexer input_lexer) : lexer(input_lexer)
 	
 }
 
-ASTBase * Parser::parseExpression()
+ASTBase * Parser::parseExpression(ASTBase *parent)
 {
 	
 	if (match(Token::TOKEN_LPAREN) || match(Token::TOKEN_INTEGER) || match(Token::TOKEN_SYMBOL)) {
@@ -26,19 +27,36 @@ ASTBase * Parser::parseExpression()
 		
 		/** If number, create ASTNumber. */
 		if (previous->token_type == Token::TOKEN_INTEGER) {
-			left = new ASTNumber(stoi(previous->value));
+			left = new ASTNumber(parent, stoi(previous->value));
 			left->line_no = previous->line_no;
 		}
 		
 		/** If symbol, create ASTSymbol. */
 		else if (previous->token_type == Token::TOKEN_SYMBOL) {
-			left = new ASTSymbol(previous->value);
-			left->line_no = previous->line_no;
+			
+			/** If it is followed by a parenthesis then it's a function call. */
+			if (look_ahead->token_type == Token::TOKEN_LPAREN) {
+			
+				ASTFunctionCall *function_call = new ASTFunctionCall(parent, previous->value);
+				
+				do {
+					/* Parse and insert. */
+					auto parsed = parseExpression(function_call);
+					parsed->confirmParent();
+				}
+				while(match(","));
+				
+				return function_call;
+			}
+			else {
+				left = new ASTSymbol(parent, previous->value);
+				left->line_no = previous->line_no;
+			}
 		}
 		
 		/** If parenthesis, parse parenthesis. */
 		else if (previous->token_type == Token::TOKEN_LPAREN) {
-			left = parseExpression();
+			left = parseExpression(parent);
 			if (!match(Token::TOKEN_RPAREN)) {
 				syntaxError("closing parenthesis");
 				return nullptr;
@@ -48,23 +66,29 @@ ASTBase * Parser::parseExpression()
 		/** If next is a operator we need to parse next expression as an operator. */
 		if (match(Token::TOKEN_OPERATOR)) {
 			string operator_name = previous->value;
-			if (auto right = parseExpression()) {
-				auto operator_call = new ASTFunctionCall(operator_name);
+			auto operator_call = new ASTFunctionCall(parent, operator_name);
+			if (auto right = parseExpression(operator_call)) {
+				
 				operator_call->line_no = previous->line_no;
-				operator_call->insertArg(left);
-				operator_call->insertArg(right);
+				left->parent_node = operator_call;
+				std::cout << "Other parent: " << right->parent_node << std::endl;
+				left->confirmParent();
+				right->confirmParent();
+				operator_call->confirmParent();
+				
 				operator_call->is_infix = true;
 				return operator_call;
 			}
 			else {
+				delete operator_call;
 				return nullptr;
 			}
 		}
 		
 		/** Check if this is the last token in this expression. */
-		else if (look_ahead->token_type == Token::TOKEN_TYPE::TOKEN_NEW_LINE || 
-				 look_ahead->token_type == Token::TOKEN_TYPE::TOKEN_RPAREN ||
-				 look_ahead->token_type == Token::TOKEN_TYPE::TOKEN_EOF ) {
+		else if (look_ahead->token_type == Token::TOKEN_NEW_LINE || 
+				 look_ahead->token_type == Token::TOKEN_RPAREN ||
+				 look_ahead->token_type == Token::TOKEN_EOF ) {
 			return left;
 		}
 		else {
@@ -79,19 +103,51 @@ ASTBase * Parser::parseExpression()
 	}
 }
 
-ASTBase * Parser::parseLine()
+ASTBase * Parser::parseLine(ASTClass *class_dest)
 {	
-	int indentation_level = 0;
 	
-	while (match(Token::TOKEN_TYPE::TOKEN_INDENT)) {
+	/* Get indentation level & parent. */
+	int indentation_level = 0;
+	while (match(Token::TOKEN_INDENT)) {
 		indentation_level += 4;
 	}
+	ASTBase *parent = class_dest->getParentForNewCode(indentation_level);
 	
-	ASTBase *expr = parseExpression();		
+	/* Do the parsing. */
+	ASTBase *parsed_line;
 	
-	if (expr && (match(Token::TOKEN_TYPE::TOKEN_NEW_LINE) || match(Token::TOKEN_TYPE::TOKEN_EOF))) {
-		expr->indentation_level = indentation_level;
-		return expr;
+	/* It's a variable definition. */
+	if (match("var")) {
+		if (match(Token::TOKEN_SYMBOL)) {
+			string name = previous->value;
+			if (match("=")) {
+				// Assign default value.
+				ASTBase *value = parseExpression(nullptr);
+				parsed_line = new ASTDefineVariable(parent, name, value);
+				value->parent_node = parsed_line;
+				value->confirmParent();
+			}
+			else {
+				syntaxError("variable value");
+				parsed_line = nullptr;
+			}
+		}
+		else {
+			syntaxError("variable name");
+			parsed_line = nullptr;
+		}
+	}
+	
+	/* It's an expression. */
+	else {
+		parsed_line = parseExpression(parent);	
+	}
+	
+	/* Finish off. */	
+	if (parsed_line && (match(Token::TOKEN_NEW_LINE) || match(Token::TOKEN_EOF))) {
+		parsed_line->indentation_level = indentation_level;
+		parsed_line->confirmParent();
+		return parsed_line;
 	}
 	else
 		return nullptr;
@@ -103,12 +159,11 @@ bool Parser::parseInput(ASTClass * class_dest)
 	look_ahead = lexer.lexToken();
 	
 	/* Parse as many lines as possible. */
-	while (auto result = parseLine()) {
-		class_dest->insertNewCode(result);
+	while (auto result = parseLine(class_dest)) {
 	}
 	
 	/* Then check for trash. */
-	if (!match(Token::TOKEN_TYPE::TOKEN_EOF)) {
+	if (!match(Token::TOKEN_EOF)) {
 		syntaxError("end of file or operator");
 		return false;
 	}
@@ -172,11 +227,11 @@ void Parser::unitTest()
 	{
 		std::istringstream input("A = 32\n");
 		
-		Lexer lexer(input, "Test.1ch");
+		Lexer lexer(&input, "Test.1ch");
 		
 		Parser parser(lexer);
 		
-		ASTClass dest("KawaiiClass1");
+		ASTClass dest(dynamic_cast<ASTBlock*>(&ClassCompile::root_class), "KawaiiClass1");
 		
 		parser.parseInput(&dest);
 		
@@ -187,11 +242,11 @@ void Parser::unitTest()
 	{
 		std::istringstream input("A = 1+2");
 		
-		Lexer lexer(input, "Test2.ch");
+		Lexer lexer(&input, "Test2.ch");
 		
 		Parser parser(lexer);
 		
-		ASTClass dest("KawaiiClass2");
+		ASTClass dest(dynamic_cast<ASTBlock*>(&ClassCompile::root_class), "KawaiiClass2");
 		
 		parser.parseInput(&dest);
 		
@@ -202,11 +257,11 @@ void Parser::unitTest()
 	{
 		std::istringstream input("A = 1+2\nB= A+4\nC=3");
 		
-		Lexer lexer(input, "Test3.ch");
+		Lexer lexer(&input, "Test3.ch");
 		
 		Parser parser(lexer);
 		
-		ASTClass dest("KawaiiClass3");
+		ASTClass dest(dynamic_cast<ASTBlock*>(&ClassCompile::root_class), "KawaiiClass3");
 		
 		parser.parseInput(&dest);
 		
@@ -221,11 +276,11 @@ if A == 32:\n\
 \tB= 43\n\
 		");
 		
-		Lexer lexer(input, "Test4.ch");
+		Lexer lexer(&input, "Test4.ch");
 		
 		Parser parser(lexer);
 		
-		ASTClass dest("KawaiiClass4");
+		ASTClass dest(dynamic_cast<ASTBlock*>(&ClassCompile::root_class), "KawaiiClass4");
 		
 		parser.parseInput(&dest);
 		
@@ -236,11 +291,11 @@ if A == 32:\n\
 	{
 		std::istringstream input("A = 3(3 + 4) * 2");
 		
-		Lexer lexer(input, "Test5.ch");
+		Lexer lexer(&input, "Test5.ch");
 		
 		Parser parser(lexer);
 		
-		ASTClass dest("KawaiiClass5");
+		ASTClass dest(dynamic_cast<ASTBlock*>(&ClassCompile::root_class), "KawaiiClass5");
 		
 		parser.parseInput(&dest);
 		

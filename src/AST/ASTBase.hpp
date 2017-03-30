@@ -16,6 +16,7 @@
 
 /* ClassCompile will be defined later. */
 class ClassCompile;
+class ASTType;
 
 class ASTBase {
 public:
@@ -33,6 +34,8 @@ public:
 	 */
 	virtual void exportSymToStream(std::ostream& output);
 	
+	virtual void confirmParent();
+	
 	/** Compiles this node into the desired backend.
 	 * @param compile_dest ClassCompile contains members that tell us where to put our results.
 	 * @return Returns true if compilation of this node succeds.
@@ -49,9 +52,18 @@ public:
 	 */
 	virtual void debugSelf();
 	
+	/** Finds the type of an expression.
+	 * @return Returns a reference to the type.
+	 */
+	virtual ASTType *getExpressionType();
+	
+	ASTBase *findSymbol(std::string name);
+
 	/** Creates a basic AST node.
 	 */
-	ASTBase();	
+	ASTBase(ASTBase *parent_node);	
+	
+	virtual ~ASTBase();
 
 	
 	/*** MEMBER VARIABLES ***/
@@ -64,5 +76,18 @@ public:
 	
 	/** What indentation level this node has. */
 	int indentation_level;
+	
+protected:
+	
+	/** Finds a symbol by name.
+	 * @param name The name of the symbol that we wish to find.
+	 * @return The found symbol.
+	 */
+	virtual ASTBase *findSymbolScan(std::string name);
+	
+	
+private:
+	
+	ASTBase *unconfirmed_parent_node;
 };
 #endif

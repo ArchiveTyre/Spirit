@@ -27,13 +27,19 @@ public:
 	/** Creates a named AST by name 
 	 * @param new_name Defines an AST by name.
 	 */
-	ASTNamed(std::string new_name);
+	ASTNamed(ASTBase *parent, std::string new_name);
 	
 	/*** OVERRIDES ***/
 	
 	virtual void exportSymToStream(std::ostream& output) override;
 	virtual bool compileToBackend(ClassCompile *compile_dest) override;
+	virtual bool compileToBackendHeader(ClassCompile *compile_dest) override;
 	virtual void debugSelf() override;
+
+	
+private:
+	
+	virtual ASTBase * findSymbolScan(std::string name) override;
 };
 
 #endif
