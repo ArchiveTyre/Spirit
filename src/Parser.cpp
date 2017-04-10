@@ -242,6 +242,7 @@ void Parser::syntaxError(std::string expected)
 
 void Parser::unitTest()
 {
+	
 	/* Test 1: Basic assignment. */
 	{
 		std::istringstream input("A = 32\n");

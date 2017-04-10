@@ -29,5 +29,5 @@ ASTNumber::ASTNumber(ASTBase *parent, int value) : ASTBase(parent)
 ASTType * ASTNumber::getExpressionType()
 {
 	std::cout << "Getting expression type." << std::endl;
-	return &Builtins::type_integer;
+	return Builtins::type_integer;
 }

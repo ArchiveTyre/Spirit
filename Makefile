@@ -148,7 +148,7 @@ debug:
 # but with a custom flag and obj dir.
 # We later call the executable created.
 test:
-	$(MAKE) $(TEST_EXEC) COMMON_FLAGS="-DTEST" OBJDIR="$(OBJDIR)/test"
+	$(MAKE) $(TEST_EXEC) COMMON_FLAGS="-DTEST -O0 -g -DDEBUG" OBJDIR="$(OBJDIR)/test"
 	./$(OBJDIR)/test/$(TEST_EXEC)
 	
 # The goal is to get the executable.

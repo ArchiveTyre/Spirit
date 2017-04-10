@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <assert.h>
 
 using std::string;
 using std::stringstream;
@@ -94,7 +95,7 @@ Token * Lexer::lexToken()
 		stringstream string_builder;
 		
 		/* If so then the rest of the alpha+numeric characters make a symbol. */
-		while (isalnum(c) && c != -1) {
+		while (isalnum(c) && c != -1 && c != '_') {
 			string_builder << c;
 			c = readChar();
 			if (!input)
@@ -122,17 +123,30 @@ Token * Lexer::lexToken()
 	}
 }
 
+static bool matches(Lexer *lexer, string name, Token::TOKEN_TYPE type)
+{
+	Token *token = lexer->lexToken();
+	bool m = token->value.compare(name) == 0 && type == token->token_type;
+	delete token;
+	return m;
+}
+
 void Lexer::unitTest()
 {
+	std::cout << "=== UNIT TESTING LEXER ===" << std::endl;
+	
+	{
 		std::istringstream input("A = 12 + f1");
-		Lexer test(&input, "Test.ch");
+		Lexer lex(&input, "Test.ch");
 		
-		for (Token *token = test.lexToken(); token->token_type != Token::TOKEN_TYPE::TOKEN_EOF; token = test.lexToken()) {
-			std::cout << " type: " << token->token_type << " token: " << token->value << std::endl;
-			std::cout << " line: " << token->line_no << " column: " << token->column_no << std::endl;
-			delete token;
-		}
+		assert(matches(&lex, "A", Token::TOKEN_SYMBOL) == true);
+		assert(matches(&lex, "=", Token::TOKEN_OPERATOR));
+		assert(matches(&lex, "12", Token::TOKEN_INTEGER));
+		assert(matches(&lex, "+", Token::TOKEN_OPERATOR));
+		assert(matches(&lex, "f1", Token::TOKEN_SYMBOL));
+		assert(matches(&lex, "", Token::TOKEN_EOF));
 		
+	}
 }
 
 

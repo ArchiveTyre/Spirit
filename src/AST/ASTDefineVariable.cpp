@@ -6,7 +6,7 @@ ASTDefineVariable::ASTDefineVariable(ASTBase *parent, std::string name, ASTBase*
 , ASTNamed(parent, name)
 , initial_value(new_initial_value)
 {
-
+	std::cout << "Defining new variable: " << name << std::endl;
 }
 
 void ASTDefineVariable::confirmParent()

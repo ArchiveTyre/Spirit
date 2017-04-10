@@ -58,7 +58,7 @@ public:
 
 	/*** STATICS ***/
 	
-	/** FIXME: Now with our own parser this should be removed. The kinds of global variables are EVIL! */
+	/** FIXME: Now with our own parser this should be removed. These kinds of global variables are EVIL! */
 	static ClassCompile *active_compilation;
 	
 	/** The default output dir. */

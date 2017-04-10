@@ -62,10 +62,10 @@ ASTBase * ASTFunctionCall::findSymbolScan(std::string name)
 ASTType * ASTFunctionCall::getExpressionType()
 {
 		if (is_infix) {
-			if (arg_nodes.front()->getExpressionType() == &Builtins::type_integer
-				&& arg_nodes.back()->getExpressionType() == &Builtins::type_integer
+			if (arg_nodes.front()->getExpressionType() == Builtins::type_integer
+				&& arg_nodes.back()->getExpressionType() == Builtins::type_integer
 			) {
-				return &Builtins::type_integer;
+				return Builtins::type_integer;
 			}
 		}
 		return nullptr;
