@@ -21,6 +21,7 @@ public:
 	/*** METHODS ***/
 	
 	ASTBlock(ASTBase *parent);
+	~ASTBlock();
 	
 	
 	/*** OVERRIDES ***/

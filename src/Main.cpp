@@ -6,13 +6,14 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "Builtins.hpp"
+#include "Version.hpp"
 
 using std::string;
 
-static void print_version()
+static void printVersion()
 {
-	printf("Cheri v0.0.1\n");
-	printf("© 2017 TYREREXUS ALL RIGHTS RESERVED\n");
+	std::cout << Version::name << " v" << Version::version << std::endl;
+	std::cout << "© 2017 TYREREXUS ALL RIGHTS RESERVED" << std::endl;
 }
 
 
@@ -21,12 +22,12 @@ static void print_version()
  */
 static void help()
 {
-	printf("Usage: cheri [options] files...\n");
-	printf("Options:\n");
-	printf("    --help        Dispays this help section.\n");
-	printf("    -v            Prints out the version\n");
-	printf("    -o            Specifies where to place output binary.\n");
-	printf("    --out-dir     Specifies where to place build files.\n");
+	std::cout << "Usage: cheri [options] files..." << std::endl;
+	std::cout << "Options:" << std::endl;
+	std::cout << "    --help        Dispays this help section." << std::endl;
+	std::cout << "    -v            Prints out the version" << std::endl;
+	std::cout << "    -o            Specifies where to place output binary." << std::endl;
+	std::cout << "    --out-dir     Specifies where to place build files." << std::endl;
 }
 
 /** If we are testing then main is defined in @file Test.cpp. */
@@ -51,7 +52,7 @@ int main(int argc, char *args[])
 			}
 
 			else if (strcmp(arg_to_parse, "-v") == 0) {
-				print_version();
+				printVersion();
 
 				// FIXME: Do proper clean-up maybe...
 				return 0;

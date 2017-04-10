@@ -10,6 +10,7 @@
 #include "AST/ASTWithArgs.hpp"
 #include "Parser.hpp"
 #include "Lexer.hpp"
+#include "Version.hpp"
 
 using std::string;
 using std::cout;
@@ -81,16 +82,16 @@ bool ClassCompile::compileFile () {
 		std::ifstream input(this->in_file_path);
 		Lexer lexer(&input, this->in_file_path);
 		Parser parser(lexer);
-		parser.parseInput(&this->class_ast);
+		parser.parseInput(this->class_ast);
 
 		/* Compile the file. */
 
 
 		/** COMPILE THE FILE **/
 
-		this->class_ast.compileToBackend(this);
-		this->class_ast.compileToBackendHeader(this);
-		this->class_ast.debugSelf();
+		this->class_ast->compileToBackend(this);
+		this->class_ast->compileToBackendHeader(this);
+		this->class_ast->debugSelf();
 
 
 		/** SAVE THE OUTPUT **/
@@ -105,13 +106,9 @@ bool ClassCompile::compileFile () {
 
 		std::ofstream file(out_file_path);
 		if (file.is_open()) {
-			
 			file << "#include " << '"' << std::string(class_name).append(".ch.hpp") << '"' << std::endl;
-			
 			file << this->output_stream.rdbuf();
-			
-			// FIXME: Replace with some constant value.
-			file << "/* Compiled with: Cheri v0.1 */" << std::endl;
+			file << "/* Compiled with: " << Version::name << " v" << Version::version << "*/" << std::endl;
 			file.flush();
 			file.close();
 		}
@@ -121,18 +118,15 @@ bool ClassCompile::compileFile () {
 		
 		std::ofstream header_file(out_header_file_path);
 		if (header_file.is_open()) {
-			
 			header_file << "#pragma once" << std::endl;
-			
 			header_file << this->output_header_stream.rdbuf();
-			header_file << "/* Compiled with: */" << std::endl;
+			header_file << "/* Compiled with: " << Version::name << " v" << Version::version << "*/" << std::endl;
 			header_file.flush();
 			header_file.close();
 		}
 		else {
 			cout << "ERROR: Could not open file: " << out_header_file_path << std::endl;
 		}
-		std::cout << "Write to headers and files. " << std::endl;
 	}
 
 	/* Or just load from cached symbol table. */
@@ -141,8 +135,8 @@ bool ClassCompile::compileFile () {
 		cout << "[INFO] Class already compiled!" << endl;
 
 		/* Cached symbols are saved in .ch.sym files. */
-		std::ifstream file(out_file_path.append(".sym"));
-		ASTBase::importSymFromStream(static_cast<ASTBase*>(static_cast<ASTNamed*>(&class_ast)), file);
+		std::ifstream file(string(out_file_path).append(".sym"));
+		ASTBase::importSymFromStream(static_cast<ASTBase*>(static_cast<ASTNamed*>(class_ast)), file);
 	}
 
 	/* Continue old compilation. */
@@ -162,11 +156,12 @@ static string get_class_name(std::string file_path)
 }
 
 ClassCompile::ClassCompile(std::string file_path)
-: class_ast(dynamic_cast<ASTBlock*>(&root_class), get_class_name(file_path))
 {
 
+	class_ast = new ASTClass(dynamic_cast<ASTBlock*>(&root_class), get_class_name(file_path));
+	
 	/* Set the class name to the ASTClass's class name. */
-	this->class_name = this->class_ast.ast_name;
+	this->class_name = this->class_ast->ast_name;
 
 	/* Set out dir to default out dir. */
 	this->out_dir = ClassCompile::default_out_dir;

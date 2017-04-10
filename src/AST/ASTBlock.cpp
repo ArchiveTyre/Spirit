@@ -9,6 +9,13 @@ ASTBlock::ASTBlock(ASTBase *parent)
 	
 }
 
+ASTBlock::~ASTBlock()
+{
+	for (auto child : child_nodes) {
+		delete child;
+	}
+}
+
 bool ASTBlock::compileToBackend(ClassCompile* compile_dest)
 {
 	compile_dest->output_stream << "{" << std::endl;

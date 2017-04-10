@@ -54,7 +54,7 @@ public:
 	std::string in_file_path;
 
 	/** The class AST for the compilation. */
-	ASTClass class_ast;
+	ASTClass *class_ast;
 
 	/*** STATICS ***/
 	

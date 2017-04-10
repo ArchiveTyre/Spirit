@@ -33,6 +33,22 @@ bool ASTFunctionCall::compileToBackend(ClassCompile *compile_dest)
 	return true;
 }
 
+bool ASTFunctionCall::compileToBackendHeader(ClassCompile *compile_dest)
+{
+	if (is_infix) {
+		/* arg1 our_name arg2. */
+		this->arg_nodes.front()->compileToBackendHeader(compile_dest);
+		ASTNamed::compileToBackendHeader(compile_dest);
+		this->arg_nodes.back()->compileToBackendHeader(compile_dest);
+	}
+	else {
+		/* our_name argN... */
+		ASTNamed::compileToBackendHeader(compile_dest);
+		ASTWithArgs::compileToBackendHeader(compile_dest);
+	}
+	return true;
+}
+
 void ASTFunctionCall::exportSymToStream(std::ostream& output)
 {
 	return;

@@ -15,8 +15,8 @@ bool Tests::testParser(std::string in, std::string out)
 	ClassCompile compile_dest(test_name.append(".ch"));
 	compile_dest.output_stream = std::stringstream();
 	
-	bool step1 = parser.parseInput(&compile_dest.class_ast);
-	bool step2 = compile_dest.class_ast.compileToBackend(&compile_dest);
+	bool step1 = parser.parseInput(compile_dest.class_ast);
+	bool step2 = compile_dest.class_ast->compileToBackend(&compile_dest);
 	bool step3 = out.compare(compile_dest.output_stream.str()) == 0;
 	
 	if (!step3)

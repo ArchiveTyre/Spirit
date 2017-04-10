@@ -29,6 +29,8 @@ public:
 	 */
 	Parser(Lexer input_lexer);
 	
+	~Parser();
+	
 	/** Parses the input given in the constructer.
 	 * @return Returns true on success.
 	 */

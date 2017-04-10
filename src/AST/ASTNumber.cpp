@@ -14,6 +14,12 @@ bool ASTNumber::compileToBackend(ClassCompile *compile_dest)
 	return true;
 }
 
+bool ASTNumber::compileToBackendHeader(ClassCompile *compile_dest)
+{
+	compile_dest->output_header_stream << this->value;
+	return true;
+}
+
 ASTNumber::ASTNumber(ASTBase *parent, int value) : ASTBase(parent)
 {
 	std::cout << "Creating number of value: " << value << std::endl;

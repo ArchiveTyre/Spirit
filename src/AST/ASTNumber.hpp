@@ -31,6 +31,7 @@ public:
 	/*** OVERRIDES ***/
 	
 	bool compileToBackend(ClassCompile *compile_dest) override;
+	bool compileToBackendHeader(ClassCompile *compile_dest) override;
 	void debugSelf() override;
 	ASTType * getExpressionType() override;
 };

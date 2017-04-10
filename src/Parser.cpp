@@ -17,6 +17,16 @@ Parser::Parser(Lexer input_lexer) : lexer(input_lexer)
 	
 }
 
+Parser::~Parser()
+{
+	if (previous != nullptr) {
+		delete previous;
+	}
+	if (look_ahead != nullptr) {
+		delete look_ahead;
+	}
+}
+
 ASTBase * Parser::parseExpression(ASTBase *parent)
 {
 	
@@ -122,7 +132,7 @@ ASTBase * Parser::parseLine(ASTClass *class_dest)
 			string name = previous->value;
 			if (match("=")) {
 				// Assign default value.
-				ASTBase *value = parseExpression(nullptr);
+				ASTBase *value = parseExpression(parent);
 				parsed_line = new ASTDefineVariable(parent, name, value);
 				value->parent_node = parsed_line;
 				value->confirmParent();
@@ -173,10 +183,14 @@ bool Parser::parseInput(ASTClass * class_dest)
 }
 
 bool Parser::match(std::string value)
-{
-	
+{	
 	/* Assume that look_ahead EOF warning is already done by previous match(). */
 	if (look_ahead != nullptr && look_ahead->value.compare(value) == 0) {
+		if (previous != nullptr) {
+			delete previous;
+			previous = nullptr;
+		}
+		previous = look_ahead;
 		look_ahead = lexer.lexToken();
 		if (look_ahead != nullptr)
 			return true;
@@ -195,6 +209,11 @@ bool Parser::match(Token::TOKEN_TYPE type)
 	
 	/* Assume that look_ahead EOF warning is already done by previous match(). */
 	if (look_ahead != nullptr && look_ahead->token_type == type) {
+		if (previous != nullptr) {
+			delete previous;
+			previous = nullptr;
+		}
+		
 		previous = look_ahead;
 		look_ahead = lexer.lexToken();
 		if (look_ahead != nullptr)

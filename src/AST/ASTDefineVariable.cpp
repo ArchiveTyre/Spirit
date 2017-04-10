@@ -17,23 +17,28 @@ void ASTDefineVariable::confirmParent()
 
 bool ASTDefineVariable::compileToBackend(ClassCompile* compile_dest)
 {
-	bool s1 = ast_type->compileToBackend(compile_dest);
-	
-	/* If class, add the colons like: ClassName::variable_name. */
-	if (auto parent = dynamic_cast<ASTClass*>(parent_node)) {
-		compile_dest->output_stream << parent->ast_name << "::";
-	}
-	bool s2 = ASTNamed::compileToBackend(compile_dest);
-	compile_dest->output_stream << " = ";
-	bool s3 = initial_value->compileToBackend(compile_dest);
-	return s1 && s2 && s3;
+#	if 0
+		bool s1 = ast_type->compileToBackend(compile_dest);
+		
+		/* If class, add the colons like: ClassName::variable_name. */
+		if (auto parent = dynamic_cast<ASTClass*>(parent_node)) {
+			compile_dest->output_stream << parent->ast_name << "::";
+		}
+		bool s2 = ASTNamed::compileToBackend(compile_dest);
+		compile_dest->output_stream << " = ";
+		bool s3 = initial_value->compileToBackend(compile_dest);
+		return s1 && s2 && s3;*/
+#	endif
+	return true;
 }
 
 bool ASTDefineVariable::compileToBackendHeader(ClassCompile* compile_dest)
 {
 	bool s1 = ast_type->compileToBackendHeader(compile_dest);
 	bool s2 = ASTNamed::compileToBackendHeader(compile_dest);
-	return s1 && s2;
+	compile_dest->output_header_stream << " = ";
+	bool s3 = initial_value->compileToBackendHeader(compile_dest);
+	return s1 && s2 && s3;
 }
 
 

@@ -29,6 +29,7 @@ public:
 	/*** OVERRIDES ***/
 	
 	bool compileToBackend(ClassCompile *compile_dest) override;
+	bool compileToBackendHeader(ClassCompile *compile_dest) override;
 	void debugSelf() override;
 	void exportSymToStream(std::ostream& output) override;
 	virtual ASTType * getExpressionType() override;
