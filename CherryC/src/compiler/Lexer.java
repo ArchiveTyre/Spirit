@@ -8,8 +8,6 @@ import java.io.InputStream;
  */
 public class Lexer
 {
-
-<<<<<<< HEAD
 	InputStream input;
 
 	public Lexer(InputStream input)
@@ -22,7 +20,4 @@ public class Lexer
 		// TODO: Not implemented.
 		return new Token("", Token.TokenType.UNKNOWN, 0, 0);
 	}
-=======
-
->>>>>>> cf8c21276498531d2ac52aef6980469092ecb27e
 }
