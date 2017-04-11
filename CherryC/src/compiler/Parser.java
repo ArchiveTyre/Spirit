@@ -5,4 +5,13 @@ package compiler;
  */
 public class Parser
 {
+	Lexer lexer;
+
+	Parser(Lexer lexer)
+	{
+		this.lexer = lexer;
+	}
+
+
+
 }
