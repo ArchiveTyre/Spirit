@@ -12,21 +12,26 @@ public class Token
 		OPERATOR,
 		SYMBOL,
 		STRING,
-		NUMBER
+		NUMBER,
+		NEWLINE,
+		INDENT,
+		LPAR,
+		RPAR,
+		EOF,
 	}
 
 	public String value;
 	public TokenType tokenType;
 
 
-	public int column_no;
-	public int line_no;
+	public int columnNumber;
+	public int lineNumber;
 
-	public Token(String value, TokenType tokenType, int column_no, int line_no)
+	public Token(String value, TokenType tokenType, int columnNumber, int lineNumber)
 	{
 		this.value = value;
 		this.tokenType = tokenType;
-		this.column_no = column_no;
-		this.line_no = line_no;
+		this.columnNumber = columnNumber;
+		this.lineNumber = lineNumber;
 	}
 }

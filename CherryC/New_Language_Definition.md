@@ -181,9 +181,8 @@ for (my_players, player_name):
 
 
 
-
+public
 hidden
-member
 family
 
 var a = 3
