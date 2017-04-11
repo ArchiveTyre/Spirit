@@ -129,6 +129,12 @@ ASTBase * Parser::parseLine(ASTClass *class_dest)
 	if (match("var")) {
 		if (match(Token::TOKEN_SYMBOL)) {
 			string name = previous->value;
+			
+			if (match(":")) {
+				ASTBase *type = parseExpression(parent);
+				std::cout << "Not implemented" << std::endl;
+			}
+			
 			if (match("=")) {
 				// Assign default value.
 				ASTBase *value = parseExpression(parent);
