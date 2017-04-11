@@ -48,14 +48,3 @@ bool ASTWithArgs::compileToBackend(ClassCompile *compile_dest)
 	compile_dest->output_stream << ')';
 	return true;
 }
-
-
-ASTBase * ASTWithArgs::findSymbolScan(string name)
-{
-	for (auto sub : arg_nodes) {
-		if (auto result = sub->findSymbol(name)) {
-			return result;
-		}
-	}
-	return ASTBase::findSymbol(name);
-}

@@ -21,7 +21,7 @@ public:
 	
 	Tests(std::string test_name);
 	
-	bool testParser(std::string in, std::string out);
+	bool testParser(std::string in, std::string source_out, std::string header_out);
 	
 	/** Tests a lot of small tests.
 	 */

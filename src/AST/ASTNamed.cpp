@@ -28,11 +28,3 @@ ASTNamed::ASTNamed(ASTBase *parent, std::string new_name) : ASTBase(parent)
 	this->ast_name = new_name;
 	std::cout << "Creating named AST: " << new_name << std::endl;
 }
-
-ASTBase * ASTNamed::findSymbolScan(std::string name)
-{
-	if (this->ast_name.compare(name) == 0)
-		return this;
-	else
-		return nullptr;
-}

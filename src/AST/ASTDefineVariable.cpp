@@ -44,7 +44,13 @@ bool ASTDefineVariable::compileToBackendHeader(ClassCompile* compile_dest)
 
 void ASTDefineVariable::debugSelf()
 {
-	
+	std::cout << "Variable -> type: ";
+	ast_type->debugSelf();
+	std::cout << " name: ";
+	ASTNamed::debugSelf();
+	std::cout << " value: ";
+	initial_value->debugSelf();
+	std::cout << std::endl;
 }
 
 void ASTDefineVariable::exportSymToStream(std::ostream& output)

@@ -36,11 +36,6 @@ public:
 	
 	/** The arguments of this node. **/
 	std::list<ASTBase *> arg_nodes;
-	
-	
-protected:
-	
-	virtual ASTBase *findSymbolScan(std::string name) override;
 };
 
 #endif

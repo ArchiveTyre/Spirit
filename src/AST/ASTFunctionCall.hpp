@@ -37,11 +37,6 @@ public:
 
 	/*** MEMBER VARIABLES ***/
 	bool is_infix = false;
-	
-	
-protected:
-	
-	virtual ASTBase * findSymbolScan(std::string name) override;
 };		
 
 #endif

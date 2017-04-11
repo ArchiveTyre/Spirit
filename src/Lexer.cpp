@@ -139,7 +139,7 @@ void Lexer::unitTest()
 		std::istringstream input("A = 12 + f1");
 		Lexer lex(&input, "Test.ch");
 		
-		assert(matches(&lex, "A", Token::TOKEN_SYMBOL) == true);
+		assert(matches(&lex, "A", Token::TOKEN_SYMBOL));
 		assert(matches(&lex, "=", Token::TOKEN_OPERATOR));
 		assert(matches(&lex, "12", Token::TOKEN_INTEGER));
 		assert(matches(&lex, "+", Token::TOKEN_OPERATOR));

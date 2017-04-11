@@ -1,4 +1,5 @@
 #include "Parser.hpp"
+#include <assert.h>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -80,10 +81,8 @@ ASTBase * Parser::parseExpression(ASTBase *parent)
 			if (auto right = parseExpression(operator_call)) {
 				
 				operator_call->line_no = previous->line_no;
-				left->parent_node = operator_call;
-				std::cout << "Other parent: " << right->parent_node << std::endl;
-				left->confirmParent();
-				right->confirmParent();
+				left->confirmParent(operator_call);
+				right->confirmParent(operator_call);
 				operator_call->confirmParent();
 				
 				operator_call->is_infix = true;
@@ -134,8 +133,7 @@ ASTBase * Parser::parseLine(ASTClass *class_dest)
 				// Assign default value.
 				ASTBase *value = parseExpression(parent);
 				parsed_line = new ASTDefineVariable(parent, name, value);
-				value->parent_node = parsed_line;
-				value->confirmParent();
+				value->confirmParent(parsed_line);
 			}
 			else {
 				syntaxError("variable value");
@@ -245,9 +243,9 @@ void Parser::unitTest()
 	
 	/* Test 1: Basic assignment. */
 	{
-		std::istringstream input("A = 32\n");
+		std::istringstream input("var A = 32\nA = 64");
 		
-		Lexer lexer(&input, "Test.1ch");
+		Lexer lexer(&input, "Test1.ch");
 		
 		Parser parser(lexer);
 		
@@ -256,11 +254,29 @@ void Parser::unitTest()
 		parser.parseInput(&dest);
 		
 		dest.debugSelf();
+		ClassCompile::root_class.child_nodes.remove(dynamic_cast<ASTBlock*>(&dest));
+	}
+	
+	/* Test 1.5: */
+	{
+		std::istringstream input("var a = 32");
+		
+		Lexer lexer(&input, "Test1_5.ch");
+		
+		Parser parser(lexer);
+		
+		ASTClass dest(dynamic_cast<ASTBlock*>(&ClassCompile::root_class), "KawaiiClass1.5");
+		
+		parser.parseInput(&dest);
+		
+		assert(((ASTBlock)dest).findSymbol("a") != nullptr);
+		
+		ClassCompile::root_class.child_nodes.remove(dynamic_cast<ASTBlock*>(&dest));
 	}
 	
 	/* Test 2: Int addition. */
 	{
-		std::istringstream input("A = 1+2");
+		std::istringstream input("var A = 1+2");
 		
 		Lexer lexer(&input, "Test2.ch");
 		
@@ -271,11 +287,12 @@ void Parser::unitTest()
 		parser.parseInput(&dest);
 		
 		dest.debugSelf();
+		ClassCompile::root_class.child_nodes.remove(dynamic_cast<ASTBlock*>(&dest));
 	}
 
 	/* Test 3: Multiline. */
 	{
-		std::istringstream input("A = 1+2\nB= A+4\nC=3");
+		std::istringstream input("var A = 1+2\nvar B= A+4\n var C=3");
 		
 		Lexer lexer(&input, "Test3.ch");
 		
@@ -286,9 +303,11 @@ void Parser::unitTest()
 		parser.parseInput(&dest);
 		
 		dest.debugSelf();
+		ClassCompile::root_class.child_nodes.remove(dynamic_cast<ASTBlock*>(&dest));
 	}
 	
 	/* Test 4: Tabs. */
+#	if 0
 	{
 		std::istringstream input("\
 A = 32\n\
@@ -305,8 +324,9 @@ if A == 32:\n\
 		parser.parseInput(&dest);
 		
 		dest.debugSelf();
+		ClassCompile::root_class.child_nodes.remove(dynamic_cast<ASTBlock*>(&dest));
 	}
-
+#	endif
 	/* Test 5: Parenthesis. */
 	{
 		std::istringstream input("A = 3(3 + 4) * 2");
@@ -320,6 +340,7 @@ if A == 32:\n\
 		parser.parseInput(&dest);
 		
 		dest.debugSelf();
+		ClassCompile::root_class.child_nodes.remove(dynamic_cast<ASTBlock*>(&dest));
 		
 		std::cout << std::endl;
 	}

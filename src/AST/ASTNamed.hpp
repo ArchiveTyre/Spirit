@@ -35,11 +35,6 @@ public:
 	virtual bool compileToBackend(ClassCompile *compile_dest) override;
 	virtual bool compileToBackendHeader(ClassCompile *compile_dest) override;
 	virtual void debugSelf() override;
-
-	
-private:
-	
-	virtual ASTBase * findSymbolScan(std::string name) override;
 };
 
 #endif

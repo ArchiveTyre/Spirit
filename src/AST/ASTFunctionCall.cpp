@@ -54,11 +54,6 @@ void ASTFunctionCall::exportSymToStream(std::ostream& output)
 	return;
 }
 
-ASTBase * ASTFunctionCall::findSymbolScan(std::string name)
-{
-	return nullptr;
-}
-
 ASTType * ASTFunctionCall::getExpressionType()
 {
 		if (is_infix) {

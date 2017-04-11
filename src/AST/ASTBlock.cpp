@@ -49,13 +49,3 @@ void ASTBlock::debugSelf()
 		std::cout << std::endl;
 	}
 }
-
-ASTBase * ASTBlock::findSymbolScan(string name) {
-	for (auto sub : child_nodes) {
-		if (auto result =sub->findSymbol(name)) {
-			return result;
-		}
-	}
-	return ASTBase::findSymbol(name);
-}
-

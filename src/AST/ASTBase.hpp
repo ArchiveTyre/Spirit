@@ -35,6 +35,7 @@ public:
 	virtual void exportSymToStream(std::ostream& output);
 	
 	virtual void confirmParent();
+	void confirmParent(ASTBase *parent);
 	
 	/** Compiles this node into the desired backend.
 	 * @param compile_dest ClassCompile contains members that tell us where to put our results.
@@ -65,6 +66,7 @@ public:
 	
 	virtual ~ASTBase();
 
+	static void unitTest();
 	
 	/*** MEMBER VARIABLES ***/
 	
@@ -76,15 +78,6 @@ public:
 	
 	/** What indentation level this node has. */
 	int indentation_level;
-	
-protected:
-	
-	/** Finds a symbol by name.
-	 * @param name The name of the symbol that we wish to find.
-	 * @return The found symbol.
-	 */
-	virtual ASTBase *findSymbolScan(std::string name);
-	
 	
 private:
 	

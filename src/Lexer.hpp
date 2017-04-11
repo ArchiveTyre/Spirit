@@ -14,6 +14,8 @@
 #include <string>
 #include <istream>
 
+
+
 /**
  * @class Token
  * The result of lexToken()

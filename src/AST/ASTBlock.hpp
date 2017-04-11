@@ -18,6 +18,8 @@
 class ASTBlock : public ASTBase {
 public:
 	
+	friend class ASTBase;
+	
 	/*** METHODS ***/
 	
 	ASTBlock(ASTBase *parent);
@@ -35,11 +37,6 @@ public:
 	
 	/** All nodes contained in this block */
 	std::list<ASTBase *> child_nodes;
-	
-	
-protected:
-	
-	virtual ASTBase *findSymbolScan(std::string name) override;
 };
 
 #endif
