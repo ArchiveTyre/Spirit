@@ -1,5 +1,12 @@
 package compiler;
 
+import compiler.ast.ASTClass;
+import compiler.lib.FileHandler;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -44,6 +51,26 @@ public class Main
 					fileNames.add(arg);
 			}
 		}
+
+
+		for (String file : fileNames)
+		{
+			String content = FileHandler.getFileContents(file);
+
+			InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+
+
+
+			PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
+
+			Lexer lexer = new Lexer(pushbackInputStream, file);
+
+			Parser parser = new Parser(lexer);
+
+			parser.parseFile(new ASTClass(file, null));
+		}
+
+
 	}
 
 	public static void printVersion()
