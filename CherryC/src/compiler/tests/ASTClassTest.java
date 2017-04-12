@@ -2,11 +2,8 @@ package compiler.tests;
 
 import compiler.ast.ASTClass;
 import compiler.ast.ASTParent;
-import compiler.ast.builtins.ASTNumber;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by alex on 4/12/17.

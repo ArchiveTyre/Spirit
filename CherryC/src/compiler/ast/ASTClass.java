@@ -1,7 +1,10 @@
 package compiler.ast;
 
+import compiler.CherryType;
 import compiler.lib.DebugPrinter;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 /**
  * Creates a basic class.
@@ -9,7 +12,7 @@ import org.junit.jupiter.api.Test;
  * @author Tyrerexus
  * @date 4/12/17.
  */
-public class ASTClass extends ASTParent
+public class ASTClass extends ASTParent implements CherryType
 {
 	public ASTClass(String name, ASTParent parent)
 	{
@@ -52,7 +55,7 @@ public class ASTClass extends ASTParent
 		{
 			if (newly_inserted_code.parent instanceof ASTParent)
 			{
-				return (ASTParent)newly_inserted_code.parent;
+				return newly_inserted_code.parent;
 			}
 			return null;
 		}
@@ -69,5 +72,17 @@ public class ASTClass extends ASTParent
 
 			return null;
 		}
+	}
+
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+
+	@Override
+	public ArrayList<ASTBase> getChildNodes()
+	{
+		return child_asts;
 	}
 }

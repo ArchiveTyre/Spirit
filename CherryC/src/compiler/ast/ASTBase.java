@@ -1,5 +1,6 @@
 package compiler.ast;
 
+import compiler.CherryType;
 import compiler.lib.DebugPrinter;
 
 /**
@@ -36,6 +37,21 @@ public abstract class ASTBase
 	{
 		this(parent);
 		this.name = name;
+	}
+
+	void setParent(ASTParent newParent)
+	{
+		if (this.parent != null)
+			this.parent.child_asts.remove(this);
+		if (newParent != null)
+			newParent.child_asts.add(this);
+		this.parent = newParent;
+
+	}
+
+	public CherryType getExpressionType()
+	{
+		return null;
 	}
 
 	/**
