@@ -44,6 +44,11 @@ public class Parser
 				operatorCall.infix = true;
 				ASTBase right = parseExpression(parent);
 
+				if (right == null)
+				{
+					return left;
+				}
+
 				left.setParent(operatorCall);
 				right.setParent(operatorCall);
 
@@ -54,6 +59,20 @@ public class Parser
 				return left;
 			}
 
+
+
+		}
+		else if (match(TokenType.LPAR))
+		{
+
+			ASTBase expression =  parseExpression(parent);
+			if (match(TokenType.RPAR))
+			{
+				return expression;
+			} else
+			{
+				error(")", "Unmatched parenthesis");
+			}
 		}
 
 

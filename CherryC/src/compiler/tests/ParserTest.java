@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ParserTest
 {
 
-	private void testClassCompile(String testString)
+	private void testClassCompile(String name, String testString)
 	{
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
@@ -29,7 +29,7 @@ class ParserTest
 
 		Parser parser = new Parser(lexer);
 
-		ASTClass astClass = new ASTClass("Test", null);
+		ASTClass astClass = new ASTClass(name, null);
 
 		parser.parseFile(astClass);
 
@@ -45,18 +45,20 @@ class ParserTest
 	{
 
 		// Test basic assignment. //
-		testClassCompile("var a = 5");
-		testClassCompile("var b = 128");
+		/*testClassCompile("AssignTest1", "var a = 5");
+		testClassCompile("AssignTest2", "var b = 128");
 
 		// Test assignments with an expression with operators. //
-		testClassCompile("var b = 3 + 4");
-		testClassCompile("var b = 3 + 4 * 2");
+		testClassCompile("ExpressionTest1", "var b = 3 + 4");
+		testClassCompile("ExpressionTest2", "var b = 3 + 4 * 2");
 
 		// Test multi-line assignments. //
-		testClassCompile("var a = 3\nvar b = 1");
-		testClassCompile("var a = 8\n\nvar b = 9\n\n");
+		testClassCompile("MultiLine1", "var a = 3\nvar b = 1");
+		testClassCompile("MultiLine2", "var a = 8\n\nvar b = 9\n\n");
 
 		// Just expressions. //
-		testClassCompile("var a = 3\na=4");
+		testClassCompile("ExpressionTest3", "var a = 3\na=4");*/
+
+		testClassCompile("ParTest1", "var a = (1 * 2)");
 	}
 }
