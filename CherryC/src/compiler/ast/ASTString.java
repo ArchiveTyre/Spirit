@@ -7,7 +7,8 @@ import compiler.builtins.Builtins;
 import compiler.lib.DebugPrinter;
 
 /**
- * Created by david on 4/12/17.
+ * @author david
+ * @date 4/12/17.
  */
 public class ASTString extends ASTBase
 {

@@ -91,6 +91,14 @@ public class Parser
 		{
 			line_indent = previous.indent;
 		}
+
+		// Skip any empty lines.
+		if (match(TokenType.NEWLINE))
+		{
+			return true;
+		}
+
+		// Use the indent to find a new parent for the contents of this line. //
 		ASTParent parent = dest.getParentForNewCode(line_indent);
 
 		// Check if we are defining a variable. //
@@ -103,6 +111,7 @@ public class Parser
 				// Parse ": Cat". //
 				CherryType definedType = parseType(parent);
 
+				// Will be set to the initial value of this variable. //
 				ASTBase value = null;
 
 				// Parse the initial value. //

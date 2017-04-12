@@ -4,11 +4,20 @@ import compiler.CherryType;
 import compiler.lib.DebugPrinter;
 
 /**
- * Created by alex on 4/12/17.
+ * Creates an AST node representing a function call to another node.
+ *
+ * Can also be used as an operator if the infix variable is set to true.
+ *
+ * @author alex
+ * @date 4/12/17.
  */
 public class ASTFunctionCall extends ASTParent
 {
 
+	/**
+	 * Used mainly to create operators.
+	 * If set to true the function name will be in the middle of the arguments.
+	 */
 	public boolean infix = false;
 
 	public ASTFunctionCall(ASTParent parent, String name)
@@ -36,12 +45,16 @@ public class ASTFunctionCall extends ASTParent
 	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
+
+		// When infix the arguments are around the function name. //
 		if (infix)
 		{
 			childAsts.get(0).debugSelf(destination);
 			destination.print(" " + name + " ");
 			childAsts.get(1).debugSelf(destination);
 		}
+
+		// Just a normal function call. //
 		else
 		{
 			destination.print("Call to: " + name + "(");
