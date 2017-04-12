@@ -2,7 +2,6 @@ package compiler.ast;
 
 import compiler.CherryType;
 import compiler.lib.DebugPrinter;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
@@ -31,7 +30,7 @@ public class ASTClass extends ASTParent implements CherryType
 		to.println(name);
 		to.println("{");
 		to.indentation++;
-		for (ASTBase child : child_asts)
+		for (ASTBase child : childAsts)
 		{
 			child.debugSelf(to);
 			to.println("");
@@ -44,11 +43,11 @@ public class ASTClass extends ASTParent implements CherryType
 	{
 
 
-		if (child_asts.size() == 0)
+		if (childAsts.size() == 0)
 			return this;
 
 		// Get last child node. //
-		ASTBase newly_inserted_code = child_asts.get(child_asts.size() - 1);
+		ASTBase newly_inserted_code = childAsts.get(childAsts.size() - 1);
 
 		if (line_indent > newly_inserted_code.columnNumber)
 		{
@@ -91,6 +90,6 @@ public class ASTClass extends ASTParent implements CherryType
 	@Override
 	public ArrayList<ASTBase> getChildNodes()
 	{
-		return child_asts;
+		return childAsts;
 	}
 }

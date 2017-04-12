@@ -1,7 +1,5 @@
 package compiler.ast;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 /**
@@ -12,7 +10,7 @@ import java.util.ArrayList;
  */
 public abstract class ASTParent extends ASTBase
 {
-	public ArrayList<ASTBase> child_asts = new ArrayList<>();
+	public ArrayList<ASTBase> childAsts = new ArrayList<>();
 
 	public ASTParent(ASTParent parent, String name)
 	{
@@ -26,7 +24,7 @@ public abstract class ASTParent extends ASTBase
 		if (result != null)
 			return result;
 
-		for (ASTBase child : child_asts) {
+		for (ASTBase child : childAsts) {
 			if (child.name == symbolName) {
 				return child;
 			}

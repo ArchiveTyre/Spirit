@@ -45,5 +45,9 @@ class ParserTest
 	{
 		testClassCompile("var a = 5");
 		testClassCompile("var b = 128");
+
+		testClassCompile("var b = 3 + 4");
+
+		testClassCompile("var b = 3 + 4 * 2");
 	}
 }

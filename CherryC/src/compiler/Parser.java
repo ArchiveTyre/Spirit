@@ -37,7 +37,22 @@ public class Parser
 			}
 			else
 			{
+				left = new ASTVariableUsage(parent, previous.value);
+			}
+			if (match(TokenType.OPERATOR))
+			{
+				ASTFunctionCall operatorCall = new ASTFunctionCall(parent, previous.value);
+				operatorCall.infix = true;
+				ASTBase right = parseExpression(parent);
 
+				left.setParent(operatorCall);
+				right.setParent(operatorCall);
+
+				return operatorCall;
+			}
+			else if (match(TokenType.NEWLINE) || match(TokenType.EOF))
+			{
+				return left;
 			}
 
 		}
@@ -55,7 +70,7 @@ public class Parser
 				ASTBase f = parent.findSymbol(previous.value);
 				if (f instanceof ASTClass)
 				{
-					return (ASTClass)f;
+					return (ASTClass) f;
 				}
 
 				CherryType type = Builtins.getBuiltin(previous.value);
@@ -69,6 +84,8 @@ public class Parser
 	private boolean parseLine(ASTClass dest)
 	{
 
+
+		// Extract indents to get a parent. //
 		int line_indent = 0;
 		if (match(TokenType.INDENT))
 		{
@@ -76,6 +93,7 @@ public class Parser
 		}
 		ASTParent parent = dest.getParentForNewCode(line_indent);
 
+		// Check if we are defining a variable. //
 		if (match(Syntax.KEYWORD_VAR))
 		{
 			if (match(TokenType.SYMBOL))
@@ -95,7 +113,7 @@ public class Parser
 					if (definedType == null)
 						definedType = valueType;
 					else if (definedType != valueType)
-						System.err.print("ERROR: Type missmatch!");
+						System.err.print("ERROR: Type miss-match at line: " + previous.lineNumber);
 				}
 
 				ASTVariableDeclaration variable = new ASTVariableDeclaration(parent, name, definedType, value);
@@ -112,24 +130,22 @@ public class Parser
 	 */
 	public void parseFile(ASTClass dest)
 	{
+
+		// Parse as many lines as possible. //
 		while (parseLine(dest));
+
+		// Check for garbage. //
+		if (!match(TokenType.EOF))
+		{
+			error("end of file", "There is un-parsed junk at the end of the file. ");
+		}
 
 	}
 
 	private boolean match(String value)
 	{
-			if (value.equals(look_ahead.value)) {
-				previous = look_ahead;
-				look_ahead = lexer.getToken();
-				return true;
-			}
-
-			return false;
-	}
-
-	private boolean match(Token.TokenType value)
-	{
-		if (value == look_ahead.tokenType) {
+		if (value.equals(look_ahead.value))
+		{
 			previous = look_ahead;
 			look_ahead = lexer.getToken();
 			return true;
@@ -138,11 +154,23 @@ public class Parser
 		return false;
 	}
 
-	private void error(String expected, Token tok, int lineNumber, String message)
+	private boolean match(Token.TokenType value)
 	{
-		System.err.println("[Cherry]: Error in file: " + lexer.fileName + "\t at line " + lineNumber + ".");
+		if (value == look_ahead.tokenType)
+		{
+			previous = look_ahead;
+			look_ahead = lexer.getToken();
+			return true;
+		}
+
+		return false;
+	}
+
+	private void error(String expected, String message)
+	{
+		System.err.println("[Cherry]: Error in file: " + lexer.fileName + "\t at line " + previous.lineNumber + ".");
 		System.out.println("\tExpected:\t\t" + expected);
-		System.out.println("\tActual:\t\t" + tok.value);
+		System.out.println("\tActual:\t\t" + previous.value);
 		System.out.println("\tMessage: " + (message.equals("") ? "[NONE]" : message));
 	}
 

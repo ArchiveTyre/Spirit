@@ -29,7 +29,7 @@ public abstract class ASTBase
 		if (parent != null)
 		{
 			this.parent = parent;
-			parent.child_asts.add(this);
+			parent.childAsts.add(this);
 		}
 	}
 
@@ -42,9 +42,9 @@ public abstract class ASTBase
 	public void setParent(ASTParent newParent)
 	{
 		if (this.parent != null)
-			this.parent.child_asts.remove(this);
+			this.parent.childAsts.remove(this);
 		if (newParent != null)
-			newParent.child_asts.add(this);
+			newParent.childAsts.add(this);
 		this.parent = newParent;
 
 	}

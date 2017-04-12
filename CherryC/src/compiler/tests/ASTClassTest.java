@@ -23,7 +23,7 @@ class ASTClassTest
 		ASTClass class3 = new ASTClass("Other sub-class", p2);
 		class3.columnNumber = 2;
 
-		Assertions.assertEquals(class3, ((ASTParent)class1.child_asts.get(0)).child_asts.get(0));
+		Assertions.assertEquals(class3, ((ASTParent)class1.childAsts.get(0)).childAsts.get(0));
 
 	}
 
