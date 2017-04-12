@@ -126,10 +126,19 @@ public class Parser
 				}
 
 				ASTVariableDeclaration variable = new ASTVariableDeclaration(parent, name, definedType, value);
-				return true;
+				return variable != null;
+			}
+			else
+			{
+				error("symbol", "Syntax: var <VARIABLE NAME> [ = <INITIAL VALUE>]");
+				return false;
 			}
 		}
-		return false;
+		else
+		{
+			ASTBase expression = parseExpression(parent);
+			return expression != null;
+		}
 	}
 
 	/**
