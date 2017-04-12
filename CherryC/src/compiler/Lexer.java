@@ -12,15 +12,20 @@ import java.io.PushbackInputStream;
  */
 public class Lexer
 {
+
+	public String fileName;
+
 	private PushbackInputStream input;
 
 	private int columnNumber = 0;
 	private int oldColumnNumber = 0;
 	private int lineNumber = 0;
 
-	public Lexer(PushbackInputStream input)
+
+	public Lexer(PushbackInputStream input, String fileName)
 	{
 		this.input = input;
+		this.fileName = fileName;
 	}
 
 
@@ -29,11 +34,25 @@ public class Lexer
 	{
 		int c = readChar();
 
+		int indent = 0;
+
 		// Check if char is EOF. //
 		if (c == -1)
 		{
 			return new Token("", Token.TokenType.EOF, columnNumber, lineNumber);
 		}
+
+		if (columnNumber == 0 && (c == ' ' || c == '\t'))
+		{
+			while (c == ' ' || c == '\t')
+			{
+				indent += (c == ' ') ? 1 : 4;
+				c = readChar();
+			}
+
+			return new Token(indent, lineNumber);
+		}
+
 
 		// Remove leading whitespace. //
 		while (c == ' ' || c == '\t')
@@ -166,14 +185,6 @@ public class Lexer
 			lineNumber--;
 		}
 	}
-
-
-
-
-
-
-
-
 }
 
 

@@ -23,6 +23,7 @@ public class Token
 
 	public String value;
 	public TokenType tokenType;
+	public int indent;
 
 
 	public int columnNumber;
@@ -34,5 +35,11 @@ public class Token
 		this.tokenType = tokenType;
 		this.columnNumber = columnNumber;
 		this.lineNumber = lineNumber;
+	}
+
+	public Token(int indent, int lineNumber)
+	{
+		this("", TokenType.INDENT, 0, lineNumber);
+		this.indent = indent;
 	}
 }

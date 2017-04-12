@@ -20,7 +20,7 @@ class LexerTest
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
 
-		Lexer lexer = new Lexer(pushbackInputStream);
+		Lexer lexer = new Lexer(pushbackInputStream, "Test.cherry");
 
 		for (String token : tokens)
 		{
