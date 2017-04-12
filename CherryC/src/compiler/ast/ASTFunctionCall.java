@@ -49,9 +49,11 @@ public class ASTFunctionCall extends ASTParent
 		// When infix the arguments are around the function name. //
 		if (infix)
 		{
+			destination.print("(");
 			childAsts.get(0).debugSelf(destination);
 			destination.print(" " + name + " ");
 			childAsts.get(1).debugSelf(destination);
+			destination.print(")");
 		}
 
 		// Just a normal function call. //
