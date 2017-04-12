@@ -104,7 +104,7 @@ public class Lexer
 		else
 		{
 			StringBuilder operator = new StringBuilder();
-			while (!Utils.isAlphaNum((char) c) && c != ' ' && c != '\t' && c != -1)
+			while (!Utils.isAlphaNum((char) c) && c != ' ' && c != '\t' && c!= '(' && c != ')' && c != -1)
 			{
 				operator.append((char) c);
 				c = readChar();
