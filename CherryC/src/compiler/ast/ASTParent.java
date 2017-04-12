@@ -10,19 +10,17 @@ import java.util.ArrayList;
  * @author Tyrerexus
  * @date 11/04/17
  */
-public class ASTParent extends ASTBase
+public abstract class ASTParent extends ASTBase
 {
 	ArrayList<ASTBase> child_asts = new ArrayList<>();
 
-	ASTParent(ASTParent parent)
+	public ASTParent(ASTParent parent, String name)
 	{
-			super(parent);
+		super(parent, name);
 	}
 
-
-
 	@Override
-	ASTBase findSymbol(String symbolName)
+	public ASTBase findSymbol(String symbolName)
 	{
 		ASTBase result = super.findSymbol(symbolName);
 		if (result != null)

@@ -1,9 +1,14 @@
 package compiler.ast;
 
+import compiler.lib.DebugPrinter;
+
 /**
- * Created by david on 4/11/17.
+ * The base class for any AST node.
+ *
+ * @author Tyrerexus
+ * @date 4/11/17.
  */
-public class ASTBase
+public abstract class ASTBase
 {
 
 	/** If the AST has a name (optional). */
@@ -18,7 +23,7 @@ public class ASTBase
 	/** Parent of this node. */
 	ASTParent parent;
 
-	ASTBase(ASTParent parent)
+	public ASTBase(ASTParent parent)
 	{
 		if (parent != null)
 		{
@@ -27,18 +32,31 @@ public class ASTBase
 		}
 	}
 
-	ASTBase(ASTParent parent, String name)
+	public ASTBase(ASTParent parent, String name)
 	{
 		this(parent);
 		this.name = name;
 	}
 
-	ASTBase findSymbol(String symbolName)
+	/**
+	 * Finds another AST from this AST's perspective.
+	 * @param symbolName
+	 * @return
+	 */
+	public ASTBase findSymbol(String symbolName)
 	{
 		if (symbolName == name)
 			return this;
 
 		return null;
 	}
+
+	/**
+	 * Prints the AST onto a stream.
+	 *
+	 * When implementing, make sure that the print does not end with a newline.
+	 * @param destination The DebugPrinter on which to print to.
+	 */
+	abstract public void debugSelf(DebugPrinter destination);
 
 }

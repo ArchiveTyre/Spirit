@@ -1,15 +1,14 @@
 package compiler;
 
 import compiler.lib.Utils;
-
 import java.io.IOException;
 import java.io.PushbackInputStream;
 
-
-
 /**
- * Created by david on 4/11/17.
- * Added getToken() by tyrerexus on 4/11/17
+ * This class is used to extract tokens out of a stream.
+ *
+ * @author david
+ * @date 4/11/17.
  */
 public class Lexer
 {
@@ -30,7 +29,7 @@ public class Lexer
 	{
 		char c = readChar();
 
-		// Check if char is -1. //
+		// Check if char is EOF. //
 		if (c == -1)
 		{
 			return new Token("", Token.TokenType.EOF, columnNumber, lineNumber);
@@ -40,6 +39,7 @@ public class Lexer
 		while (c == ' ' || c == '\t')
 			c = readChar();
 
+		// Check a bunch of single char tokens. //
 		if (c == '\n')
 			return new Token("\n", Token.TokenType.NEWLINE, columnNumber, lineNumber);
 		else if (c == '\t')
@@ -48,13 +48,15 @@ public class Lexer
 			return new Token("(", Token.TokenType.LPAR, columnNumber, lineNumber);
 		else if (c == ')')
 			return new Token(")", Token.TokenType.RPAR, columnNumber, lineNumber);
+
+		// Check if we are reading a number. //
 		else if (Utils.isDigit(c))
 		{
-			String digit = "";
+			StringBuilder digit = new StringBuilder();
 
 			while (Character.isDigit(c) && (int) c != -1)
 			{
-				digit += c;
+				digit.append(c);
 				c = readChar();
 				try
 				{
@@ -68,16 +70,18 @@ public class Lexer
 			}
 			unReadChar(c);
 
-			return new Token(digit, Token.TokenType.NUMBER, columnNumber, lineNumber);
+			return new Token(digit.toString(), Token.TokenType.NUMBER, columnNumber, lineNumber);
 		}
+
+		// check if we are reading a symbol. //
 		else if (Utils.isAlpha(c) || c == '_')
 		{
-			String string = "";
+			StringBuilder string = new StringBuilder();
 
 
 			while ((Character.isAlphabetic(c) || Character.isDigit(c)  || c == '_') && c != -1)
 			{
-				string += c;
+				string.append(c);
 				c = readChar();
 
 				try
@@ -92,14 +96,16 @@ public class Lexer
 			}
 			unReadChar(c);
 
-			return new Token(string, Token.TokenType.SYMBOL, columnNumber, lineNumber);
+			return new Token(string.toString(), Token.TokenType.SYMBOL, columnNumber, lineNumber);
 		}
+
+		// Otherwise it's an operator. //
 		else
 		{
-			String operator = "";
+			StringBuilder operator = new StringBuilder();
 			while (!Utils.isAlphaNum(c) && c != ' ' && c != '\t' && c != -1)
 			{
-				operator += c;
+				operator.append(c);
 				c = readChar();
 				try
 				{
@@ -113,14 +119,11 @@ public class Lexer
 			}
 			unReadChar(c);
 
-			return new Token(operator, Token.TokenType.OPERATOR, columnNumber, lineNumber);
+			return new Token(operator.toString(), Token.TokenType.OPERATOR, columnNumber, lineNumber);
 		}
-
-		// TODO: Not implemented.
-		//return new Token("", Token.TokenType.UNKNOWN, 0, 0);
 	}
 
-	public char readChar()
+	private char readChar()
 	{
 		char character = (char) -1;
 		try
@@ -144,7 +147,7 @@ public class Lexer
 
 	}
 
-	public void unReadChar(char c)
+	private void unReadChar(char c)
 	{
 		try
 		{

@@ -1,7 +1,8 @@
 package compiler;
 
 /**
- * Created by tyrerexus on 11/04/17.
+ * @author Tyrerexus
+ * @date 11/04/17.
  */
 public class Token
 {
