@@ -1,9 +1,6 @@
 package compiler;
 
-import compiler.ast.ASTBase;
-import compiler.ast.ASTClass;
-import compiler.ast.ASTParent;
-import compiler.ast.ASTVariable;
+import compiler.ast.*;
 import compiler.builtins.Builtins;
 
 import static compiler.Token.TokenType;
@@ -30,7 +27,10 @@ public class Parser
 	private ASTBase parseExpression(ASTParent parent)
 	{
 
-		
+		if (match(TokenType.NUMBER))
+		{
+			return new ASTNumber(parent, Integer.parseInt(previous.value));
+		}
 
 		return null;
 	}

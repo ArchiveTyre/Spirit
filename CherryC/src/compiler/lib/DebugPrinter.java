@@ -27,6 +27,11 @@ public class DebugPrinter
 		new_line_clean = true;
 	}
 
+	public void println()
+	{
+		println("");
+	}
+
 	public void print(Object what)
 	{
 		if (new_line_clean)

@@ -77,15 +77,6 @@ public class Lexer
 			{
 				digit.append((char) c);
 				c = readChar();
-				try
-				{
-					if (input.available() == 0)
-						break;
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
 			}
 			unReadChar(c);
 
@@ -117,17 +108,6 @@ public class Lexer
 			{
 				operator.append((char) c);
 				c = readChar();
-				try
-				{
-					if (input.available() == 0)
-						break;
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-
-
 			}
 			unReadChar(c);
 

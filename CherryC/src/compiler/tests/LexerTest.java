@@ -38,7 +38,7 @@ class LexerTest
 	void getToken()
 	{
 
-		testForTokens("var a = 7", new String[]{"var", "a", "=", "7"});
+		testForTokens("var a = 7123", new String[]{"var", "a", "=", "7123"});
 		testForTokens("func b():", new String[]{"func", "b", "(", ")", ":"});
 
 		System.out.println("Test/s successful.");

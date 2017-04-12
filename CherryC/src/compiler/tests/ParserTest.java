@@ -36,13 +36,14 @@ class ParserTest
 		DebugPrinter printer = new DebugPrinter(System.out);
 
 		astClass.debugSelf(printer);
+		printer.println();
 	}
 
 
 	@Test
 	void firstTest()
 	{
-		String expression = "var a = 5";
-		testClassCompile(expression);
+		testClassCompile("var a = 5");
+		testClassCompile("var b = 128");
 	}
 }
