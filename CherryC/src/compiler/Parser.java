@@ -5,6 +5,7 @@ import compiler.builtins.Builtins;
 
 import static compiler.Token.TokenType;
 
+
 /**
  * This class uses a Lexer to build an AST.
  *
@@ -26,11 +27,21 @@ public class Parser
 	// FIXME: Not implemented yet.
 	private ASTBase parseExpression(ASTParent parent)
 	{
-
-		if (match(TokenType.NUMBER))
+// left ** right
+		if (match(TokenType.NUMBER) || match(TokenType.SYMBOL))
 		{
-			return new ASTNumber(parent, Integer.parseInt(previous.value));
+			ASTBase left = null;
+			if (previous.tokenType == TokenType.NUMBER)
+			{
+				left = new ASTNumber(parent, Integer.parseInt(previous.value));
+			}
+			else
+			{
+
+			}
+
 		}
+
 
 		return null;
 	}
@@ -87,7 +98,7 @@ public class Parser
 						System.err.print("ERROR: Type missmatch!");
 				}
 
-				ASTVariable variable = new ASTVariable(parent, name, definedType, value);
+				ASTVariableDeclaration variable = new ASTVariableDeclaration(parent, name, definedType, value);
 				return true;
 			}
 		}

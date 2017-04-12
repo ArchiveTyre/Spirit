@@ -7,12 +7,12 @@ import compiler.lib.DebugPrinter;
  * @author Tyrerexus
  * @date 4/12/17.
  */
-public class ASTVariable extends ASTBase
+public class ASTVariableDeclaration extends ASTBase
 {
 	CherryType type;
 	ASTBase value;
 
-	public ASTVariable(ASTParent parent, String name, CherryType type, ASTBase value)
+	public ASTVariableDeclaration(ASTParent parent, String name, CherryType type, ASTBase value)
 	{
 		super(parent, name);
 		this.type = type;
