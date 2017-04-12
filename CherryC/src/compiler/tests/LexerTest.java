@@ -17,7 +17,6 @@ class LexerTest
 {
 	void testForTokens(String testString, String[] tokens)
 	{
-
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
 
@@ -26,12 +25,12 @@ class LexerTest
 		for (String token : tokens)
 		{
 			Token tok = lexer.getToken();
-			System.out.println(tok.tokenType);
 			Assertions.assertEquals(token, tok.value);
 		}
 
 		// Make sure all test cases end with an EOF token. //
 		Assertions.assertEquals(Token.TokenType.EOF, lexer.getToken().tokenType);
+
 	}
 
 
@@ -41,6 +40,9 @@ class LexerTest
 
 		testForTokens("var a = 7", new String[]{"var", "a", "=", "7"});
 		testForTokens("func b():", new String[]{"func", "b", "(", ")", ":"});
+
+		System.out.println("Test/s successful.");
+
 
 
 
