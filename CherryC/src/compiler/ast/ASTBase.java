@@ -15,10 +15,10 @@ public abstract class ASTBase
 	String name;
 
 	/** Line number on which it was defined on. */
-	int lineNumber;
+	public int lineNumber;
 
 	/** Column number on which it was defined on. */
-	int columnNumber;
+	public int columnNumber;
 
 	/** Parent of this node. */
 	ASTParent parent;

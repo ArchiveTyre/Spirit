@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 public abstract class ASTParent extends ASTBase
 {
-	ArrayList<ASTBase> child_asts = new ArrayList<>();
+	public ArrayList<ASTBase> child_asts = new ArrayList<>();
 
 	public ASTParent(ASTParent parent, String name)
 	{

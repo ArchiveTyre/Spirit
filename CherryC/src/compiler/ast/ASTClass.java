@@ -1,6 +1,7 @@
 package compiler.ast;
 
 import compiler.lib.DebugPrinter;
+import org.junit.jupiter.api.Test;
 
 /**
  * Creates a basic class.
@@ -10,7 +11,6 @@ import compiler.lib.DebugPrinter;
  */
 public class ASTClass extends ASTParent
 {
-
 	public ASTClass(String name, ASTParent parent)
 	{
 		super(parent, name);
@@ -29,5 +29,45 @@ public class ASTClass extends ASTParent
 		}
 		to.indentation--;
 		to.print("}");
+	}
+
+	public ASTParent getParentForNewCode(int line_indent)
+	{
+
+		if (child_asts.size() == 0)
+			return this;
+
+		// Get last child node. //
+		ASTBase newly_inserted_code = child_asts.get(child_asts.size() - 1);
+
+		if (line_indent > newly_inserted_code.columnNumber)
+		{
+			if (newly_inserted_code instanceof ASTParent)
+			{
+				return (ASTParent)newly_inserted_code;
+			}
+			return null;
+		}
+		else if (line_indent == newly_inserted_code.columnNumber)
+		{
+			if (newly_inserted_code.parent instanceof ASTParent)
+			{
+				return (ASTParent)newly_inserted_code.parent;
+			}
+			return null;
+		}
+		else
+		{
+			ASTBase parent = newly_inserted_code.parent;
+			while(parent.columnNumber >= line_indent && parent.parent != null)
+				parent = parent.parent;
+
+			if (parent instanceof ASTParent)
+			{
+				return (ASTParent) parent;
+			}
+
+			return null;
+		}
 	}
 }
