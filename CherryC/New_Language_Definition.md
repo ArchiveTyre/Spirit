@@ -171,7 +171,6 @@ loop 10
 
 
 
-
 for my_players -> player_name:
 	print player_nane
 	

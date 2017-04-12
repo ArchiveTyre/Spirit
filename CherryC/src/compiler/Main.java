@@ -1,5 +1,13 @@
 package compiler;
 
+import compiler.ast.ASTClass;
+import compiler.lib.FileCompiler;
+import compiler.lib.FileHandler;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -44,6 +52,14 @@ public class Main
 					fileNames.add(arg);
 			}
 		}
+
+
+		for (String file : fileNames)
+		{
+			FileCompiler.compileFile(file);
+		}
+
+
 	}
 
 	public static void printVersion()
