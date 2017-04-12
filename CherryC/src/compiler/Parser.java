@@ -15,13 +15,13 @@ import static compiler.Token.TokenType;
 public class Parser
 {
 	Lexer lexer;
-	Token look_ahead;
+	Token lookAhead;
 	Token previous = null;
 
 	public Parser(Lexer lexer)
 	{
 		this.lexer = lexer;
-		look_ahead = lexer.getToken();
+		lookAhead = lexer.getToken();
 	}
 
 	// FIXME: Not implemented yet.
@@ -44,17 +44,12 @@ public class Parser
 				operatorCall.infix = true;
 				ASTBase right = parseExpression(parent);
 
-				if (right == null)
-				{
-					return left;
-				}
-
 				left.setParent(operatorCall);
 				right.setParent(operatorCall);
 
 				return operatorCall;
 			}
-			else if (match(TokenType.NEWLINE) || match(TokenType.EOF))
+			else if (match(TokenType.NEWLINE) || match(TokenType.EOF) || lookAhead.tokenType == TokenType.RPAR)
 			{
 				return left;
 			}
@@ -180,10 +175,10 @@ public class Parser
 
 	private boolean match(String value)
 	{
-		if (value.equals(look_ahead.value))
+		if (value.equals(lookAhead.value))
 		{
-			previous = look_ahead;
-			look_ahead = lexer.getToken();
+			previous = lookAhead;
+			lookAhead = lexer.getToken();
 			return true;
 		}
 
@@ -192,10 +187,10 @@ public class Parser
 
 	private boolean match(Token.TokenType value)
 	{
-		if (value == look_ahead.tokenType)
+		if (value == lookAhead.tokenType)
 		{
-			previous = look_ahead;
-			look_ahead = lexer.getToken();
+			previous = lookAhead;
+			lookAhead = lexer.getToken();
 			return true;
 		}
 

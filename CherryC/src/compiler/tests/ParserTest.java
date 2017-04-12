@@ -45,7 +45,7 @@ class ParserTest
 	{
 
 		// Test basic assignment. //
-		/*testClassCompile("AssignTest1", "var a = 5");
+		testClassCompile("AssignTest1", "var a = 5");
 		testClassCompile("AssignTest2", "var b = 128");
 
 		// Test assignments with an expression with operators. //
@@ -57,7 +57,7 @@ class ParserTest
 		testClassCompile("MultiLine2", "var a = 8\n\nvar b = 9\n\n");
 
 		// Just expressions. //
-		testClassCompile("ExpressionTest3", "var a = 3\na=4");*/
+		testClassCompile("ExpressionTest3", "var a = 3\na=4");
 
 		testClassCompile("ParTest1", "var a = (1 * 2)");
 	}
