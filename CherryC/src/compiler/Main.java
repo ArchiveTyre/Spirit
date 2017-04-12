@@ -1,6 +1,7 @@
 package compiler;
 
 import compiler.ast.ASTClass;
+import compiler.lib.FileCompiler;
 import compiler.lib.FileHandler;
 
 import java.io.ByteArrayInputStream;
@@ -55,7 +56,7 @@ public class Main
 
 		for (String file : fileNames)
 		{
-
+			FileCompiler.compileFile(file);
 		}
 
 
