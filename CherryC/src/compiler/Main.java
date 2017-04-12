@@ -53,6 +53,9 @@ public class Main
 
 	public static void printHelp()
 	{
-		System.out.println("Help is coming...");
+		System.out.println("Options:");
+		System.out.println("\t-o / --output:\t\tSpecify the output file");
+		System.out.println("\t-h / --help\t\tCall help command");
+		System.out.println("\t-v / --version\t\tCurrent version of the compiler.");
 	}
 }
