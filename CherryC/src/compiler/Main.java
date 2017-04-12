@@ -55,19 +55,7 @@ public class Main
 
 		for (String file : fileNames)
 		{
-			String content = FileHandler.getFileContents(file);
 
-			InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-
-
-
-			PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
-
-			Lexer lexer = new Lexer(pushbackInputStream, file);
-
-			Parser parser = new Parser(lexer);
-
-			parser.parseFile(new ASTClass(file, null));
 		}
 
 
