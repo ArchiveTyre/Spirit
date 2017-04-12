@@ -27,7 +27,6 @@ public class Parser
 	// FIXME: Not implemented yet.
 	private ASTBase parseExpression(ASTParent parent)
 	{
-// left ** right
 		if (match(TokenType.NUMBER) || match(TokenType.SYMBOL))
 		{
 			ASTBase left = null;
