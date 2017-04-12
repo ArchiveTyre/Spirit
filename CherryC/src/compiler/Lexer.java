@@ -27,7 +27,7 @@ public class Lexer
 
 	public Token getToken()
 	{
-		char c = readChar();
+		int c = readChar();
 
 		// Check if char is EOF. //
 		if (c == -1)
@@ -50,13 +50,13 @@ public class Lexer
 			return new Token(")", Token.TokenType.RPAR, columnNumber, lineNumber);
 
 		// Check if we are reading a number. //
-		else if (Utils.isDigit(c))
+		else if (Character.isDigit((char) c))
 		{
 			StringBuilder digit = new StringBuilder();
 
-			while (Character.isDigit(c) && (int) c != -1)
+			while (Character.isDigit(c) && c != -1)
 			{
-				digit.append(c);
+				digit.append((char) c);
 				c = readChar();
 				try
 				{
@@ -74,28 +74,19 @@ public class Lexer
 		}
 
 		// check if we are reading a symbol. //
-		else if (Utils.isAlpha(c) || c == '_')
+		else if (Character.isAlphabetic((char) c) || c == '_')
 		{
 			StringBuilder string = new StringBuilder();
 
 
 			while ((Character.isAlphabetic(c) || Character.isDigit(c)  || c == '_') && c != -1)
 			{
-				string.append(c);
+				string.append((char) c);
 				c = readChar();
 
-				try
-				{
-					if (input.available() == 0)
-						break;
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
 			}
-			unReadChar(c);
 
+			unReadChar(c);
 			return new Token(string.toString(), Token.TokenType.SYMBOL, columnNumber, lineNumber);
 		}
 
@@ -103,9 +94,9 @@ public class Lexer
 		else
 		{
 			StringBuilder operator = new StringBuilder();
-			while (!Utils.isAlphaNum(c) && c != ' ' && c != '\t' && c != -1)
+			while (!Utils.isAlphaNum((char) c) && c != ' ' && c != '\t' && c != -1)
 			{
-				operator.append(c);
+				operator.append((char) c);
 				c = readChar();
 				try
 				{
@@ -116,6 +107,8 @@ public class Lexer
 				{
 					e.printStackTrace();
 				}
+
+
 			}
 			unReadChar(c);
 
@@ -123,12 +116,14 @@ public class Lexer
 		}
 	}
 
-	private char readChar()
+	private int readChar()
 	{
-		char character = (char) -1;
+		int character;
+
+
 		try
 		{
-			character = (char) input.read();
+			character =  input.read();
 
 			if (character == '\n')
 			{
@@ -139,19 +134,23 @@ public class Lexer
 		}
 		catch (IOException e)
 		{
+			character = -1;
 			e.printStackTrace();
 		}
+
+
 
 		return character;
 
 
 	}
 
-	private void unReadChar(char c)
+	private void unReadChar(int c)
 	{
 		try
 		{
-			input.unread((int) c);
+			if (c != -1)
+				input.unread(c);
 		}
 		catch (IOException e)
 		{
@@ -167,6 +166,9 @@ public class Lexer
 			lineNumber--;
 		}
 	}
+
+
+
 
 
 
