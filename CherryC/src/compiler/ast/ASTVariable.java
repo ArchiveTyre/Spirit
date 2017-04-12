@@ -23,8 +23,16 @@ public class ASTVariable extends ASTBase
 
 
 	@Override
+	public CherryType getExpressionType()
+	{
+		return this.type;
+	}
+
+	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
+		destination.print("Variable: " + name + " of type: " + type.getName() + " with value of ");
+		value.debugSelf(destination);
 
 	}
 }

@@ -20,6 +20,12 @@ public class ASTClass extends ASTParent implements CherryType
 	}
 
 	@Override
+	public CherryType getExpressionType()
+	{
+		return this;
+	}
+
+	@Override
 	public void debugSelf(DebugPrinter to)
 	{
 		to.println(name);
@@ -36,6 +42,7 @@ public class ASTClass extends ASTParent implements CherryType
 
 	public ASTParent getParentForNewCode(int line_indent)
 	{
+
 
 		if (child_asts.size() == 0)
 			return this;
@@ -73,6 +80,7 @@ public class ASTClass extends ASTParent implements CherryType
 			return null;
 		}
 	}
+
 
 	@Override
 	public String getName()

@@ -4,6 +4,7 @@ import compiler.ast.ASTBase;
 import compiler.ast.ASTClass;
 import compiler.ast.ASTParent;
 import compiler.ast.ASTVariable;
+import compiler.builtins.Builtins;
 
 import static compiler.Token.TokenType;
 
@@ -19,19 +20,22 @@ public class Parser
 	Token look_ahead;
 	Token previous = null;
 
-	Parser(Lexer lexer)
+	public Parser(Lexer lexer)
 	{
 		this.lexer = lexer;
 		look_ahead = lexer.getToken();
 	}
 
 	// FIXME: Not implemented yet.
-	ASTBase parseExpression(ASTParent parent)
+	private ASTBase parseExpression(ASTParent parent)
 	{
+
+		
+
 		return null;
 	}
 
-	CherryType parseType(ASTParent parent)
+	private CherryType parseType(ASTParent parent)
 	{
 		if (match(Syntax.OPERATOR_BLOCKSTART))
 		{
@@ -42,12 +46,16 @@ public class Parser
 				{
 					return (ASTClass)f;
 				}
+
+				CherryType type = Builtins.getBuiltin(previous.value);
+				if (type != null)
+					return type;
 			}
 		}
 		return null;
 	}
 
-	boolean parseLine(ASTClass dest)
+	private boolean parseLine(ASTClass dest)
 	{
 
 		int line_indent = 0;
@@ -91,13 +99,13 @@ public class Parser
 	 *
 	 * It does this by calling parseLine as many times as possible.
 	 */
-	void parseFile(ASTClass dest)
+	public void parseFile(ASTClass dest)
 	{
 		while (parseLine(dest));
 
 	}
 
-	boolean match(String value)
+	private boolean match(String value)
 	{
 			if (value.equals(look_ahead.value)) {
 				previous = look_ahead;
@@ -108,7 +116,7 @@ public class Parser
 			return false;
 	}
 
-	boolean match(Token.TokenType value)
+	private boolean match(Token.TokenType value)
 	{
 		if (value == look_ahead.tokenType) {
 			previous = look_ahead;
@@ -117,6 +125,14 @@ public class Parser
 		}
 
 		return false;
+	}
+
+	private void error(String expected, Token tok, int lineNumber, String message)
+	{
+		System.err.println("[Cherry]: Error in file: " + lexer.fileName + "\t at line " + lineNumber + ".");
+		System.out.println("\tExpected:\t\t" + expected);
+		System.out.println("\tActual:\t\t" + tok.value);
+		System.out.println("\tMessage: " + (message.equals("") ? "[NONE]" : message));
 	}
 
 }

@@ -39,7 +39,7 @@ public abstract class ASTBase
 		this.name = name;
 	}
 
-	void setParent(ASTParent newParent)
+	public void setParent(ASTParent newParent)
 	{
 		if (this.parent != null)
 			this.parent.child_asts.remove(this);
@@ -49,10 +49,7 @@ public abstract class ASTBase
 
 	}
 
-	public CherryType getExpressionType()
-	{
-		return null;
-	}
+	public abstract CherryType getExpressionType();
 
 	/**
 	 * Finds another AST from this AST's perspective.

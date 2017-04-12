@@ -1,7 +1,9 @@
-package compiler.ast.builtins;
+package compiler.ast;
 
+import compiler.CherryType;
 import compiler.ast.ASTBase;
 import compiler.ast.ASTParent;
+import compiler.builtins.Builtins;
 import compiler.lib.DebugPrinter;
 
 /**
@@ -17,6 +19,12 @@ public class ASTString extends ASTBase
 		this.value = value;
 
 
+	}
+
+	@Override
+	public CherryType getExpressionType()
+	{
+		return Builtins.getBuiltin("string");
 	}
 
 	@Override
