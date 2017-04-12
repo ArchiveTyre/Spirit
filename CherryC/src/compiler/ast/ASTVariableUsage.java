@@ -15,8 +15,9 @@ public class ASTVariableUsage extends ASTBase
 
 	public ASTVariableUsage(ASTParent parent, String name)
 	{
-		super(parent, name);
+		super(null, name);
 		this.declaration = (ASTVariableDeclaration) parent.findSymbol(name);
+		setParent(parent);
 	}
 
 	@Override
@@ -28,6 +29,6 @@ public class ASTVariableUsage extends ASTBase
 	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
-
+		destination.print(name);
 	}
 }

@@ -14,7 +14,8 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Created by david on 4/12/17.
+ * @author david, Tyrerexus
+ * @date 4/12/17.
  */
 class ParserTest
 {
@@ -26,10 +27,9 @@ class ParserTest
 
 		Lexer lexer = new Lexer(pushbackInputStream, "Test.cherry");
 
-
 		Parser parser = new Parser(lexer);
 
-		ASTClass astClass = new ASTClass("test", null);
+		ASTClass astClass = new ASTClass("Test", null);
 
 		parser.parseFile(astClass);
 
@@ -55,5 +55,8 @@ class ParserTest
 		// Test multi-line assignments. //
 		testClassCompile("var a = 3\nvar b = 1");
 		testClassCompile("var a = 8\n\nvar b = 9\n\n");
+
+		// Just expressions. //
+		testClassCompile("var a = 3\na=4");
 	}
 }
