@@ -58,13 +58,13 @@ public class ASTClass extends ASTParent implements CherryType
 		}
 		else if (line_indent == newly_inserted_code.columnNumber)
 		{
-			parent = newly_inserted_code.parent;
+			parent = newly_inserted_code.getParent();
 		}
 		else
 		{
-			parent = newly_inserted_code.parent;
-			while(parent.columnNumber >= line_indent && parent.parent != null)
-				parent = parent.parent;
+			parent = newly_inserted_code.getParent();
+			while(parent.columnNumber >= line_indent && parent.getParent() != null)
+				parent = parent.getParent();
 		}
 
 		// Validate parent. //

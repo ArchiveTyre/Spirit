@@ -22,7 +22,22 @@ public abstract class ASTBase
 	public int columnNumber;
 
 	/** Parent of this node. */
-	ASTParent parent;
+	private ASTParent parent;
+
+	public void setParent(ASTParent newParent)
+	{
+		if (this.parent != null)
+			this.parent.childAsts.remove(this);
+		if (newParent != null)
+			newParent.childAsts.add(this);
+		this.parent = newParent;
+
+	}
+
+	public ASTParent getParent()
+	{
+		return parent;
+	}
 
 	public ASTBase(ASTParent parent)
 	{
@@ -37,16 +52,6 @@ public abstract class ASTBase
 	{
 		this(parent);
 		this.name = name;
-	}
-
-	public void setParent(ASTParent newParent)
-	{
-		if (this.parent != null)
-			this.parent.childAsts.remove(this);
-		if (newParent != null)
-			newParent.childAsts.add(this);
-		this.parent = newParent;
-
 	}
 
 	public abstract CherryType getExpressionType();

@@ -14,17 +14,24 @@ import static compiler.Token.TokenType;
  */
 public class Parser
 {
+
+	/** The lexer to read from. */
 	Lexer lexer;
+
 	private Token lookAhead;
 	private Token previous = null;
 
+	/**
+	 * Creates a Parser that will read from a lexer.
+	 * @param lexer The lexer to read from.
+	 */
 	public Parser(Lexer lexer)
 	{
 		this.lexer = lexer;
 		lookAhead = lexer.getToken();
 	}
 
-	// FIXME: Not implemented yet.
+	// FIXME: Add support for strings.
 	private ASTBase parseExpression(ASTParent parent)
 	{
 		if (match(TokenType.NUMBER) || match(TokenType.SYMBOL))
@@ -139,95 +146,32 @@ public class Parser
 		return null;
 	}
 
-	private CherryType findType(ASTParent perspective, String name)
-	{
-		ASTBase f = perspective.findSymbol(name);
-		if (f instanceof ASTClass)
-			return (ASTClass) f;
-
-		CherryType type = Builtins.getBuiltin(name);
-		if (type != null)
-			return type;
-
-		return null;
-	}
-
-	private CherryType parseType(ASTParent parent)
+	/**
+	 * Mainly used by parseFunctionDeclaration() and parseVariableDeclaration().
+	 * @param perspective From what perspective to search from.
+	 * @return A type.
+	 */
+	private CherryType parseType(ASTParent perspective)
 	{
 		if (match(Syntax.OPERATOR_BLOCKSTART))
 		{
 			if (match(TokenType.SYMBOL))
 			{
-				return findType(parent, previous.value);
+				return findType(perspective, previous.value);
 			}
 		}
 		return null;
 	}
 
-	private ASTFunctionDeclaration parseFunction(ASTClass dest)
+	private ASTVariableDeclaration parseFunctionDeclaration(ASTParent parent)
 	{
-		return null;
-	}
-
-	private boolean parseLine(ASTClass dest)
-	{
-
-
-		// Extract indents to get a parent. //
-		int line_indent = 0;
-		if (match(TokenType.INDENT))
-		{
-			line_indent = previous.indent;
-		}
-
-		// Skip any empty lines.
-		if (match(TokenType.NEWLINE))
-		{
-			return true;
-		}
-
-		// Use the indent to find a new parent for the contents of this line. //
-		ASTParent parent = dest.getParentForNewCode(line_indent);
-
-		// Check if we are defining a variable. //
-		if (match(Syntax.KEYWORD_VAR))
+		if (match(Syntax.KEYWORD_FUN))
 		{
 			if (match(TokenType.SYMBOL))
 			{
 				String name = previous.value;
 
-				// Parse ": Cat". //
-				CherryType definedType = parseType(parent);
-
-				// Will be set to the initial value of this variable. //
-				ASTBase value = null;
-
-				// Parse the initial value. //
-				if (match("="))
-				{
-					value = parseExpression(parent);
-					CherryType valueType = value.getExpressionType();
-					if (definedType == null)
-						definedType = valueType;
-					else if (definedType != valueType)
-						System.err.print("ERROR: Type miss-match at line: " + previous.lineNumber);
-				}
-
-				ASTVariableDeclaration variable = new ASTVariableDeclaration(parent, name, definedType, value);
-				variable.columnNumber = line_indent;
-				return variable != null;
-			}
-			else
-			{
-				error("symbol", "Syntax: var <VARIABLE NAME> [ = <INITIAL VALUE>]");
-				return false;
-			}
-		}
-		else if (match(Syntax.KEYWORD_FUN))
-		{
-			if (match(TokenType.SYMBOL))
-			{
-				String name = previous.value;
+				// Create the function declaration with the default type of void. //
 				ASTFunctionDeclaration function = new ASTFunctionDeclaration(parent, Builtins.getBuiltin("void"));
 
 				// Parse args. //
@@ -253,7 +197,7 @@ public class Parser
 						if (!match (TokenType.RPAR))
 						{
 							error(")", "Unmatched parenthesis");
-							return false;
+							return null;
 						}
 					}
 				}
@@ -268,27 +212,118 @@ public class Parser
 					else
 					{
 						error("return type", "Return type is required after \"->\"");
-						return false;
+						return null;
 					}
 				}
 
+				// Make sure function declarations end with a colon. //
 				if (!match(Syntax.OPERATOR_BLOCKSTART))
 				{
 					error(":", "A colon is required at the end of a function declaration.");
 				}
 
-				ASTVariableDeclaration functionAsVariable = // FIXME: Change type to lambda or function
-						new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("fun"), function);
-				functionAsVariable.columnNumber = line_indent;
-				return functionAsVariable != null && function != null;
-
+				return new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("fun"), function);
 			}
 			else
 			{
 				error("name", "Expected a name for the function.");
-				return false;
+				return null;
 			}
 		}
+		else
+		{
+			System.err.println("Compiler error!");
+			return null;
+		}
+	}
+
+	private ASTVariableDeclaration parseVariableDeclaration(ASTParent parent)
+	{
+		if (match(Syntax.KEYWORD_VAR))
+		{
+			if (match(TokenType.SYMBOL))
+			{
+				String name = previous.value;
+
+				// Parse ": Cat". //
+				CherryType definedType = parseType(parent);
+
+				// Will be set to the initial value of this variable. //
+				ASTBase value = null;
+
+				// Parse the initial value. //
+				if (match("="))
+				{
+					value = parseExpression(parent);
+					CherryType valueType = value.getExpressionType();
+					if (definedType == null)
+						definedType = valueType;
+					else if (definedType != valueType)
+						System.err.print("ERROR: Type miss-match at line: " + previous.lineNumber);
+				}
+
+				return new ASTVariableDeclaration(parent, name, definedType, value);
+			}
+			else
+			{
+				error("symbol", "Syntax: var <VARIABLE NAME> [ = <INITIAL VALUE>]");
+				return null;
+			}
+		}
+		else
+		{
+			System.err.println("Compiler error!");
+			return null;
+		}
+	}
+
+	private boolean parseLine(ASTClass dest)
+	{
+
+
+		// Extract indents to get a parent. //
+		int line_indent = 0;
+		if (match(TokenType.INDENT))
+		{
+			line_indent = previous.indent;
+		}
+
+		// Skip any empty lines.
+		if (match(TokenType.NEWLINE))
+		{
+			return true;
+		}
+
+		// Use the indent to find a new parent for the contents of this line. //
+		ASTParent parent = dest.getParentForNewCode(line_indent);
+
+		// Check if we are defining a variable. //
+		if (lookAhead.value.equals(Syntax.KEYWORD_VAR))
+		{
+			ASTVariableDeclaration variable = parseVariableDeclaration(parent);
+			if (variable != null)
+			{
+				variable.columnNumber = line_indent;
+				return true;
+			}
+
+			return false;
+		}
+
+		// Check if we are defining a function. //
+		else if (lookAhead.value.equals(Syntax.KEYWORD_FUN))
+		{
+			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
+			if (function != null)
+			{
+				function.columnNumber = line_indent;
+				return true;
+			}
+
+			return false;
+		}
+
+		// Otherwise it's just an expression. //
 		else
 		{
 			ASTBase expression = parseExpression(parent);
@@ -315,6 +350,21 @@ public class Parser
 			error("end of file", "There is un-parsed junk at the end of the file. ");
 		}
 
+	}
+
+	private CherryType findType(ASTParent perspective, String name)
+	{
+		// FIXME: Is this really the best place?
+
+		ASTBase f = perspective.findSymbol(name);
+		if (f instanceof ASTClass)
+			return (ASTClass) f;
+
+		CherryType type = Builtins.getBuiltin(name);
+		if (type != null)
+			return type;
+
+		return null;
 	}
 
 	private boolean match(String value)
