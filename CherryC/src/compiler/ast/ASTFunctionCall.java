@@ -20,10 +20,36 @@ public class ASTFunctionCall extends ASTParent
 	 */
 	public boolean infix = false;
 
+	public ASTVariableDeclaration declaration;
+	public ASTFunctionDeclaration functionDeclaration;
+
 	public ASTFunctionCall(ASTParent parent, String name)
 	{
 		super(parent, name);
-		// FIXME: Find declaration.
+		System.out.println("Creating call with name: " + name);
+
+		// Infixes don't have a declaration. //
+		if (infix == false)
+		{
+			ASTBase symbol = parent.findSymbol(name);
+			if (symbol instanceof  ASTVariableDeclaration)
+			{
+				declaration = (ASTVariableDeclaration) symbol;
+				if (declaration.value instanceof ASTFunctionDeclaration)
+				{
+					functionDeclaration = (ASTFunctionDeclaration) declaration.value;
+				}
+				else
+				{
+					System.err.print("Can't call non-function. ");
+					functionDeclaration = null;
+				}
+			}
+			else
+			{
+				declaration = null;
+			}
+		}
 	}
 
 	@Override
@@ -37,8 +63,7 @@ public class ASTFunctionCall extends ASTParent
 		}
 		else
 		{
-			System.err.println("ERROR: Not implemented yet.");
-			return null;
+			return functionDeclaration.returnType;
 		}
 	}
 

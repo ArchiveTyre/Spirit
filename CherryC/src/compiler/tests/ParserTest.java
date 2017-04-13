@@ -65,7 +65,12 @@ class ParserTest
 		testClassCompile("MultiLineParentSearch", "\tvar a = 10\n\ta = 25");
 
 		// Test functions. //
-		testClassCompile("FunTest1", "fun Add(a : int, b : int) -> int");
-		testClassCompile("FunTest2", "fun Add(a : int, b : int) -> int\n\ta+b");
+		testClassCompile("FunTest1", "fun Add(a : int, b : int) -> int:");
+		testClassCompile("FunTest2", "fun Add(a : int, b : int) -> int:\n\ta+b");
+		testClassCompile("FunTest3", "fun Add(a : int, b : int) -> int:\n\tfun DoAdd(a : int, b : int)->int:");
+
+		// Test function calls. //
+		testClassCompile("FunCall1", "fun Add(a : int, b : int )->int:\nAdd(3, 2)");
+		testClassCompile("FunCall2", "fun Neg(b : int) -> int:\nNeg 2");
 	}
 }

@@ -15,8 +15,8 @@ import static compiler.Token.TokenType;
 public class Parser
 {
 	Lexer lexer;
-	Token lookAhead;
-	Token previous = null;
+	private Token lookAhead;
+	private Token previous = null;
 
 	public Parser(Lexer lexer)
 	{
@@ -29,16 +29,70 @@ public class Parser
 	{
 		if (match(TokenType.NUMBER) || match(TokenType.SYMBOL))
 		{
-			ASTBase left = null;
+			ASTBase left;
+
+			// Create left-hand side. //
 			if (previous.tokenType == TokenType.NUMBER)
 			{
 				left = new ASTNumber(parent, Integer.parseInt(previous.value));
 			}
+			else if (previous.tokenType == TokenType.SYMBOL)
+			{
+				String name = previous.value;
+
+				// Check if function call. //
+				if (match(TokenType.LPAR))
+				{
+					ASTFunctionCall functionCall = new ASTFunctionCall(parent, name);
+
+					// Try to parse arguments. //
+					if (lookAhead.tokenType != TokenType.RPAR)
+					{
+						do
+						{
+							parseExpression(functionCall);
+						} while (match(","));
+
+						if (!match(TokenType.RPAR))
+						{
+							error(")", "Unmatched parenthesis");
+						}
+					}
+					return functionCall;
+				}
+
+				// Single argument function call. //
+				else if (lookAhead.tokenType == TokenType.SYMBOL
+						|| lookAhead.tokenType == TokenType.STRING
+						|| lookAhead.tokenType == TokenType.NUMBER)
+				{
+					ASTFunctionCall functionCall = new ASTFunctionCall(parent, name);
+					parseExpression(functionCall);
+					return functionCall;
+				}
+
+				// Nope, just normal symbol. //
+				else
+				{
+					left = new ASTVariableUsage(parent, name);
+				}
+			}
+
+			// An error has occurred. //
 			else
 			{
-				left = new ASTVariableUsage(parent, previous.value);
+				System.err.println("Compiler error.");
+				return null;
 			}
-			if (match(TokenType.OPERATOR))
+
+			// Check if we have hit an end. //
+			if (lookAhead.value.equals(","))
+			{
+				return left;
+			}
+
+			// Either we have an operator, or alternatively left is single-node expression or a function call. //
+			else if (match(TokenType.OPERATOR))
 			{
 				ASTFunctionCall operatorCall = new ASTFunctionCall(parent, previous.value);
 				operatorCall.infix = true;
@@ -49,14 +103,24 @@ public class Parser
 
 				return operatorCall;
 			}
-			else if (match(TokenType.NEWLINE) || match(TokenType.EOF) || lookAhead.tokenType == TokenType.RPAR)
+
+			// Single-node expression. //
+			else if (match(TokenType.NEWLINE)
+					|| match(TokenType.EOF)
+					|| lookAhead.tokenType == TokenType.RPAR)
 			{
 				return left;
+			}
+			else
+			{
+				error("end of expression", "");
 			}
 
 
 
 		}
+
+		// Try to parse parentheses. //
 		else if (match(TokenType.LPAR))
 		{
 
@@ -64,7 +128,8 @@ public class Parser
 			if (match(TokenType.RPAR))
 			{
 				return expression;
-			} else
+			}
+			else
 			{
 				error(")", "Unmatched parenthesis");
 			}
@@ -96,6 +161,11 @@ public class Parser
 				return findType(parent, previous.value);
 			}
 		}
+		return null;
+	}
+
+	private ASTFunctionDeclaration parseFunction(ASTClass dest)
+	{
 		return null;
 	}
 
@@ -202,6 +272,11 @@ public class Parser
 					}
 				}
 
+				if (!match(Syntax.OPERATOR_BLOCKSTART))
+				{
+					error(":", "A colon is required at the end of a function declaration.");
+				}
+
 				ASTVariableDeclaration functionAsVariable = // FIXME: Change type to lambda or function
 						new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("fun"), function);
 				functionAsVariable.columnNumber = line_indent;
@@ -270,7 +345,7 @@ public class Parser
 	{
 		System.err.println("[Cherry]: Error in file: " + lexer.fileName + "\t at line " + previous.lineNumber + ".");
 		System.err.println("\tExpected:\t\t" + expected);
-		System.err.println("\tActual:\t\t\t" + previous.value);
+		System.err.println("\tActual:\t\t\t" + lookAhead.value);
 		System.err.println("\tMessage: " + (message.equals("") ? "[NONE]" : message));
 	}
 

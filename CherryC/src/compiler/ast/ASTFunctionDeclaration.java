@@ -1,6 +1,7 @@
 package compiler.ast;
 
 import compiler.CherryType;
+import compiler.builtins.Builtins;
 import compiler.lib.DebugPrinter;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public CherryType getExpressionType()
 	{
-		return null;
+		return Builtins.getBuiltin("fun");
 	}
 
 	@Override
