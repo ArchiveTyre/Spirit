@@ -49,35 +49,38 @@ public class ASTClass extends ASTParent implements CherryType
 		// Get last child node. //
 		ASTBase newly_inserted_code = childAsts.get(childAsts.size() - 1);
 
+		ASTBase parent;
+
+		// Find parent. //
 		if (line_indent > newly_inserted_code.columnNumber)
 		{
-			if (newly_inserted_code instanceof ASTParent)
-			{
-				return (ASTParent)newly_inserted_code;
-			}
-			return null;
+			parent = newly_inserted_code;
 		}
 		else if (line_indent == newly_inserted_code.columnNumber)
 		{
-			if (newly_inserted_code.parent instanceof ASTParent)
-			{
-				return newly_inserted_code.parent;
-			}
-			return null;
+			parent = newly_inserted_code.parent;
 		}
 		else
 		{
-			ASTBase parent = newly_inserted_code.parent;
+			parent = newly_inserted_code.parent;
 			while(parent.columnNumber >= line_indent && parent.parent != null)
 				parent = parent.parent;
-
-			if (parent instanceof ASTParent)
-			{
-				return (ASTParent) parent;
-			}
-
-			return null;
 		}
+
+		// Validate parent. //
+		if (parent instanceof ASTParent)
+		{
+			return (ASTParent) parent;
+		}
+		else if (parent instanceof ASTVariableDeclaration)
+		{
+			ASTVariableDeclaration parentAsVar = (ASTVariableDeclaration)parent;
+			if (parentAsVar.value instanceof ASTFunctionDeclaration)
+				return (ASTFunctionDeclaration)parentAsVar.value;
+		}
+
+		// Validation failed. There is no parent. //
+		return null;
 	}
 
 

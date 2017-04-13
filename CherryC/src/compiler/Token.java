@@ -23,7 +23,7 @@ public class Token
 
 	public String value;
 	public TokenType tokenType;
-	public int indent;
+	public int indent = 0;
 
 
 	public int columnNumber;

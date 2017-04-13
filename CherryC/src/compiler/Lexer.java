@@ -34,7 +34,7 @@ public class Lexer
 	{
 		int c = readChar();
 
-		int indent = 0;
+
 
 		// Check if char is EOF. //
 		if (c == -1)
@@ -42,27 +42,28 @@ public class Lexer
 			return new Token("", Token.TokenType.EOF, columnNumber, lineNumber);
 		}
 
+		// Try to create indent token. //
 		if (columnNumber == 0 && (c == ' ' || c == '\t'))
 		{
+			int indent = 0;
 			while (c == ' ' || c == '\t')
 			{
 				indent += (c == ' ') ? 1 : 4;
 				c = readChar();
 			}
-
+			unReadChar(c);
 			return new Token(indent, lineNumber);
 		}
-
-
-		// Remove leading whitespace. //
-		while (c == ' ' || c == '\t')
-			c = readChar();
+		else
+		{
+			// Remove leading whitespace. //
+			while (c == ' ' || c == '\t')
+				c = readChar();
+		}
 
 		// Check a bunch of single char tokens. //
 		if (c == '\n')
 			return new Token("\n", Token.TokenType.NEWLINE, columnNumber, lineNumber);
-		else if (c == '\t')
-			return new Token("\t", Token.TokenType.INDENT, columnNumber, lineNumber);
 		else if (c == '(')
 			return new Token("(", Token.TokenType.LPAR, columnNumber, lineNumber);
 		else if (c == ')')

@@ -74,21 +74,26 @@ public class Parser
 		return null;
 	}
 
+	private CherryType findType(ASTParent perspective, String name)
+	{
+		ASTBase f = perspective.findSymbol(name);
+		if (f instanceof ASTClass)
+			return (ASTClass) f;
+
+		CherryType type = Builtins.getBuiltin(name);
+		if (type != null)
+			return type;
+
+		return null;
+	}
+
 	private CherryType parseType(ASTParent parent)
 	{
 		if (match(Syntax.OPERATOR_BLOCKSTART))
 		{
 			if (match(TokenType.SYMBOL))
 			{
-				ASTBase f = parent.findSymbol(previous.value);
-				if (f instanceof ASTClass)
-				{
-					return (ASTClass) f;
-				}
-
-				CherryType type = Builtins.getBuiltin(previous.value);
-				if (type != null)
-					return type;
+				return findType(parent, previous.value);
 			}
 		}
 		return null;
@@ -139,6 +144,7 @@ public class Parser
 				}
 
 				ASTVariableDeclaration variable = new ASTVariableDeclaration(parent, name, definedType, value);
+				variable.columnNumber = line_indent;
 				return variable != null;
 			}
 			else
@@ -147,9 +153,72 @@ public class Parser
 				return false;
 			}
 		}
+		else if (match(Syntax.KEYWORD_FUN))
+		{
+			if (match(TokenType.SYMBOL))
+			{
+				String name = previous.value;
+				ASTFunctionDeclaration function = new ASTFunctionDeclaration(parent, Builtins.getBuiltin("void"));
+
+				// Parse args. //
+				if(match(TokenType.LPAR))
+				{
+					// If we aren't directly followed by a closing parentheses. //
+					if (!match(TokenType.RPAR))
+					{
+
+						// Match as many arguments as possible. //
+						do
+						{
+							if (match(TokenType.SYMBOL))
+							{
+								String argName = previous.value;
+								CherryType argType = parseType(parent);
+								// TODO: Support default value.
+								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+							}
+						} while (match(","));
+
+						// Check for matching parentheses. //
+						if (!match (TokenType.RPAR))
+						{
+							error(")", "Unmatched parenthesis");
+							return false;
+						}
+					}
+				}
+
+				// Parse return type. //
+				if (match(Syntax.OPERATOR_RETURNTYPE))
+				{
+					if (match(TokenType.SYMBOL))
+					{
+						function.returnType = findType(parent, previous.value);
+					}
+					else
+					{
+						error("return type", "Return type is required after \"->\"");
+						return false;
+					}
+				}
+
+				ASTVariableDeclaration functionAsVariable = // FIXME: Change type to lambda or function
+						new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("fun"), function);
+				functionAsVariable.columnNumber = line_indent;
+				return functionAsVariable != null && function != null;
+
+			}
+			else
+			{
+				error("name", "Expected a name for the function.");
+				return false;
+			}
+		}
 		else
 		{
 			ASTBase expression = parseExpression(parent);
+			if (expression != null)
+				expression.columnNumber = line_indent;
 			return expression != null;
 		}
 	}
@@ -200,9 +269,9 @@ public class Parser
 	private void error(String expected, String message)
 	{
 		System.err.println("[Cherry]: Error in file: " + lexer.fileName + "\t at line " + previous.lineNumber + ".");
-		System.out.println("\tExpected:\t\t" + expected);
-		System.out.println("\tActual:\t\t" + previous.value);
-		System.out.println("\tMessage: " + (message.equals("") ? "[NONE]" : message));
+		System.err.println("\tExpected:\t\t" + expected);
+		System.err.println("\tActual:\t\t\t" + previous.value);
+		System.err.println("\tMessage: " + (message.equals("") ? "[NONE]" : message));
 	}
 
 }

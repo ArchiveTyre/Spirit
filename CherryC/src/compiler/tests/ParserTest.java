@@ -25,7 +25,7 @@ class ParserTest
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
 
-		Lexer lexer = new Lexer(pushbackInputStream, "Test.cherry");
+		Lexer lexer = new Lexer(pushbackInputStream, name + ".cherry");
 
 		Parser parser = new Parser(lexer);
 
@@ -43,7 +43,7 @@ class ParserTest
 	@Test
 	void firstTest()
 	{
-
+	/*
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "var a = 5");
 		testClassCompile("AssignTest2", "var b = 128");
@@ -60,5 +60,13 @@ class ParserTest
 		testClassCompile("ExpressionTest3", "var a = 3\na=4");
 
 		testClassCompile("ParTest1", "var a = (1 * 2)");
+	*/
+
+		// Test multi-line parent search. //
+		testClassCompile("MultiLineParentSearch", "\tvar a = 10\n\ta = 25");
+
+		// Test functions. //
+		testClassCompile("FunTest1", "fun Add(a : int, b : int) -> int");
+		testClassCompile("FunTest2", "fun Add(a : int, b : int) -> int\n\ta+b");
 	}
 }

@@ -40,7 +40,9 @@ class LexerTest
 
 		testForTokens("var a = 7123", new String[]{"var", "a", "=", "7123"});
 		testForTokens("func b():", new String[]{"func", "b", "(", ")", ":"});
-
+		testForTokens("\tvar a = 7123", new String[]{"", "var", "a", "=", "7123"});
+		testForTokens("func b(a : int, b : int) -> int:", new String[]{
+				"func", "b", "(", "a", ":", "int", ",", "b", ":", "int", ")", "->", "int", ":"});
 		System.out.println("Test/s successful.");
 
 
