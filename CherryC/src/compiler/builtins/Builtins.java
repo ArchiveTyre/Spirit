@@ -10,6 +10,14 @@ public class Builtins
 
 	private static CherryType[] builtins = {
 			new TypeInteger(),
+			new TypeBool(),
+			new TypeChar(),
+			new TypeDouble(),
+			new TypeFloat(),
+			new TypeLong(),
+			new TypeShort(),
+			new TypeString(),
+			new TypeVoid(),
 	};
 
 	public static CherryType getBuiltin(String name)

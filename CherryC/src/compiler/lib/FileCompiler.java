@@ -35,7 +35,18 @@ public class FileCompiler
 
 			Parser parser = new Parser(lexer);
 
-			parser.parseFile(new ASTClass(className, null));
+
+			ASTClass parent = new ASTClass(className, null);
+			parser.parseFile(parent);
+
+
+			DebugPrinter printer = new DebugPrinter(System.out);
+
+			parent.debugSelf(printer);
+
+			printer.println();
+
+
 		}
 	}
 

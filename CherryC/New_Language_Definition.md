@@ -1,11 +1,7 @@
 
 
-Variables kind of:
-LANG_NAME	- Name of language
-LANG_EXT  - File extension
 
-
-# LANG_NAME
+# Raven
 
 
 
@@ -32,7 +28,7 @@ LANG_EXT  - File extension
 ## Main Features
 * Indent based
 * Serializable
-* Every LANG_NAME is a class.
+* Every Raven is a class.
 * Object Oriented
 * Garbage Collection
 * Optional Manual Memory Management
@@ -51,9 +47,9 @@ To declare a new variable, there are two keywords. Either `var`or `con`.
 `var`is a mutable variable, and `con` is a constant.
 
 
-**Example.LANG_EXT**
+**Example.raven**
 
-```LANG_NAME
+```Raven
 var a = 2
 a = 123 # Ok.
 
@@ -63,7 +59,7 @@ b = 123 # ERROR!
 
 To declare a variable with no value you simply specify the type using the `:` operator.
 
-**Example2.LANG_EXT**
+**Example2.raven**
 
 ```
 var a : int
@@ -104,7 +100,7 @@ break statement is not needed.
 
 #### LOOP statement
 
-There are many ways to create a loop in LANG_NAME.  
+There are many ways to create a loop in Raven.  
 The general syntax for a loop is as follows:
 
 ```
@@ -115,7 +111,7 @@ loop DECLARATIONS if CONDITION then EXPRESSION:
 For example:
 
 
-**Example.LANG_EXT**
+**Example.raven**
 
 ```
 loop var i = 0 if i < 10 then i++:
@@ -152,7 +148,7 @@ loop AMOUNT_OF_TIMES as VARIABLE
 
 Example:
 
-**Example.LANG_EXT**
+**Example.raven**
 
 ```
 loop 10 as i:
