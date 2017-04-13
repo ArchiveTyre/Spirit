@@ -43,7 +43,6 @@ class ParserTest
 	@Test
 	void firstTest()
 	{
-	/*
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "var a = 5");
 		testClassCompile("AssignTest2", "var b = 128");
@@ -60,7 +59,7 @@ class ParserTest
 		testClassCompile("ExpressionTest3", "var a = 3\na=4");
 
 		testClassCompile("ParTest1", "var a = (1 * 2)");
-	*/
+
 
 		// Test multi-line parent search. //
 		testClassCompile("MultiLineParentSearch", "\tvar a = 10\n\ta = 25");
