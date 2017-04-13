@@ -38,6 +38,15 @@
 
 ## Syntax
 
+### Main Function
+
+The main function, also known as the entry point of the code is specified using the `start` keyword.  
+It looks like this:
+
+```
+start:
+	# Code
+```
 
 ### Variables
 
@@ -67,6 +76,29 @@ var a : int
 # You can also specify type with a value like this:
 var b : int = 5	
 ```
+
+### Functions
+
+#### Declarations
+To declare a function you use the `fun` keyword.
+Then you declare the name of the function, specify the parameters (if any), and declare the return type.  
+The syntax for declaring a function is the following:
+
+```
+fun function_name(param1 : param_type, param2 : param_type) -> return_type:
+```
+
+Example:
+**Example.raven**
+
+```
+fun add(a : int, b : int) -> int:
+	return a + b
+	
+start:
+	print add(1, 5) # Will output 6
+```
+
 
 ### Control Flow (if, match, loop, try, break, continue...
 
@@ -160,8 +192,30 @@ loop 10
 	# This will run 10 times
 ```
 
+You can also iterate over an array like this:
 
+```
+loop array as item:
+	print item	
+```
 
+#### TRY/RESCUE/ALWAYS statement
+
+A try statement is a way to do error handling. If everything runs as it should,
+the body of the try statement will be run, but if an error is thrown, then the appropriate rescue statment is run.
+The always block is always run.
+The syntax looks as follows:
+
+```
+try:
+	# Risky stuff that could throw an exception.	
+rescue Exception as e:
+	# Error handling.
+always:
+	# Cleanup, and other stuff that should always run.
+```
+
+#### 
 
 
 

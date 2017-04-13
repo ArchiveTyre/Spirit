@@ -18,6 +18,7 @@ public class Builtins
 			new TypeShort(),
 			new TypeString(),
 			new TypeVoid(),
+			new TypeFunction(),
 	};
 
 	public static CherryType getBuiltin(String name)
