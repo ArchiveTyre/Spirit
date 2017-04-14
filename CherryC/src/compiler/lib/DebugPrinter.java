@@ -19,9 +19,12 @@ public class DebugPrinter
 
 	public void println(Object what)
 	{
-		for (int i = 0; i < indentation; i++)
+		if (new_line_clean)
 		{
-			destination.print("  ");
+			for (int i = 0; i < indentation; i++)
+			{
+				destination.print("  ");
+			}
 		}
 		destination.println(what);
 		new_line_clean = true;

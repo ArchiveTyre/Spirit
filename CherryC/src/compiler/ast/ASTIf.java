@@ -15,6 +15,7 @@ public class ASTIf extends ASTParent
 	{
 		super(parent, "");
 		this.condition = condition;
+		condition.setParent(this);
 	}
 
 	@Override
@@ -26,20 +27,24 @@ public class ASTIf extends ASTParent
 	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
-		destination.print("if ");
+		destination.print("if (");
 		condition.debugSelf(destination);
+		destination.println(")");
 		destination.println("{");
 		destination.indentation++;
 		for (ASTBase child : childAsts)
 		{
-			child.debugSelf(destination);
-			destination.println("");
+			if (child != condition)
+			{
+				child.debugSelf(destination);
+				destination.println("");
+			}
 		}
 		destination.indentation--;
 
 		if (elseStatement != null)
 		{
-			destination.print("}");
+			destination.println("}");
 			destination.println("else");
 			destination.println("{");
 			destination.indentation++;

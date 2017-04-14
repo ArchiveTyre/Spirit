@@ -12,15 +12,19 @@ public class ASTElse extends ASTParent
 
 	public ASTElse(ASTParent parent)
 	{
-		super(null, "");
-		ASTBase lastSibling = parent.childAsts.get(parent.childAsts.size() - 1);
-		if (lastSibling instanceof ASTIf)
+		super(parent, "");
+		ASTBase lastSibling = parent.childAsts.get(parent.childAsts.size() - 2);
+		if (lastSibling != null && lastSibling instanceof ASTIf)
 		{
 			ifStatement = (ASTIf)lastSibling;
 			if (ifStatement.elseStatement == null)
 				ifStatement.elseStatement = this;
 			else
 				System.err.println("Can't have multiple \"else\" statements.");
+		}
+		else
+		{
+			System.err.println("Could not find owning \"if\" statement. ");
 		}
 
 	}
@@ -34,7 +38,9 @@ public class ASTElse extends ASTParent
 	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
-
+		/*
+		 * This does nothing because it's printed out by the owning "if" statement.
+		 */
 	}
 
 	@Override

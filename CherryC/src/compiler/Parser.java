@@ -93,7 +93,7 @@ public class Parser
 			}
 
 			// Check if we have hit an end. //
-			if (lookAhead.value.equals(","))
+			if (lookAhead.value.equals(",") || lookAhead.value.equals(":"))
 			{
 				return left;
 			}
@@ -122,9 +122,6 @@ public class Parser
 			{
 				error("end of expression", "");
 			}
-
-
-
 		}
 
 		// Try to parse parentheses. //
@@ -141,7 +138,6 @@ public class Parser
 				error(")", "Unmatched parenthesis");
 			}
 		}
-
 
 		return null;
 	}
@@ -279,8 +275,6 @@ public class Parser
 
 	private boolean parseLine(ASTClass dest)
 	{
-
-
 		// Extract indents to get a parent. //
 		int line_indent = 0;
 		if (match(TokenType.INDENT))
@@ -321,6 +315,37 @@ public class Parser
 			}
 
 			return false;
+		}
+
+		else if (match(Syntax.KEYWORD_IF))
+		{
+			ASTBase condition = parseExpression(parent);
+			if (match(Syntax.OPERATOR_BLOCKSTART))
+			{
+				new ASTIf(parent, condition);
+				return true;
+			}
+			else
+			{
+				error(":", "A colon is required at the end of an if statement.");
+				return false;
+			}
+
+		}
+
+		else if (match(Syntax.KEYWORD_ELSE))
+		{
+			if (match(Syntax.OPERATOR_BLOCKSTART))
+			{
+				new ASTElse(parent);
+				return true;
+			}
+			else
+			{
+				error(":", "A colon is required at the end of an else statement.");
+				return false;
+			}
+
 		}
 
 		// Otherwise it's just an expression. //

@@ -1,0 +1,8 @@
+fun a(b : string):
+	println "Hello"
+	println b
+
+a "World"
+
+
+

@@ -72,5 +72,9 @@ class ParserTest
 		// Test function calls. //
 		testClassCompile("FunCall1", "fun Add(a : int, b : int )->int:\nAdd(3, 2)");
 		testClassCompile("FunCall2", "fun Neg(b : int) -> int:\nNeg 2");
+
+		// If statements. //
+		testClassCompile("IfStatement1", "var A = 3\nif A:\n\tprint A");
+		testClassCompile("IfStatement2", "var A = 3\nif A:\n\tprint A\nelse:\n\tprint 32");
 	}
 }
