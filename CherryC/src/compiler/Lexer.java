@@ -21,14 +21,16 @@ public class Lexer
 	private int oldColumnNumber = 0;
 	private int lineNumber = 0;
 
-
 	public Lexer(PushbackInputStream input, String fileName)
 	{
 		this.input = input;
 		this.fileName = fileName;
 	}
 
-
+	public int getLineNumber()
+	{
+		return lineNumber;
+	}
 
 	public Token getToken()
 	{
@@ -68,6 +70,8 @@ public class Lexer
 			return new Token("(", Token.TokenType.LPAR, columnNumber, lineNumber);
 		else if (c == ')')
 			return new Token(")", Token.TokenType.RPAR, columnNumber, lineNumber);
+		else if (c == ':')
+			return new Token(":", Token.TokenType.OPERATOR, columnNumber, lineNumber);
 
 		// Check if we are reading a number. //
 		else if (Character.isDigit((char) c))

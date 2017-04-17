@@ -1,0 +1,43 @@
+
+# This will print monkey 10 times.
+loop 10:
+	print "Monkey"
+
+
+# This will print 0123456789
+loop 0 to 9 as i:
+	print i
+
+
+# Same thing.
+loop 10 as i
+	print i
+
+
+# This will print out the names in order.
+var names = ["Miho", "Saori", "Hana", "Yukari", "Mako"]
+loop names as name:
+	print name
+
+
+# This will print out the names in reverse order.
+loop reverse names as name:
+	print name
+
+a : int = 1
+n := "Hello"
+
+
+
+# Will print: 345678910
+loop var A = 3 A < 10  i++:
+	print A
+
+
+
+// C code
+for (int A = 3; A < 10; i++)
+{
+
+}
+

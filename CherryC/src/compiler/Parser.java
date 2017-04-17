@@ -16,9 +16,10 @@ public class Parser
 {
 
 	/** The lexer to read from. */
-	Lexer lexer;
+	private Lexer lexer;
 
 	private Token lookAhead;
+	private Token nextLookAhead;
 	private Token previous = null;
 
 	/**
@@ -29,6 +30,7 @@ public class Parser
 	{
 		this.lexer = lexer;
 		lookAhead = lexer.getToken();
+		nextLookAhead = lexer.getToken();
 	}
 
 	// FIXME: Add support for strings.
@@ -69,7 +71,7 @@ public class Parser
 				}
 
 				// Single argument function call. //
-				else if (lookAhead.tokenType == TokenType.SYMBOL
+				else if ((lookAhead.tokenType == TokenType.SYMBOL && !Syntax.isKeyword(lookAhead.value))
 						|| lookAhead.tokenType == TokenType.STRING
 						|| lookAhead.tokenType == TokenType.NUMBER)
 				{
@@ -106,7 +108,11 @@ public class Parser
 				ASTBase right = parseExpression(parent);
 
 				left.setParent(operatorCall);
-				right.setParent(operatorCall);
+
+				if (right != null)
+					right.setParent(operatorCall);
+				else
+					return null;
 
 				return operatorCall;
 			}
@@ -114,7 +120,8 @@ public class Parser
 			// Single-node expression. //
 			else if (match(TokenType.NEWLINE)
 					|| match(TokenType.EOF)
-					|| lookAhead.tokenType == TokenType.RPAR)
+					|| lookAhead.tokenType == TokenType.RPAR
+					|| Syntax.isKeyword(lookAhead.value))
 			{
 				return left;
 			}
@@ -149,7 +156,7 @@ public class Parser
 	 */
 	private CherryType parseType(ASTParent perspective)
 	{
-		if (match(Syntax.OPERATOR_BLOCKSTART))
+		if (match(Syntax.OPERATOR_TYPESPECIFY))
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -235,36 +242,66 @@ public class Parser
 
 	private ASTVariableDeclaration parseVariableDeclaration(ASTParent parent)
 	{
-		if (match(Syntax.KEYWORD_VAR))
+		if (match(TokenType.SYMBOL))
 		{
-			if (match(TokenType.SYMBOL))
+			String name = previous.value;
+			if (lookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY))
 			{
-				String name = previous.value;
-
-				// Parse ": Cat". //
-				CherryType definedType = parseType(parent);
-
-				// Will be set to the initial value of this variable. //
+				CherryType cherryType = parseType(parent);
 				ASTBase value = null;
 
-				// Parse the initial value. //
+				// Try to parse initial value. //
 				if (match("="))
 				{
 					value = parseExpression(parent);
-					CherryType valueType = value.getExpressionType();
-					if (definedType == null)
-						definedType = valueType;
-					else if (definedType != valueType)
+					if (cherryType == null)
+						cherryType = value.getExpressionType();
+
+						// Check that the types match. //
+					else if (cherryType != value.getExpressionType())
 						System.err.print("ERROR: Type miss-match at line: " + previous.lineNumber);
 				}
 
-				return new ASTVariableDeclaration(parent, name, definedType, value);
+				return new ASTVariableDeclaration(parent, name, cherryType, value);
 			}
 			else
 			{
-				error("symbol", "Syntax: var <VARIABLE NAME> [ = <INITIAL VALUE>]");
 				return null;
 			}
+		}
+		else
+		{
+			error("name", "Names are required for variable declaration.");
+			return null;
+		}
+	}
+
+	private ASTLoop parseLoop(ASTParent parent)
+	{
+		if (match(Syntax.KEYWORD_LOOP))
+		{
+			ASTLoop loop = new ASTLoop(parent);
+
+			if (nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY))
+				loop.initialStatement = parseVariableDeclaration(loop);
+			else
+				loop.initialStatement = parseExpression(loop);
+
+			if (match(","))
+			{
+
+				loop.conditionalStatement = parseExpression(loop);
+			}
+			if (match(","))
+			{
+				loop.iterationalStatement = parseExpression(loop);
+			}
+			if (!match(Syntax.OPERATOR_BLOCKSTART))
+			{
+				error(":", "A colon is required at the end of a loop statement.");
+			}
+
+			return loop;
 		}
 		else
 		{
@@ -291,21 +328,15 @@ public class Parser
 		// Use the indent to find a new parent for the contents of this line. //
 		ASTParent parent = dest.getParentForNewCode(line_indent);
 
-		// Check if we are defining a variable. //
-		if (lookAhead.value.equals(Syntax.KEYWORD_VAR))
+		if (parent == null)
 		{
-			ASTVariableDeclaration variable = parseVariableDeclaration(parent);
-			if (variable != null)
-			{
-				variable.columnNumber = line_indent;
-				return true;
-			}
-
+			System.err.println("Incorrect line indentation at: " + lexer.getLineNumber());
+			System.err.println("Tabbing: " + line_indent);
 			return false;
 		}
 
 		// Check if we are defining a function. //
-		else if (lookAhead.value.equals(Syntax.KEYWORD_FUN))
+		if (lookAhead.value.equals(Syntax.KEYWORD_FUN))
 		{
 			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
 			if (function != null)
@@ -313,7 +344,6 @@ public class Parser
 				function.columnNumber = line_indent;
 				return true;
 			}
-
 			return false;
 		}
 
@@ -348,13 +378,40 @@ public class Parser
 
 		}
 
+		else if (lookAhead.value.equals(Syntax.KEYWORD_LOOP))
+		{
+			ASTLoop loop = parseLoop(parent);
+			if (loop != null)
+			{
+				loop.columnNumber = line_indent;
+				return true;
+			}
+			return false;
+		}
+
+		// Try to parse as a variable declaration. //
+		else if (lookAhead.tokenType == TokenType.SYMBOL
+				&& nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY))
+		{
+			ASTVariableDeclaration declaration = parseVariableDeclaration(parent);
+			if (declaration != null)
+			{
+				declaration.columnNumber = line_indent;
+				return true;
+			}
+			return false;
+		}
+
 		// Otherwise it's just an expression. //
 		else
 		{
 			ASTBase expression = parseExpression(parent);
 			if (expression != null)
+			{
 				expression.columnNumber = line_indent;
-			return expression != null;
+				return true;
+			}
+			return false;
 		}
 	}
 
@@ -397,7 +454,8 @@ public class Parser
 		if (value.equals(lookAhead.value))
 		{
 			previous = lookAhead;
-			lookAhead = lexer.getToken();
+			lookAhead = nextLookAhead;
+			nextLookAhead = lexer.getToken();
 			return true;
 		}
 
@@ -409,7 +467,8 @@ public class Parser
 		if (value == lookAhead.tokenType)
 		{
 			previous = lookAhead;
-			lookAhead = lexer.getToken();
+			lookAhead = nextLookAhead;
+			nextLookAhead = lexer.getToken();
 			return true;
 		}
 

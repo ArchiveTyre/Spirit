@@ -44,25 +44,28 @@ class ParserTest
 	void firstTest()
 	{
 		// Test basic assignment. //
-		testClassCompile("AssignTest1", "var a = 5");
-		testClassCompile("AssignTest2", "var b = 128");
+		testClassCompile("AssignTest1", "a := 5");
+		testClassCompile("AssignTest2", "b := 128");
 
 		// Test assignments with an expression with operators. //
-		testClassCompile("ExpressionTest1", "var b = 3 + 4");
-		testClassCompile("ExpressionTest2", "var b = 3 + 4 * 2");
+		testClassCompile("ExpressionTest1", "b := 3 + 4");
+		testClassCompile("ExpressionTest2", "b := 3 + 4 * 2");
 
 		// Test multi-line assignments. //
-		testClassCompile("MultiLine1", "var a = 3\nvar b = 1");
-		testClassCompile("MultiLine2", "var a = 8\n\nvar b = 9\n\n");
+		testClassCompile("MultiLine1", "a := 3\nb : int = 1");
+		testClassCompile("MultiLine2", "a := 8\n\nvar b = 9\n\n");
 
 		// Just expressions. //
-		testClassCompile("ExpressionTest3", "var a = 3\na=4");
+		testClassCompile("ExpressionTest3", "a := 3\na=4");
 
-		testClassCompile("ParTest1", "var a = (1 * 2)");
+		testClassCompile("ParTest1", "a := (1 * 2)");
 
+		// Tabbing. //
+		testClassCompile("Tabing1", "\ta:=3");
+		testClassCompile("Tabing2", "\ta:=3\n\ta = 23");
 
 		// Test multi-line parent search. //
-		testClassCompile("MultiLineParentSearch", "\tvar a = 10\n\ta = 25");
+		testClassCompile("MultiLineParentSearch1", "\ta:= 10\n\ta = 25");
 
 		// Test functions. //
 		testClassCompile("FunTest1", "fun Add(a : int, b : int) -> int:");
@@ -71,10 +74,13 @@ class ParserTest
 
 		// Test function calls. //
 		testClassCompile("FunCall1", "fun Add(a : int, b : int )->int:\nAdd(3, 2)");
-		testClassCompile("FunCall2", "fun Neg(b : int) -> int:\nNeg 2");
+		testClassCompile("FunCall2", "fun Neg(b : int) -> int:\n0 - 2");
 
 		// If statements. //
-		testClassCompile("IfStatement1", "var A = 3\nif A:\n\tprint A");
-		testClassCompile("IfStatement2", "var A = 3\nif A:\n\tprint A\nelse:\n\tprint 32");
+		testClassCompile("IfStatement1", "A := 3\nif A:\n\tprint A");
+		testClassCompile("IfStatement2", "A := 3\nif A:\n\tprint A\nelse:\n\tprint 32");
+
+		// Loops. //
+		testClassCompile("Loops1", "loop A := 3, A < 10, i = i + 1:");
 	}
 }

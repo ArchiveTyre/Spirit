@@ -15,8 +15,10 @@ public class ASTVariableUsage extends ASTBase
 
 	public ASTVariableUsage(ASTParent parent, String name)
 	{
-		super(null, name);
-		this.declaration = (ASTVariableDeclaration) parent.findSymbol(name);
+		super(parent, name);
+		ASTBase possibleResult = parent.findSymbol(name);
+		if (possibleResult != null)
+			declaration = (ASTVariableDeclaration)possibleResult;
 		setParent(parent);
 	}
 

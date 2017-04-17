@@ -17,15 +17,18 @@ public abstract class ASTParent extends ASTBase
 		super(parent, name);
 	}
 
-	@Override
+	/**
+	 * Finds another AST from this AST's perspective.
+	 * @param symbolName
+	 * @return
+	 */
 	public ASTBase findSymbol(String symbolName)
 	{
-		ASTBase result = super.findSymbol(symbolName);
-		if (result != null)
-			return result;
+		if (name.equals(symbolName))
+			return this;
 
 		for (ASTBase child : childAsts) {
-			if (child.name == symbolName) {
+			if (child.name.equals(symbolName) && !(child instanceof ASTVariableUsage)) {
 				return child;
 			}
 		}

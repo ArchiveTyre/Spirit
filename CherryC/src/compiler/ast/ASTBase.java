@@ -13,7 +13,7 @@ public abstract class ASTBase
 {
 
 	/** If the AST has a name (optional). */
-	String name;
+	String name = "";
 
 	/** Line number on which it was defined on. */
 	public int lineNumber;
@@ -55,19 +55,6 @@ public abstract class ASTBase
 	}
 
 	public abstract CherryType getExpressionType();
-
-	/**
-	 * Finds another AST from this AST's perspective.
-	 * @param symbolName
-	 * @return
-	 */
-	public ASTBase findSymbol(String symbolName)
-	{
-		if (symbolName == name)
-			return this;
-
-		return null;
-	}
 
 	/**
 	 * Prints the AST onto a stream.
