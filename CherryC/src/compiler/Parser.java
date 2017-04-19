@@ -24,7 +24,7 @@ public class Parser
 	private Token previous = null;
 
 	private boolean fileTypeDeclared = false;
-	private ParseStage parseStage;
+	private int parseStage = ParseStage.NONE;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -341,6 +341,27 @@ public class Parser
 		}
 	}
 
+	private ASTSubclassExpression parseSubclassExpression(ASTParent parent)
+	{
+		if (match(Syntax.KEYWORD_EXTEND))
+		{
+			if (match(TokenType.SYMBOL))
+			{
+				ASTSubclassExpression expression = new ASTSubclassExpression(parent, previous.value);
+				return expression;
+			}
+			else
+			{
+				unexpectedExpressionError(lookAhead.value, "Invalid name for class/object.");
+			}
+		}
+		else
+		{
+			System.err.println("Compiler syntaxError! There was no subclass expression!");
+		}
+		return null;
+	}
+
 	private boolean parseLine(ASTClass dest)
 	{
 		// Extract indents to get a parent. //
@@ -373,6 +394,8 @@ public class Parser
 				{
 					declaration.columnNumber = line_indent;
 					fileTypeDeclared = true;
+
+					setStage(ParseStage.FILETYPE_DECLARATION);
 					return true;
 				}
 				return false;
@@ -390,12 +413,26 @@ public class Parser
 			return false;
 		}
 
+		// Check if we are extending a class. //
+		if (lookAhead.value.equals(Syntax.KEYWORD_EXTEND))
+		{
+			ASTSubclassExpression subclassExpression = parseSubclassExpression(parent);
+			if (subclassExpression != null)
+			{
+				setStage(ParseStage.EXTENSIONS);
+				subclassExpression.columnNumber = line_indent;
+				return true;
+			}
+			return false;
+		}
 		// Check if we are defining a function. //
-		if (lookAhead.value.equals(Syntax.KEYWORD_FUN))
+		else if (lookAhead.value.equals(Syntax.KEYWORD_FUN))
 		{
 			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
 			if (function != null)
 			{
+				setStage(ParseStage.CODE);
+
 				function.columnNumber = line_indent;
 				return true;
 			}
@@ -407,6 +444,7 @@ public class Parser
 			ASTBase condition = parseExpression(parent);
 			if (match(Syntax.OPERATOR_BLOCKSTART))
 			{
+				setStage(ParseStage.CODE);
 				new ASTIf(parent, condition);
 				return true;
 			}
@@ -422,6 +460,7 @@ public class Parser
 		{
 			if (match(Syntax.OPERATOR_BLOCKSTART))
 			{
+				setStage(ParseStage.CODE);
 				new ASTElse(parent);
 				return true;
 			}
@@ -438,6 +477,7 @@ public class Parser
 			ASTLoop loop = parseLoop(parent);
 			if (loop != null)
 			{
+				setStage(ParseStage.CODE);
 				loop.columnNumber = line_indent;
 				return true;
 			}
@@ -451,6 +491,7 @@ public class Parser
 			ASTVariableDeclaration declaration = parseVariableDeclaration(parent);
 			if (declaration != null)
 			{
+				setStage(ParseStage.CODE);
 				declaration.columnNumber = line_indent;
 				return true;
 			}
@@ -464,6 +505,7 @@ public class Parser
 			ASTBase expression = parseExpression(parent);
 			if (expression != null)
 			{
+				setStage(ParseStage.CODE);
 				expression.columnNumber = line_indent;
 				return true;
 			}
@@ -479,6 +521,7 @@ public class Parser
 	public void parseFile(ASTClass dest)
 	{
 
+		previous = new Token("", TokenType.UNKNOWN, 0, 1);
 		// Parse as many lines as possible. //
 		while (parseLine(dest));
 
@@ -531,6 +574,51 @@ public class Parser
 		return false;
 	}
 
+	private void setStage(int newStage)
+	{
+		boolean success = true;
+		switch (newStage)
+		{
+			case ParseStage.NONE:
+				error("Parse Stage cannot be NONE.");
+				success = false;
+				break;
+			case ParseStage.IMPORTS:
+				if (newStage < parseStage)
+				{
+					unexpectedExpressionError("Import statements must take place at the start of every file.");
+					success = false;
+				}
+				break;
+			case ParseStage.FILETYPE_DECLARATION:
+				if (newStage < parseStage)
+				{
+					unexpectedExpressionError("File declarations must take place at the start of every file, or after the import/use statements.");
+					success = false;
+				}
+				break;
+			case ParseStage.EXTENSIONS:
+				if (parseStage < ParseStage.FILETYPE_DECLARATION)
+				{
+					unexpectedExpressionError("File type must have been declared for this expression to occur.");
+					success = false;
+				}
+				if (newStage < parseStage)
+				{
+					System.out.println(newStage + ", " + parseStage);
+					unexpectedExpressionError("Not expecting this expression at this stage.");
+					success = false;
+				}
+			case ParseStage.CODE:
+				if (parseStage < ParseStage.FILETYPE_DECLARATION)
+				{
+					unexpectedExpressionError("File type must have been declared for this expression to occur.");
+					success = false;
+				}
+		}
+		parseStage = (success) ? newStage : parseStage;
+	}
+
 	private void syntaxError(String expected, String message)
 	{
 		syntaxError(expected, lookAhead.value, message);
@@ -553,6 +641,12 @@ public class Parser
 	{
 		System.err.println("[Raven]: Unexpected Expression Error in file: " + lexer.fileName + "\tat line " + previous.lineNumber + ".");
 		System.err.println("Expression:\t\t" + expression);
+		System.err.println("Message:\t\t" + (message.equals("") ? "[NONE]" : message));
+	}
+
+	private void error(String message)
+	{
+		System.err.println("[Raven]: Error in file: " + lexer.fileName + "\tat line " + previous.lineNumber + ".");
 		System.err.println("Message:\t\t" + (message.equals("") ? "[NONE]" : message));
 	}
 
