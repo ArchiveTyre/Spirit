@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ParserTest
 {
 
-	private void testClassCompile(String name, String testString)
+	private void testClassCompile(boolean incompleteClass, String name, String testString)
 	{
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
@@ -28,6 +28,7 @@ class ParserTest
 		Lexer lexer = new Lexer(pushbackInputStream, name + ".cherry");
 
 		Parser parser = new Parser(lexer);
+		parser.fileTypeDeclared = incompleteClass;
 
 		ASTClass astClass = new ASTClass(name, null);
 
@@ -39,11 +40,17 @@ class ParserTest
 		printer.println();
 	}
 
+	private void testClassCompile(String name, String testString)
+	{
+		testClassCompile(true, name, testString);
+	}
+
 
 	@Test
 	void firstTest()
 	{
-		/*
+
+
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "a := 5");
 		testClassCompile("AssignTest2", "b := 128");
@@ -82,6 +89,7 @@ class ParserTest
 		testClassCompile("IfStatement2", "A := 3\nif A:\n\tprint A\nelse:\n\tprint 32");
 
 		// Loops. //
+
 		testClassCompile("Loops1", "loop A := 3, A < 10, i = i + 1:");
 		testClassCompile("Loops2", "loop 10:\n\tprint 2");
 		testClassCompile("Loops3", "loop 6 + 2:\n\tprint 2");
@@ -89,10 +97,9 @@ class ParserTest
 
 
 		// File type declarations. //
-		testClassCompile("FileType1", "type enum");
-		testClassCompile("FileType2", "type object");
-		*/
+		testClassCompile(false, "FileType1", "type enum");
+		testClassCompile(false, "FileType2", "type object");
 
-		testClassCompile("Subclass1", "type enum\nextends MyObject");
+		testClassCompile(false, "Subclass1", "type enum\nextends MyObject");
 	}
 }
