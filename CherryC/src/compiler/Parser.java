@@ -382,29 +382,7 @@ public class Parser
 		ASTParent parent = dest.getParentForNewCode(line_indent);
 
 
-		// Check if it contains the keyword "type" to see if we can see what type it is. //
-		if (match(Syntax.KEYWORD_TYPE))
-		{
-			// Check that we have not already declared the filetype. //
-			if (!fileTypeDeclared)
-			{
-				// Get the file type declaration. //
-				ASTFileTypeDeclaration declaration = parseFileTypeDeclaration(parent);
-				if (declaration != null)
-				{
-					declaration.columnNumber = line_indent;
-					fileTypeDeclared = true;
 
-					setStage(ParseStage.FILETYPE_DECLARATION);
-					return true;
-				}
-				return false;
-			} else
-			{
-				// Error. //
-				unexpectedExpressionError(previous.value, "File type has already been declared, was not expecting another declaration");
-			}
-		}
 
 		if (parent == null)
 		{
@@ -498,6 +476,29 @@ public class Parser
 			return false;
 		}
 
+		// Check if it contains the keyword "type" to see if we can see what type it is. //
+		else if (match(Syntax.KEYWORD_TYPE))
+		{
+			// Check that we have not already declared the filetype. //
+			if (!fileTypeDeclared)
+			{
+				// Get the file type declaration. //
+				ASTFileTypeDeclaration declaration = parseFileTypeDeclaration(parent);
+				if (declaration != null)
+				{
+					declaration.columnNumber = line_indent;
+					fileTypeDeclared = true;
+
+					setStage(ParseStage.FILETYPE_DECLARATION);
+					return true;
+				}
+				return false;
+			} else
+			{
+				// Error. //
+				unexpectedExpressionError(previous.value, "File type has already been declared, was not expecting another declaration");
+			}
+		}
 
 		// Otherwise it's just an expression. //
 		else
