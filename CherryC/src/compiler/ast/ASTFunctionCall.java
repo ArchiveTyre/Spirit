@@ -77,7 +77,8 @@ public class ASTFunctionCall extends ASTParent
 			destination.print("(");
 			childAsts.get(0).debugSelf(destination);
 			destination.print(" " + name + " ");
-			childAsts.get(1).debugSelf(destination);
+			if (childAsts.size() == 2)
+				childAsts.get(1).debugSelf(destination);
 			destination.print(")");
 		}
 

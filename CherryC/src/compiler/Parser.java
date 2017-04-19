@@ -21,6 +21,7 @@ public class Parser
 
 	private Token lookAhead;
 	private Token nextLookAhead;
+	private Token nextNextLookAhead;
 	private Token previous = null;
 
 	private boolean fileTypeDeclared = false;
@@ -35,6 +36,7 @@ public class Parser
 		this.lexer = lexer;
 		lookAhead = lexer.getToken();
 		nextLookAhead = lexer.getToken();
+		nextNextLookAhead = lexer.getToken();
 	}
 
 	// FIXME: Add support for strings.
@@ -313,20 +315,47 @@ public class Parser
 		{
 			ASTLoop loop = new ASTLoop(parent);
 
-			if (nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY))
+			if (nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY)
+					&& nextNextLookAhead.tokenType != TokenType.NEWLINE)
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
 				loop.initialStatement = parseExpression(loop);
 
 			if (match(","))
 			{
-
 				loop.conditionalStatement = parseExpression(loop);
+				if (match(","))
+				{
+					loop.iterationalStatement = parseExpression(loop);
+				}
 			}
-			if (match(","))
+
+			// TODO: Add as syntax.
+			else if (match("as"))
 			{
-				loop.iterationalStatement = parseExpression(loop);
+				System.out.println("Not implemented yet");
 			}
+			else
+			{
+				ASTBase until = loop.initialStatement;
+				if (until.getExpressionType() != Builtins.getBuiltin("int"))
+				{
+					syntaxError("int", "Can only loop without index with type \"int\".");
+					return null;
+				}
+				final String counterName = "__c_counter";
+				loop.initialStatement = new ASTVariableDeclaration(loop, counterName, Builtins.getBuiltin("int"), until);
+
+				loop.conditionalStatement = new ASTFunctionCall(loop, ">");
+				new ASTVariableUsage((ASTParent)loop.conditionalStatement, counterName);
+				new ASTNumber((ASTParent)loop.conditionalStatement, 0);
+				((ASTFunctionCall)loop.conditionalStatement).infix = true;
+
+				loop.iterationalStatement = new ASTFunctionCall(loop, "--");
+				new ASTVariableUsage((ASTParent)loop.iterationalStatement, counterName);
+				((ASTFunctionCall)loop.iterationalStatement).infix = true;
+			}
+
 			if (!match(Syntax.OPERATOR_BLOCKSTART))
 			{
 				syntaxError(":", "A colon is required at the end of a loop statement.");
@@ -505,13 +534,19 @@ public class Parser
 		return null;
 	}
 
+	private void step()
+	{
+		previous = lookAhead;
+		lookAhead = nextLookAhead;
+		nextLookAhead = nextNextLookAhead;
+		nextNextLookAhead = lexer.getToken();
+	}
+
 	private boolean match(String value)
 	{
 		if (value.equals(lookAhead.value))
 		{
-			previous = lookAhead;
-			lookAhead = nextLookAhead;
-			nextLookAhead = lexer.getToken();
+			step();
 			return true;
 		}
 
@@ -522,9 +557,7 @@ public class Parser
 	{
 		if (value == lookAhead.tokenType)
 		{
-			previous = lookAhead;
-			lookAhead = nextLookAhead;
-			nextLookAhead = lexer.getToken();
+			step();
 			return true;
 		}
 

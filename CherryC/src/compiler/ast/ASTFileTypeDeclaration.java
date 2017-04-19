@@ -26,6 +26,6 @@ public class ASTFileTypeDeclaration extends ASTBase
 	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
-		destination.println("File type: " + FileType.toString(type));
+		destination.println("File type: " + type.name());
 	}
 }

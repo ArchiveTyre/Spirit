@@ -43,7 +43,7 @@ public class ASTLoop extends ASTParent
 		destination.print("; ");
 		if (iterationalStatement != null)
 			iterationalStatement.debugSelf(destination);
-		destination.println();
+		destination.println(")");
 		destination.println("{");
 		destination.indentation++;
 		for (ASTBase child : childAsts)

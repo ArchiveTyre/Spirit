@@ -13,22 +13,6 @@ public enum FileType
 	UNDEFINED;
 
 
-	public static String toString(FileType type)
-	{
-		switch (type)
-		{
-			case OBJECT:
-				return "OBJECT";
-			case INTERFACE:
-				return "INTERFACE";
-			case ENUM:
-				return "ENUM";
-			default:
-				return "UNDEFINED";
-		}
-	}
-
-
 	public static FileType toFileType(String symbol)
 	{
 		switch (symbol)
