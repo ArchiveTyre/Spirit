@@ -82,5 +82,10 @@ class ParserTest
 
 		// Loops. //
 		testClassCompile("Loops1", "loop A := 3, A < 10, i = i + 1:");
+
+
+		// File type declarations. //
+		testClassCompile("FileType1", "type enum");
+		testClassCompile("FileType2", "type object");
 	}
 }

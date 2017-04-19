@@ -2,6 +2,7 @@ package compiler;
 
 import compiler.ast.*;
 import compiler.builtins.Builtins;
+import compiler.builtins.FileType;
 
 import static compiler.Token.TokenType;
 
@@ -21,6 +22,9 @@ public class Parser
 	private Token lookAhead;
 	private Token nextLookAhead;
 	private Token previous = null;
+
+	private boolean fileTypeDeclared = false;
+	private ParseStage parseStage;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -64,7 +68,7 @@ public class Parser
 
 						if (!match(TokenType.RPAR))
 						{
-							error(")", "Unmatched parenthesis");
+							syntaxError(")", "Unmatched parenthesis");
 						}
 					}
 					return functionCall;
@@ -87,10 +91,10 @@ public class Parser
 				}
 			}
 
-			// An error has occurred. //
+			// An syntaxError has occurred. //
 			else
 			{
-				System.err.println("Compiler error.");
+				System.err.println("Compiler syntaxError.");
 				return null;
 			}
 
@@ -127,7 +131,7 @@ public class Parser
 			}
 			else
 			{
-				error("end of expression", "");
+				syntaxError("end of expression", "");
 			}
 		}
 
@@ -142,7 +146,7 @@ public class Parser
 			}
 			else
 			{
-				error(")", "Unmatched parenthesis");
+				syntaxError(")", "Unmatched parenthesis");
 			}
 		}
 
@@ -199,7 +203,7 @@ public class Parser
 						// Check for matching parentheses. //
 						if (!match (TokenType.RPAR))
 						{
-							error(")", "Unmatched parenthesis");
+							syntaxError(")", "Unmatched parenthesis");
 							return null;
 						}
 					}
@@ -214,7 +218,7 @@ public class Parser
 					}
 					else
 					{
-						error("return type", "Return type is required after \"->\"");
+						syntaxError("return type", "Return type is required after \"->\"");
 						return null;
 					}
 				}
@@ -222,20 +226,20 @@ public class Parser
 				// Make sure function declarations end with a colon. //
 				if (!match(Syntax.OPERATOR_BLOCKSTART))
 				{
-					error(":", "A colon is required at the end of a function declaration.");
+					syntaxError(":", "A colon is required at the end of a function declaration.");
 				}
 
 				return new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("fun"), function);
 			}
 			else
 			{
-				error("name", "Expected a name for the function.");
+				syntaxError("name", "Expected a name for the function.");
 				return null;
 			}
 		}
 		else
 		{
-			System.err.println("Compiler error!");
+			System.err.println("Compiler syntaxError!");
 			return null;
 		}
 	}
@@ -271,9 +275,36 @@ public class Parser
 		}
 		else
 		{
-			error("name", "Names are required for variable declaration.");
+			syntaxError("name", "Names are required for variable declaration.");
 			return null;
 		}
+	}
+
+
+	private ASTFileTypeDeclaration parseFileTypeDeclaration(ASTParent parent)
+	{
+		ASTFileTypeDeclaration declaration;
+		if (match(TokenType.SYMBOL))
+		{
+			if (FileType.toFileType(previous.value) != FileType.UNDEFINED)
+			{
+
+
+				declaration = new ASTFileTypeDeclaration(parent, FileType.toFileType(previous.value));
+				return declaration;
+
+			}
+			else
+			{
+				syntaxError("filetype", previous.value, "The file type provided is not recognized");
+			}
+		}
+		else
+		{
+			syntaxError("file type", "A file type is required for file type declaration.");
+		}
+
+		return null;
 	}
 
 	private ASTLoop parseLoop(ASTParent parent)
@@ -298,14 +329,14 @@ public class Parser
 			}
 			if (!match(Syntax.OPERATOR_BLOCKSTART))
 			{
-				error(":", "A colon is required at the end of a loop statement.");
+				syntaxError(":", "A colon is required at the end of a loop statement.");
 			}
 
 			return loop;
 		}
 		else
 		{
-			System.err.println("Compiler error!");
+			System.err.println("Compiler syntaxError!");
 			return null;
 		}
 	}
@@ -325,8 +356,32 @@ public class Parser
 			return true;
 		}
 
+
 		// Use the indent to find a new parent for the contents of this line. //
 		ASTParent parent = dest.getParentForNewCode(line_indent);
+
+
+		// Check if it contains the keyword "type" to see if we can see what type it is. //
+		if (match(Syntax.KEYWORD_TYPE))
+		{
+			// Check that we have not already declared the filetype. //
+			if (!fileTypeDeclared)
+			{
+				// Get the file type declaration. //
+				ASTFileTypeDeclaration declaration = parseFileTypeDeclaration(parent);
+				if (declaration != null)
+				{
+					declaration.columnNumber = line_indent;
+					fileTypeDeclared = true;
+					return true;
+				}
+				return false;
+			} else
+			{
+				// Error. //
+				unexpectedExpressionError(previous.value, "File type has already been declared, was not expecting another declaration");
+			}
+		}
 
 		if (parent == null)
 		{
@@ -357,7 +412,7 @@ public class Parser
 			}
 			else
 			{
-				error(":", "A colon is required at the end of an if statement.");
+				syntaxError(":", "A colon is required at the end of an if statement.");
 				return false;
 			}
 
@@ -372,7 +427,7 @@ public class Parser
 			}
 			else
 			{
-				error(":", "A colon is required at the end of an else statement.");
+				syntaxError(":", "A colon is required at the end of an else statement.");
 				return false;
 			}
 
@@ -402,6 +457,7 @@ public class Parser
 			return false;
 		}
 
+
 		// Otherwise it's just an expression. //
 		else
 		{
@@ -429,7 +485,7 @@ public class Parser
 		// Check for garbage. //
 		if (!match(TokenType.EOF))
 		{
-			error("end of file", "There is un-parsed junk at the end of the file. ");
+			syntaxError("end of file", "There is un-parsed junk at the end of the file. ");
 		}
 
 	}
@@ -475,12 +531,29 @@ public class Parser
 		return false;
 	}
 
-	private void error(String expected, String message)
+	private void syntaxError(String expected, String message)
 	{
-		System.err.println("[Cherry]: Error in file: " + lexer.fileName + "\t at line " + previous.lineNumber + ".");
+		syntaxError(expected, lookAhead.value, message);
+	}
+
+	private void syntaxError(String expected, String actual, String message)
+	{
+		System.err.println("[Raven]: Syntax Error in file: " + lexer.fileName + "\tat line " + previous.lineNumber + ".");
 		System.err.println("\tExpected:\t\t" + expected);
-		System.err.println("\tActual:\t\t\t" + lookAhead.value);
-		System.err.println("\tMessage: " + (message.equals("") ? "[NONE]" : message));
+		System.err.println("\tActual:\t\t\t" + actual);
+		System.err.println("\tMessage:\t\t" + (message.equals("") ? "[NONE]" : message));
+	}
+
+	private void unexpectedExpressionError(String message)
+	{
+		unexpectedExpressionError(lookAhead.value, message);
+	}
+
+	private void unexpectedExpressionError(String expression, String message)
+	{
+		System.err.println("[Raven]: Unexpected Expression Error in file: " + lexer.fileName + "\tat line " + previous.lineNumber + ".");
+		System.err.println("Expression:\t\t" + expression);
+		System.err.println("Message:\t\t" + (message.equals("") ? "[NONE]" : message));
 	}
 
 }
