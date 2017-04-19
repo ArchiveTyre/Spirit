@@ -84,7 +84,7 @@ class ParserTest
 		testClassCompile("Loops1", "loop A := 3, A < 10, i = i + 1:");
 		testClassCompile("Loops2", "loop 10:\n\tprint 2");
 		testClassCompile("Loops3", "loop 6 + 2:\n\tprint 2");
-		testClassCompile("Loops4", "loop 10 as i:\n\tprint 2");
+		//testClassCompile("Loops4", "loop 10 as i:\n\tprint 2");
 
 
 		// File type declarations. //
