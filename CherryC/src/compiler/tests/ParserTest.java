@@ -43,6 +43,7 @@ class ParserTest
 	@Test
 	void firstTest()
 	{
+		/*
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "a := 5");
 		testClassCompile("AssignTest2", "b := 128");
@@ -90,5 +91,8 @@ class ParserTest
 		// File type declarations. //
 		testClassCompile("FileType1", "type enum");
 		testClassCompile("FileType2", "type object");
+		*/
+
+		testClassCompile("Subclass1", "type enum\nextends MyObject");
 	}
 }

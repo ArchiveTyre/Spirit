@@ -41,6 +41,7 @@ public class Syntax
 	public static final String KEYWORD_TYPE_OBJECT		= "object"		;
 	public static final String KEYWORD_TYPE_INTERFACE	= "interface"	;
 	public static final String KEYWORD_TYPE_ENUM		= "enum"		;
+	public static final String KEYWORD_EXTEND			= "extends"		;
 
 	public static final String COND_OPERATOR_EQU		= "is"			;
 	public static final String COND_OPERATOR_AND		= "and"			;
