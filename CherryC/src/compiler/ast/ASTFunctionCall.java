@@ -26,7 +26,7 @@ public class ASTFunctionCall extends ASTParent
 	public ASTFunctionCall(ASTParent parent, String name)
 	{
 		super(parent, name);
-		System.out.println("Creating call with name: " + name);
+		//System.out.println("Creating call with name: " + name);
 
 		// Infixes don't have a declaration. //
 		if (infix == false)

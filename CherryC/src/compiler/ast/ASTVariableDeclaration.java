@@ -31,7 +31,8 @@ public class ASTVariableDeclaration extends ASTBase
 	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
-		destination.print("Variable: " + name + " of type: " + type.getName() + " with value of ");
+		destination.print("Variable: " + name +
+				" of type: " + type.getName() + " with value of ");
 		value.debugSelf(destination);
 
 	}

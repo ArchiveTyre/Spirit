@@ -16,7 +16,7 @@ public class Syntax
 	public static final String KEYWORD_CON				= "con"			;
 
 	/** Used to declare functions. */
-	public static final String KEYWORD_FUN				= "fun"			;
+	public static final String KEYWORD_FUN				= "fn"			;
 
 	/** Used to declare an if statement*/
 	public static final String KEYWORD_IF				= "if"			;
@@ -53,7 +53,8 @@ public class Syntax
 	public static final String OPERATOR_ACCESS			= "."			;
 	public static final String OPERATOR_BLOCKSTART		= ":"			;
 	public static final String OPERATOR_TYPESPECIFY		= ":"			;
-	public static final String OPERATOR_RETURNTYPE		= "->"			;
+	public static final String OPERATOR_RETURNTYPE		= ":"			;
+	public static final String OPERATOR_RETURNVALUE		= "="			;
 
 	public static final String MATH_OP_PLUS				= "+"			;
 	public static final String MATH_OP_SUB				= "-"			;
@@ -125,7 +126,6 @@ public class Syntax
 		{
 			case OPERATOR_ACCESS		:
 			case OPERATOR_BLOCKSTART	:
-			case OPERATOR_RETURNTYPE	:
 				return true;
 			default:
 				return false;

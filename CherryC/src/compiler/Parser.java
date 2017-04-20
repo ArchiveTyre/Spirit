@@ -173,7 +173,7 @@ public class Parser
 
 	private ASTVariableDeclaration parseFunctionDeclaration(ASTParent parent)
 	{
-		if (match(Syntax.KEYWORD_FUN))
+		/*if (match(Syntax.KEYWORD_FUN))
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -242,6 +242,80 @@ public class Parser
 		{
 			System.err.println("Compiler syntaxError!");
 			return null;
+		}*/
+
+
+		if (match(Syntax.KEYWORD_FUN))
+		{
+			if (match(TokenType.SYMBOL))
+			{
+				String name = previous.value;
+
+				ASTFunctionDeclaration function = new ASTFunctionDeclaration(parent, Builtins.getBuiltin("void"));
+
+				if (match(TokenType.LPAR))
+				{
+					if (!match(TokenType.RPAR))
+					{
+						do
+						{
+							if (match(TokenType.SYMBOL))
+							{
+								String argName = previous.value;
+								CherryType argType = parseType(parent);
+								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+							}
+						} while (match(","));
+
+						if (!match (TokenType.RPAR))
+						{
+							syntaxError(")", "Unmatched parenthesis");
+							return null;
+						}
+					}
+				}
+
+				if (match(Syntax.OPERATOR_RETURNTYPE))
+				{
+					if (match(TokenType.SYMBOL))
+					{
+						function.returnType = findType(parent, previous.value);
+					}
+					else
+					{
+						syntaxError("return type", "Return type is required after \"->\"");
+						return null;
+					}
+				}
+				else
+				{
+					function.returnType = Builtins.getBuiltin("void");
+				}
+
+				if (match(Syntax.OPERATOR_RETURNVALUE))
+				{
+					//ASTFunctionCall call = new ASTFunctionCall(parent, "return");
+					ASTReturnExpression call = new ASTReturnExpression(parent, "return");
+					while (match(TokenType.NEWLINE));
+					ASTBase right = parseExpression(parent);
+					right.setParent(call);
+					call.setParent(function);
+				}
+
+
+				return new ASTVariableDeclaration(parent, name, Builtins.getBuiltin(Syntax.KEYWORD_FUN), function);
+			}
+			else
+			{
+				syntaxError("function name", "Expected a name for the function.");
+				return null;
+			}
+
+
+		} else
+		{
+			System.err.println("Compilier error!!!");
+			return null;
 		}
 	}
 
@@ -255,15 +329,15 @@ public class Parser
 				CherryType cherryType = parseType(parent);
 				ASTBase value = null;
 
+
 				// Try to parse initial value. //
 				if (match("="))
 				{
 					value = parseExpression(parent);
 					if (cherryType == null)
 						cherryType = value.getExpressionType();
-
 						// Check that the types match. //
-					else if (cherryType != value.getExpressionType())
+					else if (cherryType != value.getExpressionType() && value.getExpressionType() != null)
 						System.err.print("ERROR: Type miss-match at line: " + previous.lineNumber);
 				}
 

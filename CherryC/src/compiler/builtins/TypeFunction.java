@@ -13,7 +13,7 @@ public class TypeFunction implements CherryType
 	@Override
 	public String getName()
 	{
-		return "fun";
+		return "fn";
 	}
 
 	@Override

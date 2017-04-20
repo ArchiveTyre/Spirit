@@ -52,7 +52,7 @@ class ParserTest
 
 
 		// Test basic assignment. //
-		testClassCompile("AssignTest1", "a := 5");
+		testClassCompile("AssignTest1", "a := 5\nb : int = a");
 		testClassCompile("AssignTest2", "b := 128");
 
 		// Test assignments with an expression with operators. //
@@ -75,14 +75,17 @@ class ParserTest
 		// Test multi-line parent search. //
 		testClassCompile("MultiLineParentSearch1", "\ta:= 10\n\ta = 25");
 
-		// Test functions. //
+		/*// Test functions. //
 		testClassCompile("FunTest1", "fun Add(a : int, b : int) -> int:");
 		testClassCompile("FunTest2", "fun Add(a : int, b : int) -> int:\n\ta+b");
-		testClassCompile("FunTest3", "fun Add(a : int, b : int) -> int:\n\tfun DoAdd(a : int, b : int)->int:");
+		testClassCompile("FunTest3", "fun Add(a : int, b : int) -> int:\n\tfun DoAdd(a : int, b : int)->int:");*/
+		testClassCompile("FnTest1", "fn add(a : int, b : int) : int = a + b");
+		testClassCompile("FnTest2", "fn foo\n\ta := 2");
+		testClassCompile("FnTest3", "fn foo(a : int, b : int)\n\tc : int = a + b");
 
 		// Test function calls. //
-		testClassCompile("FunCall1", "fun Add(a : int, b : int )->int:\nAdd(3, 2)");
-		testClassCompile("FunCall2", "fun Neg(b : int) -> int:\n0 - 2");
+		testClassCompile("FunCall1", "fn Add(a : int, b : int ) : int = \nAdd(3, 2)");
+		testClassCompile("FunCall2", "fn Neg(b : int) : int =\n0 - 2");
 
 		// If statements. //
 		testClassCompile("IfStatement1", "A := 3\nif A:\n\tprint A");
