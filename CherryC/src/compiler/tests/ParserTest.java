@@ -3,6 +3,7 @@ package compiler.tests;
 import compiler.Lexer;
 import compiler.Parser;
 import compiler.ast.ASTClass;
+import compiler.builtins.Builtins;
 import compiler.lib.DebugPrinter;
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +51,7 @@ class ParserTest
 	void firstTest()
 	{
 
+		System.out.println(Builtins.getBuiltin("void").getName());
 
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "a := 5\nb : int = a");
@@ -79,16 +81,19 @@ class ParserTest
 		testClassCompile("FunTest1", "fun Add(a : int, b : int) -> int:");
 		testClassCompile("FunTest2", "fun Add(a : int, b : int) -> int:\n\ta+b");
 		testClassCompile("FunTest3", "fun Add(a : int, b : int) -> int:\n\tfun DoAdd(a : int, b : int)->int:");*/
-		testClassCompile("FnTest1", "fn add(a : int, b : int) : int = a + b");
+		/*testClassCompile("FnTest1", "fn add(a : int, b : int) : int = a + b");
 		testClassCompile("FnTest2", "fn foo\n\ta := 2");
 		testClassCompile("FnTest3", "fn foo(a : int, b : int)\n\tc : int = a + b");
 
 		// Test function calls. //
 		testClassCompile("FunCall1", "fn Add(a : int, b : int ) : int = \nAdd(3, 2)");
-		testClassCompile("FunCall2", "fn Neg(b : int) : int =\n0 - 2");
+		testClassCompile("FunCall2", "fn Neg(b : int) : int =\n0 - 2");*/
+
+		testClassCompile("FunTest1", "a : (x : int, y : int) int = x + y");
+		testClassCompile("FunTest2", "a : ()\n\tprint 23");
 
 		// If statements. //
-		testClassCompile("IfStatement1", "A := 3\nif A:\n\tprint A");
+		testClassCompile("IfStatement1", "A := 3\nif A:\n\tprint A\n\tprint A + 5\nb := 10");
 		testClassCompile("IfStatement2", "A := 3\nif A:\n\tprint A\nelse:\n\tprint 32");
 
 		// Loops. //

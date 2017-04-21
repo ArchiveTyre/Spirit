@@ -37,7 +37,7 @@ public class ASTFunctionDeclaration extends ASTParent
 			if (arg != args.get(args.size() - 1))
 				destination.print(", ");
 		}
-		destination.println(") -> " + returnType.getName() + ": ");
+		destination.println(") -> " + returnType.getName());
 		destination.println("{");
 		destination.indentation++;
 		for (ASTBase child : childAsts)

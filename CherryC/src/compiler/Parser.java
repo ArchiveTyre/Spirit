@@ -161,7 +161,12 @@ public class Parser
 	 */
 	private CherryType parseType(ASTParent perspective)
 	{
-		if (match(Syntax.OPERATOR_TYPESPECIFY))
+		return parseType(perspective, false);
+	}
+
+	private CherryType parseType(ASTParent perspective, boolean isFunctionType)
+	{
+		if (match(Syntax.OPERATOR_TYPESPECIFY) || isFunctionType)
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -243,9 +248,7 @@ public class Parser
 			System.err.println("Compiler syntaxError!");
 			return null;
 		}*/
-
-
-		if (match(Syntax.KEYWORD_FUN))
+		/*if (match(Syntax.KEYWORD_FUN))
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -315,6 +318,94 @@ public class Parser
 		} else
 		{
 			System.err.println("Compilier error!!!");
+			return null;
+		}*/
+
+		// Functions always start with a name as their identifier. //
+		if (match(TokenType.SYMBOL))
+		{
+			String name = previous.value;
+			ASTFunctionDeclaration function = new ASTFunctionDeclaration(parent, Builtins.getBuiltin("void"));
+
+			// Check that we specify the return type of the function (and the parameters). //
+			if (match(Syntax.OPERATOR_RETURNTYPE))
+			{
+				// Make sure we match a parenthesis which is basically the function indicator. //
+				if (match(TokenType.LPAR))
+				{
+					do
+					{
+						if (match(TokenType.SYMBOL))
+						{
+							String argName = previous.value;
+							CherryType argType = parseType(parent);
+							function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+						}
+					} while (match(","));
+
+					if (!match(TokenType.RPAR))
+					{
+						syntaxError(")", "Unmatched parenthesis");
+					}
+
+					if (lookAhead.tokenType == TokenType.SYMBOL)
+					{
+						CherryType argType = parseType(parent, true);
+						function.returnType = argType;
+					}
+					else
+					{
+						function.returnType = Builtins.getBuiltin("void");
+					}
+
+					if (lookAhead.value.equals(Syntax.OPERATOR_RETURNVALUE))
+					{
+						ASTReturnExpression call = parseReturnExpression(parent);
+						if (call != null)
+						{
+							call.setParent(function);
+						}
+					}
+
+					System.err.println("RT: " + function.returnType);
+					return new ASTVariableDeclaration(parent, name, Builtins.getBuiltin(Syntax.KEYWORD_FUN), function);
+				}
+				else
+				{
+					syntaxError("(", "All function type declarations need to start with a parenthesis");
+					return null;
+				}
+			}
+			else
+			{
+				syntaxError(":", "You need to specify a type for the function, void functions use () as their type ");
+				return null;
+			}
+		}
+		else
+		{
+			System.err.println("COMPILER ERROR!");
+			return null;
+		}
+	}
+
+	private ASTReturnExpression parseReturnExpression(ASTParent parent)
+	{
+		if (match(Syntax.OPERATOR_RETURNVALUE))
+		{
+			ASTReturnExpression returnExpression = new ASTReturnExpression(parent);
+
+			// Filter out any newlines. //
+			while (match(TokenType.NEWLINE));
+
+			ASTBase right = parseExpression(parent);
+			right.setParent(returnExpression);
+
+			return returnExpression;
+		}
+		else
+		{
+			syntaxError(Syntax.OPERATOR_RETURNVALUE, "COMPILER ERROR!!!");
 			return null;
 		}
 	}
@@ -490,6 +581,7 @@ public class Parser
 		}
 
 
+
 		// Use the indent to find a new parent for the contents of this line. //
 		ASTParent parent = dest.getParentForNewCode(line_indent);
 
@@ -515,7 +607,9 @@ public class Parser
 			return false;
 		}
 		// Check if we are defining a function. //
-		else if (lookAhead.value.equals(Syntax.KEYWORD_FUN))
+		else if (lookAhead.tokenType == TokenType.SYMBOL
+				&& nextLookAhead.value == Syntax.OPERATOR_TYPESPECIFY
+				&& nextNextLookAhead.tokenType == TokenType.LPAR)
 		{
 			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
 			if (function != null)
@@ -525,6 +619,7 @@ public class Parser
 			}
 			return false;
 		}
+
 
 		else if (match(Syntax.KEYWORD_IF))
 		{

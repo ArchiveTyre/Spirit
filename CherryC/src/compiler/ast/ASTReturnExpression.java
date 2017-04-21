@@ -8,9 +8,9 @@ import compiler.lib.DebugPrinter;
  */
 public class ASTReturnExpression extends ASTParent
 {
-	public ASTReturnExpression(ASTParent parent, String name)
+	public ASTReturnExpression(ASTParent parent)
 	{
-		super(parent, name);
+		super(parent, "return");
 	}
 
 	@Override
