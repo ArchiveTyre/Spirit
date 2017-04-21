@@ -15,6 +15,8 @@ public enum FileType
 
 	public static FileType toFileType(String symbol)
 	{
+		// FIXME: I don't like this function. B-baka! ^^
+
 		switch (symbol)
 		{
 			case Syntax.KEYWORD_TYPE_OBJECT:

@@ -23,6 +23,8 @@ public class Builtins
 
 	public static CherryType getBuiltin(String name)
 	{
+		// FIXME: This is so slow onii-chan. I want a direct reference to the builtins too.
+
 		for (CherryType type : builtins)
 		{
 			if (name.equals(type.getName()))

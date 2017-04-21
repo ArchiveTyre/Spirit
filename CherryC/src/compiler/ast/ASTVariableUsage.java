@@ -19,7 +19,6 @@ public class ASTVariableUsage extends ASTBase
 		ASTBase possibleResult = parent.findSymbol(name);
 		if (possibleResult != null)
 			declaration = (ASTVariableDeclaration)possibleResult;
-		setParent(parent);
 	}
 
 	@Override
