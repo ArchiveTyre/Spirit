@@ -9,25 +9,25 @@ package compiler;
 public class Syntax
 {
 
-	/** Used to declare variables. */
-	public static final String KEYWORD_VAR				= "var"			;
 
-	/** Used to declare constants. */
+	/*public static final String KEYWORD_VAR				= "var"			;
+
+
 	public static final String KEYWORD_CON				= "con"			;
 
-	/** Used to declare functions. */
+
 	public static final String KEYWORD_FUN				= "fn"			;
 
-	/** Used to declare an if statement*/
+
 	public static final String KEYWORD_IF				= "if"			;
 
-	/** Used to declare an else if statement. */
+
 	public static final String KEYWORD_ELSEIF			= "elseif"		;
 
-	/** Used to declare an else statement. */
+
 	public static final String KEYWORD_ELSE				= "else"		;
 
-	/** Used to declare a match statement  */
+
 	public static final String KEYWORD_MATCH			= "match"		;
 
 	public static final String KEYWORD_CASE				= "case"		;
@@ -73,7 +73,8 @@ public class Syntax
 	public static final String ASSIGN_POW				= "**="			;
 	public static final String ASSIGN_ROOT				= "//="			;
 	public static final String ASSIGN_INC				= "++"			;
-	public static final String ASSIGN_DEC				= "--"			;
+	public static final String ASSIGN_DEC				= "--"			;*/
+
 
 
 
@@ -148,21 +149,24 @@ public class Syntax
 
 	public class Type
 	{
-		public static final String CHAR		= "char"	;
-		public static final String WCHAR	= "wchar"	;
-
-		public static final String INT8		= "int8"	;
-		public static final String INT16	= "int16"	;
-		public static final String INT		= "int"		;
-		public static final String INT64	= "int64"	;
-
-		public static final String UINT8	= "uint8"	;
-		public static final String UINT16	= "uint16"	;
-		public static final String UINT		= "uint"	;
-		public static final String UINT64	= "uint64"	;
-
-		public static final String FLOAT	= "float"	;
-		public static final String DOUBLE	= "double"	;
+		public static final String CHAR			= "char"		;
+		public static final String WCHAR		= "wchar"		;
+		public static final String INT8			= "int8"		;
+		public static final String INT16		= "int16"		;
+		public static final String INT			= "int"			;
+		public static final String INT64		= "int64"		;
+		public static final String UINT8		= "uint8"		;
+		public static final String UINT16		= "uint16"		;
+		public static final String UINT			= "uint"		;
+		public static final String UINT64		= "uint64"		;
+		public static final String FLOAT		= "float"		;
+		public static final String DOUBLE		= "double"		;
+		public static final String STRING		= "string"		;
+		public static final String CONSTANT		= "const"		;
+		public static final String OBJECT		= "object"		;
+		public static final String ENUM			= "enum"		;
+		public static final String INTERFACE	= "interface"	;
+		public static final String FUNC			= "function"		;
 
 	}
 
@@ -171,24 +175,16 @@ public class Syntax
 	{
 		switch (string)
 		{
-			case KEYWORD_VAR			:
-			case KEYWORD_CON			:
-			case KEYWORD_FUN			:
-			case KEYWORD_IF			 	:
-			case KEYWORD_ELSE			:
-			case KEYWORD_ELSEIF			:
-			case KEYWORD_MATCH			:
-			case KEYWORD_CASE			:
-			case KEYWORD_LOOP			:
-			case KEYWORD_CLASS			:
-			case KEYWORD_MY				:
-			case KEYWORD_IMPORT			:
-			case KEYWORD_USE_NAMESPACE	:
-			case KEYWORD_THEN			:
-			case KEYWORD_TYPE			:
-			case KEYWORD_TYPE_OBJECT	:
-			case KEYWORD_TYPE_INTERFACE	:
-			case KEYWORD_TYPE_ENUM		:
+			case Keyword.IF			 	:
+			case Keyword.ELSE			:
+			case Keyword.ELSEIF			:
+			case Keyword.MATCH			:
+			case Keyword.LOOP			:
+			case Keyword.MY				:
+			case Keyword.IMPORT			:
+			case Keyword.USE			:
+			case Keyword.THEN			:
+			case Keyword.TYPE			:
 				return true;
 			default:
 				return false;
@@ -197,7 +193,7 @@ public class Syntax
 
 	// FIXME: These might be unnecessary.
 
-	public static boolean isConditionalOperator(String string)
+	/*public static boolean isConditionalOperator(String string)
 	{
 		switch (string)
 		{
@@ -222,7 +218,7 @@ public class Syntax
 			default:
 				return false;
 		}
-	}
+	}*/
 
 
 

@@ -20,12 +20,13 @@ public class Parser
 	/** The lexer to read from. */
 	private Lexer lexer;
 
-	private Token lookAhead;
-	private Token nextLookAhead;
-	private Token nextNextLookAhead;
+
+	private Token[] lookAheads = new Token[3];
 	private Token previous = null;
 
 	public boolean fileTypeDeclared = false;
+
+	public Syntax syntax;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -34,9 +35,11 @@ public class Parser
 	public Parser(Lexer lexer)
 	{
 		this.lexer = lexer;
-		lookAhead = lexer.getToken();
-		nextLookAhead = lexer.getToken();
-		nextNextLookAhead = lexer.getToken();
+		for (int i = 0; i < lookAheads.length; i++)
+		{
+			lookAheads[i] = lexer.getToken();
+		}
+		syntax = new Syntax();
 	}
 
 	private boolean isFundamental(TokenType tokenType)
@@ -72,21 +75,26 @@ public class Parser
 		}
 	}
 
-	// FIXME: Add support for strings.
 	private ASTBase parseExpression(ASTParent parent)
 	{
-		if (isFundamental(lookAhead.tokenType))
+		return parseExpression(parent, false);
+	}
+
+	// FIXME: Add support for strings.
+	private ASTBase parseExpression(ASTParent parent, boolean inPar)
+	{
+		if (isFundamental(lookAheads[0].tokenType))
 		{
 			ASTBase left;
 
 			// Create left-hand side. //
 			// From number. //
-			if (match(TokenType.NUMBER))
+			if (match(TokenType.NUMBER, inPar))
 			{
 				left = new ASTNumber(parent, Integer.parseInt(previous.value));
 			}
 			// Or from a symbol... //
-			else if (match(TokenType.SYMBOL))
+			else if (match(TokenType.SYMBOL, inPar))
 			{
 				String name = previous.value;
 
@@ -99,9 +107,9 @@ public class Parser
 					// Parse arguments until we find something un-parsable. //
 					while(true)
 					{
-						if (isFundamental(lookAhead.tokenType))
+						if (isFundamental(lookAheads[0].tokenType))
 							parseFundamentalWithOperator(functionCall);
-						else if (lookAhead.tokenType == TokenType.LPAR)
+						else if (lookAheads[0].tokenType == TokenType.LPAR)
 							parseExpression(functionCall);
 						else
 							break;
@@ -123,25 +131,32 @@ public class Parser
 				return null;
 			}
 
+			while (inPar && match("\n"));
+
+
 			// Check if we have hit an end. //
-			if (lookAhead.value.equals(",") || lookAhead.value.equals(":"))
+			if (lookAheads[0].value.equals(",") || lookAheads[0].value.equals(":"))
 			{
 				return left;
 			}
 
 			// Either we have an operator, or alternatively left is single-node expression or a function call. //
-			else if (match(TokenType.OPERATOR))
+			else if (match(TokenType.OPERATOR, inPar))
 			{
 				String opName = previous.value;
-				ASTBase right = parseExpression(parent);
+				while (inPar && match("\n", true));
+
+				ASTBase right = parseExpression(parent, inPar);
 
 				return new ASTOperator(parent, opName, right, left);
 			}
 
+
+
 			// Single-node expression. //
-			else if (mathEOLF()
-					|| lookAhead.tokenType == TokenType.RPAR
-					|| Syntax.isKeyword(lookAhead.value))
+			else if ((mathEOLF() && !inPar)
+					|| lookAheads[0].tokenType == TokenType.RPAR
+					|| Syntax.isKeyword(lookAheads[0].value))
 			{
 				return left;
 			}
@@ -152,11 +167,11 @@ public class Parser
 		}
 
 		// Try to parse parentheses. //
-		else if (match(TokenType.LPAR))
+		else if (match(TokenType.LPAR, inPar))
 		{
-
-			ASTBase expression =  parseExpression(parent);
-			if (match(TokenType.RPAR))
+			while (match("\n"));
+			ASTBase expression =  parseExpression(parent, true);
+			if (match(TokenType.RPAR, true))
 			{
 				return expression;
 			}
@@ -181,7 +196,7 @@ public class Parser
 
 	private CherryType parseType(ASTParent perspective, boolean isFunctionType)
 	{
-		if (match(Syntax.OPERATOR_TYPESPECIFY) || isFunctionType)
+		if (match(Syntax.Op.TYPEDEF) || isFunctionType)
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -201,7 +216,7 @@ public class Parser
 			ASTFunctionDeclaration function = new ASTFunctionDeclaration(parent, Builtins.getBuiltin("void"));
 
 			// Check that we specify the return type of the function (and the parameters). //
-			if (match(Syntax.OPERATOR_RETURNTYPE))
+			if (match(Syntax.Op.TYPEDEF))
 			{
 				// Make sure we match a parenthesis which is basically the function indicator. //
 				if (match(TokenType.LPAR))
@@ -221,7 +236,7 @@ public class Parser
 						syntaxError(")", "Unmatched parenthesis");
 					}
 
-					if (lookAhead.tokenType == TokenType.SYMBOL)
+					if (lookAheads[0].tokenType == TokenType.SYMBOL)
 					{
 						function.returnType = parseType(parent, true);
 					}
@@ -230,7 +245,7 @@ public class Parser
 						function.returnType = Builtins.getBuiltin("void");
 					}
 
-					if (lookAhead.value.equals(Syntax.OPERATOR_RETURNVALUE))
+					if (lookAheads[0].value.equals(Syntax.Op.FUNCVAL))
 					{
 						ASTReturnExpression call = parseReturnExpression(parent);
 						if (call != null)
@@ -239,8 +254,7 @@ public class Parser
 						}
 					}
 
-					System.err.println("Debug: " + function.returnType);
-					return new ASTVariableDeclaration(parent, name, Builtins.getBuiltin(Syntax.KEYWORD_FUN), function);
+					return new ASTVariableDeclaration(parent, name, Builtins.getBuiltin(Syntax.Type.FUNC), function);
 				}
 				else
 				{
@@ -263,7 +277,7 @@ public class Parser
 
 	private ASTReturnExpression parseReturnExpression(ASTParent parent)
 	{
-		if (match(Syntax.OPERATOR_RETURNVALUE))
+		if (match(Syntax.Op.FUNCVAL))
 		{
 			ASTReturnExpression returnExpression = new ASTReturnExpression(parent);
 
@@ -278,7 +292,7 @@ public class Parser
 		}
 		else
 		{
-			syntaxError(Syntax.OPERATOR_RETURNVALUE, "COMPILER ERROR!!!");
+			syntaxError(Syntax.Op.FUNCVAL, "COMPILER ERROR!!!");
 			return null;
 		}
 	}
@@ -288,7 +302,7 @@ public class Parser
 		if (match(TokenType.SYMBOL))
 		{
 			String name = previous.value;
-			if (lookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY))
+			if (lookAheads[0].value.equals(Syntax.Op.TYPEDEF))
 			{
 				CherryType cherryType = parseType(parent);
 				ASTBase value = null;
@@ -327,7 +341,7 @@ public class Parser
 	{
 
 		// Skip indentation . //
-		if (nextLookAhead.value.equals(Syntax.KEYWORD_TYPE))
+		if (lookAheads[1].value.equals(Syntax.Keyword.TYPE))
 			match(TokenType.INDENT);
 
 		// Skip any empty lines.
@@ -336,7 +350,7 @@ public class Parser
 			return true;
 		}
 
-		if (match(Syntax.KEYWORD_TYPE))
+		if (match(Syntax.Keyword.TYPE))
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -359,14 +373,15 @@ public class Parser
 		return false;
 	}
 
+	// FIXME: Loops do not work
 	private ASTLoop parseLoop(ASTParent parent)
 	{
-		if (match(Syntax.KEYWORD_LOOP))
+		if (match(Syntax.Keyword.LOOP))
 		{
 			ASTLoop loop = new ASTLoop(parent);
 
-			if (nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY)
-					&& nextNextLookAhead.tokenType != TokenType.NEWLINE)
+			if (lookAheads[1].value.equals(Syntax.Op.TYPEDEF)
+					&& lookAheads[2].tokenType != TokenType.NEWLINE)
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
 				loop.initialStatement = parseExpression(loop);
@@ -406,10 +421,10 @@ public class Parser
 						null);
 			}
 
-			if (!match(Syntax.OPERATOR_BLOCKSTART))
+			/*if (!match(Syntax.Op.))
 			{
 				syntaxError(":", "A colon is required at the end of a loop statement.");
-			}
+			}*/
 
 			return loop;
 		}
@@ -420,9 +435,10 @@ public class Parser
 		}
 	}
 
+
 	private ASTSubclassExpression parseExtendDeclaration(ASTParent parent)
 	{
-		if (match(Syntax.KEYWORD_EXTEND))
+		if (match(Syntax.Keyword.EXTENDS))
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -430,7 +446,7 @@ public class Parser
 			}
 			else
 			{
-				unexpectedExpressionError(lookAhead.value, "Invalid name for class/object.");
+				unexpectedExpressionError(lookAheads[0].value, "Invalid name for class/object.");
 			}
 		}
 		else
@@ -470,7 +486,7 @@ public class Parser
 		}
 
 		// Check if we are extending a class. //
-		if (lookAhead.value.equals(Syntax.KEYWORD_EXTEND))
+		if (lookAheads[0].value.equals(Syntax.Keyword.EXTENDS))
 		{
 			ASTSubclassExpression subclassExpression = parseExtendDeclaration(parent);
 			if (subclassExpression != null)
@@ -481,9 +497,9 @@ public class Parser
 			return false;
 		}
 		// Check if we are defining a function. //
-		else if (lookAhead.tokenType == TokenType.SYMBOL
-				&& nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY)
-				&& nextNextLookAhead.tokenType == TokenType.LPAR)
+		else if (lookAheads[0].tokenType == TokenType.SYMBOL
+				&& lookAheads[1].value.equals(Syntax.Op.TYPEDEF)
+				&& lookAheads[2].tokenType == TokenType.LPAR)
 		{
 			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
 			if (function != null)
@@ -494,39 +510,26 @@ public class Parser
 			return false;
 		}
 
-
-		else if (match(Syntax.KEYWORD_IF))
+		// FIXME: If/ELSE does not work!
+		else if (match(Syntax.Keyword.IF))
 		{
 			ASTBase condition = parseExpression(parent);
-			if (match(Syntax.OPERATOR_BLOCKSTART))
-			{
-				new ASTIf(parent, condition);
-				return true;
-			}
-			else
-			{
-				syntaxError(":", "A colon is required at the end of an if statement.");
-				return false;
-			}
+
+			new ASTIf(parent, condition);
+			return true;
+
+
 
 		}
 
-		else if (match(Syntax.KEYWORD_ELSE))
+		// FIXME: If/ELSE does not work! Or does it?
+		else if (match(Syntax.Keyword.ELSE))
 		{
-			if (match(Syntax.OPERATOR_BLOCKSTART))
-			{
-				new ASTElse(parent);
-				return true;
-			}
-			else
-			{
-				syntaxError(":", "A colon is required at the end of an else statement.");
-				return false;
-			}
-
+			new ASTElse(parent);
+			return true;
 		}
 
-		else if (lookAhead.value.equals(Syntax.KEYWORD_LOOP))
+		else if (lookAheads[0].value.equals(Syntax.Keyword.LOOP))
 		{
 			ASTLoop loop = parseLoop(parent);
 			if (loop != null)
@@ -538,8 +541,8 @@ public class Parser
 		}
 
 		// Try to parse as a variable declaration. //
-		else if (lookAhead.tokenType == TokenType.SYMBOL
-				&& nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY))
+		else if (lookAheads[0].tokenType == TokenType.SYMBOL
+				&& lookAheads[1].value.equals(Syntax.Op.TYPEDEF))
 		{
 			ASTVariableDeclaration declaration = parseVariableDeclaration(parent);
 			if (declaration != null)
@@ -551,7 +554,7 @@ public class Parser
 		}
 
 		// Check if it contains the keyword "type" to see if we can see what type it is. //
-		else if (match(Syntax.KEYWORD_TYPE))
+		else if (match(Syntax.Keyword.TYPE))
 		{
 			// Error. //
 			unexpectedExpressionError(previous.value, "File type has already been declared, was not expecting another declaration");
@@ -611,10 +614,13 @@ public class Parser
 
 	private void step()
 	{
-		previous = lookAhead;
-		lookAhead = nextLookAhead;
-		nextLookAhead = nextNextLookAhead;
-		nextNextLookAhead = lexer.getToken();
+		previous = lookAheads[0];
+		for (int i = 0; i < lookAheads.length - 1; i++)
+		{
+			lookAheads[i] = lookAheads[i+1];
+		}
+
+		lookAheads[lookAheads.length - 1] = lexer.getToken();
 	}
 
 	/**
@@ -628,7 +634,26 @@ public class Parser
 
 	private boolean match(String value)
 	{
-		if (value.equals(lookAhead.value))
+		return match(value, false);
+	}
+
+	private boolean match(String value, boolean ignoreNewline)
+	{
+		while (ignoreNewline && (match(TokenType.NEWLINE) || match(TokenType.INDENT)));
+
+		if (value.equals(lookAheads[0].value))
+		{
+			step();
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean match(TokenType value, boolean ignoreNewline)
+	{
+		while (ignoreNewline && (match(TokenType.NEWLINE) || match(TokenType.INDENT)));
+		if (value == lookAheads[0].tokenType)
 		{
 			step();
 			return true;
@@ -639,18 +664,12 @@ public class Parser
 
 	private boolean match(Token.TokenType value)
 	{
-		if (value == lookAhead.tokenType)
-		{
-			step();
-			return true;
-		}
-
-		return false;
+		return match(value, false);
 	}
 
 	private void syntaxError(String expected, String message)
 	{
-		syntaxError(expected, lookAhead.value, message);
+		syntaxError(expected, lookAheads[0].value, message);
 	}
 
 	private void syntaxError(String expected, String actual, String message)
@@ -664,7 +683,7 @@ public class Parser
 	/*
 	private void unexpectedExpressionError(String message)
 	{
-		unexpectedExpressionError(lookAhead.value, message);
+		unexpectedExpressionError(lookAheads[0].value, message);
 	}
 	*/
 

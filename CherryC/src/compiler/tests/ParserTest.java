@@ -53,8 +53,8 @@ class ParserTest
 	void firstTest()
 	{
 
-		System.out.println(Builtins.getBuiltin("void").getName());
 
+		/*
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "a := 5\nb : int = a");
 		testClassCompile("AssignTest2", "b := 128");
@@ -105,5 +105,9 @@ class ParserTest
 		testClassCompile(false, "FileType2", "type object");
 
 		testClassCompile(false, "Subclass1", "type enum\nextends MyObject");
+		*/
+
+		testClassCompile("If1", "if (\n5 \n==\n 5\n)\n\tprint! 5");
+		testClassCompile("Else1", "if (\n5 \n==\n 5\n)\n\tprint! 5\nelse\n\tprint! 10");
 	}
 }

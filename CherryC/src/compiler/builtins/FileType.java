@@ -19,11 +19,11 @@ public enum FileType
 
 		switch (symbol)
 		{
-			case Syntax.KEYWORD_TYPE_OBJECT:
+			case Syntax.Type.OBJECT:
 				return OBJECT;
-			case Syntax.KEYWORD_TYPE_INTERFACE:
+			case Syntax.Type.INTERFACE:
 				return INTERFACE;
-			case Syntax.KEYWORD_TYPE_ENUM:
+			case Syntax.Type.ENUM:
 				return ENUM;
 			default:
 				return UNDEFINED;

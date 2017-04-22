@@ -1,6 +1,7 @@
 package compiler.builtins;
 
 import compiler.CherryType;
+import compiler.Syntax;
 import compiler.ast.ASTBase;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public class TypeFunction implements CherryType
 	@Override
 	public String getName()
 	{
-		return "fn";
+		return Syntax.Type.FUNC;
 	}
 
 	@Override
