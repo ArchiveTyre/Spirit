@@ -20,12 +20,13 @@ public class Parser
 	/** The lexer to read from. */
 	private Lexer lexer;
 
-	private Token lookAhead;
-	private Token nextLookAhead;
-	private Token nextNextLookAhead;
+
+	private Token[] lookAheads = new Token[3];
 	private Token previous = null;
 
 	public boolean fileTypeDeclared = false;
+
+	public Syntax syntax;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -34,9 +35,11 @@ public class Parser
 	public Parser(Lexer lexer)
 	{
 		this.lexer = lexer;
-		lookAhead = lexer.getToken();
-		nextLookAhead = lexer.getToken();
-		nextNextLookAhead = lexer.getToken();
+		for (int i = 0; i < lookAheads.length; i++)
+		{
+			lookAheads[i] = lexer.getToken();
+		}
+		syntax = new Syntax();
 	}
 
 	private boolean isFundamental(TokenType tokenType)
@@ -72,21 +75,26 @@ public class Parser
 		}
 	}
 
-	// FIXME: Add support for strings.
 	private ASTBase parseExpression(ASTParent parent)
 	{
-		if (isFundamental(lookAhead.tokenType))
+		return parseExpression(parent, false);
+	}
+
+	// FIXME: Add support for strings.
+	private ASTBase parseExpression(ASTParent parent, boolean inPar)
+	{
+		if (isFundamental(lookAheads[0].tokenType))
 		{
 			ASTBase left;
 
 			// Create left-hand side. //
 			// From number. //
-			if (match(TokenType.NUMBER))
+			if (match(TokenType.NUMBER, inPar))
 			{
 				left = new ASTNumber(parent, Integer.parseInt(previous.value));
 			}
 			// Or from a symbol... //
-			else if (match(TokenType.SYMBOL))
+			else if (match(TokenType.SYMBOL, inPar))
 			{
 				String name = previous.value;
 
@@ -99,9 +107,9 @@ public class Parser
 					// Parse arguments until we find something un-parsable. //
 					while(true)
 					{
-						if (isFundamental(lookAhead.tokenType))
+						if (isFundamental(lookAheads[0].tokenType))
 							parseFundamentalWithOperator(functionCall);
-						else if (lookAhead.tokenType == TokenType.LPAR)
+						else if (lookAheads[0].tokenType == TokenType.LPAR)
 							parseExpression(functionCall);
 						else
 							break;
@@ -123,25 +131,32 @@ public class Parser
 				return null;
 			}
 
+			while (inPar && match("\n"));
+
+
 			// Check if we have hit an end. //
-			if (lookAhead.value.equals(",") || lookAhead.value.equals(":"))
+			if (lookAheads[0].value.equals(",") || lookAheads[0].value.equals(":"))
 			{
 				return left;
 			}
 
 			// Either we have an operator, or alternatively left is single-node expression or a function call. //
-			else if (match(TokenType.OPERATOR))
+			else if (match(TokenType.OPERATOR, inPar))
 			{
 				String opName = previous.value;
-				ASTBase right = parseExpression(parent);
+				while (inPar && match("\n", true));
+
+				ASTBase right = parseExpression(parent, inPar);
 
 				return new ASTOperator(parent, opName, right, left);
 			}
 
+
+
 			// Single-node expression. //
-			else if (mathEOLF()
-					|| lookAhead.tokenType == TokenType.RPAR
-					|| Syntax.isKeyword(lookAhead.value))
+			else if ((mathEOLF() && !inPar)
+					|| lookAheads[0].tokenType == TokenType.RPAR
+					|| Syntax.isKeyword(lookAheads[0].value))
 			{
 				return left;
 			}
@@ -152,11 +167,11 @@ public class Parser
 		}
 
 		// Try to parse parentheses. //
-		else if (match(TokenType.LPAR))
+		else if (match(TokenType.LPAR, inPar))
 		{
-
-			ASTBase expression =  parseExpression(parent);
-			if (match(TokenType.RPAR))
+			while (match("\n"));
+			ASTBase expression =  parseExpression(parent, true);
+			if (match(TokenType.RPAR, true))
 			{
 				return expression;
 			}
@@ -199,7 +214,7 @@ public class Parser
 		{
 			String name = previous.value;
 			ASTVariableDeclaration variableDeclaration =
-					new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("fn"), null);
+					new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("function"), null);
 			ASTFunctionDeclaration function =
 					new ASTFunctionDeclaration(variableDeclaration, Builtins.getBuiltin("void"));
 
@@ -224,7 +239,7 @@ public class Parser
 						syntaxError(")", "Unmatched parenthesis");
 					}
 
-					if (lookAhead.tokenType == TokenType.SYMBOL)
+					if (lookAheads[0].tokenType == TokenType.SYMBOL)
 					{
 						function.returnType = parseType(parent, true);
 					}
@@ -232,8 +247,7 @@ public class Parser
 					{
 						function.returnType = Builtins.getBuiltin("void");
 					}
-
-					if (lookAhead.value.equals(Syntax.Op.FUNCVAL))
+					if (lookAheads[0].value.equals(Syntax.Op.FUNCVAL))
 					{
 						ASTReturnExpression call = parseReturnExpression(parent);
 						if (call != null)
@@ -241,7 +255,6 @@ public class Parser
 							call.setParent(function);
 						}
 					}
-
 					System.err.println("Debug: " + function.returnType);
 					return variableDeclaration;
 				}
@@ -291,7 +304,7 @@ public class Parser
 		if (match(TokenType.SYMBOL))
 		{
 			String name = previous.value;
-			if (lookAhead.value.equals(Syntax.Op.TYPEDEF))
+			if (lookAheads[0].value.equals(Syntax.Op.TYPEDEF))
 			{
 				CherryType cherryType = parseType(parent);
 				ASTBase value = null;
@@ -330,7 +343,7 @@ public class Parser
 	{
 
 		// Skip indentation . //
-		if (nextLookAhead.value.equals(Syntax.Keyword.TYPE))
+		if (lookAheads[1].value.equals(Syntax.Keyword.TYPE))
 			match(TokenType.INDENT);
 
 		// Skip any empty lines.
@@ -362,14 +375,14 @@ public class Parser
 		return false;
 	}
 
+	// FIXME: Loops do not work
 	private ASTLoop parseLoop(ASTParent parent)
 	{
 		if (match(Syntax.Keyword.LOOP))
 		{
 			ASTLoop loop = new ASTLoop(parent);
-
-			if (nextLookAhead.value.equals(Syntax.Op.TYPEDEF)
-					&& nextNextLookAhead.tokenType != TokenType.NEWLINE)
+			if (lookAheads[1].value.equals(Syntax.Op.TYPEDEF)
+					&& lookAheads[2].tokenType != TokenType.NEWLINE)
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
 				loop.initialStatement = parseExpression(loop);
@@ -409,6 +422,7 @@ public class Parser
 						new ASTVariableUsage(parent, counterName));
 			}
 
+
 			return loop;
 		}
 		else
@@ -417,6 +431,7 @@ public class Parser
 			return null;
 		}
 	}
+
 
 	private ASTSubclassExpression parseExtendDeclaration(ASTParent parent)
 	{
@@ -428,7 +443,7 @@ public class Parser
 			}
 			else
 			{
-				unexpectedExpressionError(lookAhead.value, "Invalid name for class/object.");
+				unexpectedExpressionError(lookAheads[0].value, "Invalid name for class/object.");
 			}
 		}
 		else
@@ -468,7 +483,7 @@ public class Parser
 		}
 
 		// Check if we are extending a class. //
-		if (lookAhead.value.equals(Syntax.Keyword.EXTENDS))
+		if (lookAheads[0].value.equals(Syntax.Keyword.EXTENDS))
 		{
 			ASTSubclassExpression subclassExpression = parseExtendDeclaration(parent);
 			if (subclassExpression != null)
@@ -479,9 +494,9 @@ public class Parser
 			return false;
 		}
 		// Check if we are defining a function. //
-		else if (lookAhead.tokenType == TokenType.SYMBOL
-				&& nextLookAhead.value.equals(Syntax.Op.TYPEDEF)
-				&& nextNextLookAhead.tokenType == TokenType.LPAR)
+		else if (lookAheads[0].tokenType == TokenType.SYMBOL
+				&& lookAheads[1].value.equals(Syntax.Op.TYPEDEF)
+				&& lookAheads[2].tokenType == TokenType.LPAR)
 		{
 			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
 			if (function != null)
@@ -491,22 +506,26 @@ public class Parser
 			}
 			return false;
 		}
-
-
+		// FIXME: If/ELSE does not work!
 		else if (match(Syntax.Keyword.IF))
 		{
 			ASTBase condition = parseExpression(parent);
+
 			new ASTIf(parent, condition);
 			return true;
+
+
+
 		}
 
+		// FIXME: If/ELSE does not work! Or does it?
 		else if (match(Syntax.Keyword.ELSE))
 		{
 			new ASTElse(parent);
 			return true;
 		}
 
-		else if (lookAhead.value.equals(Syntax.Keyword.LOOP))
+		else if (lookAheads[0].value.equals(Syntax.Keyword.LOOP))
 		{
 			ASTLoop loop = parseLoop(parent);
 			if (loop != null)
@@ -518,8 +537,9 @@ public class Parser
 		}
 
 		// Try to parse as a variable declaration. //
-		else if (lookAhead.tokenType == TokenType.SYMBOL
-				&& nextLookAhead.value.equals(Syntax.Op.TYPEDEF))
+
+		else if (lookAheads[0].tokenType == TokenType.SYMBOL
+				&& lookAheads[1].value.equals(Syntax.Op.TYPEDEF))
 		{
 			ASTVariableDeclaration declaration = parseVariableDeclaration(parent);
 			if (declaration != null)
@@ -591,10 +611,13 @@ public class Parser
 
 	private void step()
 	{
-		previous = lookAhead;
-		lookAhead = nextLookAhead;
-		nextLookAhead = nextNextLookAhead;
-		nextNextLookAhead = lexer.getToken();
+		previous = lookAheads[0];
+		for (int i = 0; i < lookAheads.length - 1; i++)
+		{
+			lookAheads[i] = lookAheads[i+1];
+		}
+
+		lookAheads[lookAheads.length - 1] = lexer.getToken();
 	}
 
 	/**
@@ -608,7 +631,26 @@ public class Parser
 
 	private boolean match(String value)
 	{
-		if (value.equals(lookAhead.value))
+		return match(value, false);
+	}
+
+	private boolean match(String value, boolean ignoreNewline)
+	{
+		while (ignoreNewline && (match(TokenType.NEWLINE) || match(TokenType.INDENT)));
+
+		if (value.equals(lookAheads[0].value))
+		{
+			step();
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean match(TokenType value, boolean ignoreNewline)
+	{
+		while (ignoreNewline && (match(TokenType.NEWLINE) || match(TokenType.INDENT)));
+		if (value == lookAheads[0].tokenType)
 		{
 			step();
 			return true;
@@ -619,18 +661,12 @@ public class Parser
 
 	private boolean match(Token.TokenType value)
 	{
-		if (value == lookAhead.tokenType)
-		{
-			step();
-			return true;
-		}
-
-		return false;
+		return match(value, false);
 	}
 
 	private void syntaxError(String expected, String message)
 	{
-		syntaxError(expected, lookAhead.value, message);
+		syntaxError(expected, lookAheads[0].value, message);
 	}
 
 	private void syntaxError(String expected, String actual, String message)
@@ -644,7 +680,7 @@ public class Parser
 	/*
 	private void unexpectedExpressionError(String message)
 	{
-		unexpectedExpressionError(lookAhead.value, message);
+		unexpectedExpressionError(lookAheads[0].value, message);
 	}
 	*/
 

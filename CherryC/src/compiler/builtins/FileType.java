@@ -18,11 +18,11 @@ public enum FileType
 	{
 		switch (symbol)
 		{
-			case Syntax.Definable.OBJECT:
+			case Syntax.Type.OBJECT:
 				return OBJECT;
-			case Syntax.Definable.INTERFACE:
+			case Syntax.Type.INTERFACE:
 				return INTERFACE;
-			case Syntax.Definable.ENUM:
+			case Syntax.Type.ENUM:
 				return ENUM;
 			default:
 				return UNDEFINED;
