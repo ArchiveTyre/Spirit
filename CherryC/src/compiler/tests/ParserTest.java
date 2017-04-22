@@ -88,7 +88,7 @@ class ParserTest
 
 		// Test function calls. //
 		testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na! 1 2");
-		testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na! 1 2 (a! 3 4)");
+		testClassCompile("FunCall1", "a : (x, y : int) int = x + y\na! 1 2 (a! 3 4)");
 
 		// If statements. //
 		testClassCompile("IfStatement1", tmpPrint + "A := 3\nif A\n\tprint! A\n\tprint! A + 5\nb := 10");

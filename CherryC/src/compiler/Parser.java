@@ -4,6 +4,8 @@ import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
 
+import java.util.ArrayList;
+
 import static compiler.Token.TokenType;
 
 
@@ -224,15 +226,44 @@ public class Parser
 				// Make sure we match a parenthesis which is basically the function indicator. //
 				if (match(TokenType.LPAR))
 				{
+					ArrayList<String> unspecifiedParams = new ArrayList<>();
 					do
 					{
 						if (match(TokenType.SYMBOL))
 						{
 							String argName = previous.value;
-							CherryType argType = parseType(parent);
-							function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+							if (lookAheads[0].value.equals(Syntax.Op.TYPEDEF))
+							{
+								CherryType argType = parseType(parent);
+								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+
+								if (!unspecifiedParams.isEmpty())
+								{
+									for (String param : unspecifiedParams)
+									{
+										function.args.add(new ASTVariableDeclaration(null, param, argType, null));
+
+									}
+									unspecifiedParams.clear();
+								}
+							}
+							else if (lookAheads[0].value.equals(Syntax.Op.ARG_SEP))
+							{
+								unspecifiedParams.add(argName);
+							}
 						}
-					} while (match(","));
+					} while (match(Syntax.Op.ARG_SEP));
+
+					if (!unspecifiedParams.isEmpty())
+					{
+						String args = "";
+						for (String param: unspecifiedParams)
+						{
+							args += param + ", ";
+						}
+						args = args.substring(0, args.length() - 3);
+						syntaxError("Type specification", "Some arguments did not have a specified type. [" + args + "]");
+					}
 
 					if (!match(TokenType.RPAR))
 					{
