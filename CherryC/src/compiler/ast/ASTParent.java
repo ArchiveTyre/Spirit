@@ -19,19 +19,21 @@ public abstract class ASTParent extends ASTBase
 
 	/**
 	 * Finds another AST from this AST's perspective.
-	 * @param symbolName
-	 * @return
+	 * @param symbolName The name of the symbol we want to find.
+	 * @return The symbol was found. Null if none.
 	 */
 	public ASTBase findSymbol(String symbolName)
 	{
-		if (name.equals(symbolName))
-			return this;
+		// FIXME: More like findVariable!
 
 		for (ASTBase child : childAsts) {
-			if (child.name.equals(symbolName) && !(child instanceof ASTVariableUsage)) {
+			if (child.name.equals(symbolName) && child instanceof ASTVariableDeclaration) {
 				return child;
 			}
 		}
+
+		if (getParent() != null)
+			return getParent().findSymbol(symbolName);
 
 		return null;
 	}

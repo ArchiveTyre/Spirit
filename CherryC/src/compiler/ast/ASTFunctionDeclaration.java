@@ -16,9 +16,14 @@ public class ASTFunctionDeclaration extends ASTParent
 	public ArrayList<ASTVariableDeclaration> args = new ArrayList<>();
 	public CherryType returnType;
 
+	private boolean isNestedFunction;
+
 	public ASTFunctionDeclaration(ASTParent parent, CherryType returnType)
 	{
 		super(parent, "");
+		isNestedFunction = !(parent.getParent() instanceof ASTClass);
+		if (isNestedFunction)
+			System.out.println("Defining a nested function.");
 	}
 
 	@Override
@@ -30,6 +35,8 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
+		if (isNestedFunction)
+			destination.print("nested ");
 		destination.print("(");
 		for (ASTVariableDeclaration arg : args)
 		{
@@ -47,5 +54,14 @@ public class ASTFunctionDeclaration extends ASTParent
 		}
 		destination.indentation--;
 		destination.print("}");
+	}
+
+	@Override
+	public ASTParent getParent()
+	{
+		if (isNestedFunction)
+			return null;
+
+		return super.getParent();
 	}
 }

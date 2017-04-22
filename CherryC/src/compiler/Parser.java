@@ -181,7 +181,7 @@ public class Parser
 
 	private CherryType parseType(ASTParent perspective, boolean isFunctionType)
 	{
-		if (match(Syntax.OPERATOR_TYPESPECIFY) || isFunctionType)
+		if (match(Syntax.Op.TYPEDEF) || isFunctionType)
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -198,10 +198,13 @@ public class Parser
 		if (match(TokenType.SYMBOL))
 		{
 			String name = previous.value;
-			ASTFunctionDeclaration function = new ASTFunctionDeclaration(parent, Builtins.getBuiltin("void"));
+			ASTVariableDeclaration variableDeclaration =
+					new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("fn"), null);
+			ASTFunctionDeclaration function =
+					new ASTFunctionDeclaration(variableDeclaration, Builtins.getBuiltin("void"));
 
 			// Check that we specify the return type of the function (and the parameters). //
-			if (match(Syntax.OPERATOR_RETURNTYPE))
+			if (match(Syntax.Op.TYPEDEF))
 			{
 				// Make sure we match a parenthesis which is basically the function indicator. //
 				if (match(TokenType.LPAR))
@@ -230,7 +233,7 @@ public class Parser
 						function.returnType = Builtins.getBuiltin("void");
 					}
 
-					if (lookAhead.value.equals(Syntax.OPERATOR_RETURNVALUE))
+					if (lookAhead.value.equals(Syntax.Op.FUNCVAL))
 					{
 						ASTReturnExpression call = parseReturnExpression(parent);
 						if (call != null)
@@ -240,7 +243,7 @@ public class Parser
 					}
 
 					System.err.println("Debug: " + function.returnType);
-					return new ASTVariableDeclaration(parent, name, Builtins.getBuiltin(Syntax.KEYWORD_FUN), function);
+					return variableDeclaration;
 				}
 				else
 				{
@@ -263,7 +266,7 @@ public class Parser
 
 	private ASTReturnExpression parseReturnExpression(ASTParent parent)
 	{
-		if (match(Syntax.OPERATOR_RETURNVALUE))
+		if (match(Syntax.Op.FUNCVAL))
 		{
 			ASTReturnExpression returnExpression = new ASTReturnExpression(parent);
 
@@ -278,7 +281,7 @@ public class Parser
 		}
 		else
 		{
-			syntaxError(Syntax.OPERATOR_RETURNVALUE, "COMPILER ERROR!!!");
+			syntaxError(Syntax.Op.FUNCVAL, "COMPILER ERROR!!!");
 			return null;
 		}
 	}
@@ -288,7 +291,7 @@ public class Parser
 		if (match(TokenType.SYMBOL))
 		{
 			String name = previous.value;
-			if (lookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY))
+			if (lookAhead.value.equals(Syntax.Op.TYPEDEF))
 			{
 				CherryType cherryType = parseType(parent);
 				ASTBase value = null;
@@ -327,7 +330,7 @@ public class Parser
 	{
 
 		// Skip indentation . //
-		if (nextLookAhead.value.equals(Syntax.KEYWORD_TYPE))
+		if (nextLookAhead.value.equals(Syntax.Keyword.TYPE))
 			match(TokenType.INDENT);
 
 		// Skip any empty lines.
@@ -336,7 +339,7 @@ public class Parser
 			return true;
 		}
 
-		if (match(Syntax.KEYWORD_TYPE))
+		if (match(Syntax.Keyword.TYPE))
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -361,11 +364,11 @@ public class Parser
 
 	private ASTLoop parseLoop(ASTParent parent)
 	{
-		if (match(Syntax.KEYWORD_LOOP))
+		if (match(Syntax.Keyword.LOOP))
 		{
 			ASTLoop loop = new ASTLoop(parent);
 
-			if (nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY)
+			if (nextLookAhead.value.equals(Syntax.Op.TYPEDEF)
 					&& nextNextLookAhead.tokenType != TokenType.NEWLINE)
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
@@ -402,13 +405,8 @@ public class Parser
 
 
 				loop.iterationalStatement = new ASTOperator(loop, "--",
-						new ASTVariableUsage(parent, counterName),
-						null);
-			}
-
-			if (!match(Syntax.OPERATOR_BLOCKSTART))
-			{
-				syntaxError(":", "A colon is required at the end of a loop statement.");
+						null,
+						new ASTVariableUsage(parent, counterName));
 			}
 
 			return loop;
@@ -422,7 +420,7 @@ public class Parser
 
 	private ASTSubclassExpression parseExtendDeclaration(ASTParent parent)
 	{
-		if (match(Syntax.KEYWORD_EXTEND))
+		if (match(Syntax.Keyword.EXTENDS))
 		{
 			if (match(TokenType.SYMBOL))
 			{
@@ -470,7 +468,7 @@ public class Parser
 		}
 
 		// Check if we are extending a class. //
-		if (lookAhead.value.equals(Syntax.KEYWORD_EXTEND))
+		if (lookAhead.value.equals(Syntax.Keyword.EXTENDS))
 		{
 			ASTSubclassExpression subclassExpression = parseExtendDeclaration(parent);
 			if (subclassExpression != null)
@@ -482,7 +480,7 @@ public class Parser
 		}
 		// Check if we are defining a function. //
 		else if (lookAhead.tokenType == TokenType.SYMBOL
-				&& nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY)
+				&& nextLookAhead.value.equals(Syntax.Op.TYPEDEF)
 				&& nextNextLookAhead.tokenType == TokenType.LPAR)
 		{
 			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
@@ -495,38 +493,20 @@ public class Parser
 		}
 
 
-		else if (match(Syntax.KEYWORD_IF))
+		else if (match(Syntax.Keyword.IF))
 		{
 			ASTBase condition = parseExpression(parent);
-			if (match(Syntax.OPERATOR_BLOCKSTART))
-			{
-				new ASTIf(parent, condition);
-				return true;
-			}
-			else
-			{
-				syntaxError(":", "A colon is required at the end of an if statement.");
-				return false;
-			}
-
+			new ASTIf(parent, condition);
+			return true;
 		}
 
-		else if (match(Syntax.KEYWORD_ELSE))
+		else if (match(Syntax.Keyword.ELSE))
 		{
-			if (match(Syntax.OPERATOR_BLOCKSTART))
-			{
-				new ASTElse(parent);
-				return true;
-			}
-			else
-			{
-				syntaxError(":", "A colon is required at the end of an else statement.");
-				return false;
-			}
-
+			new ASTElse(parent);
+			return true;
 		}
 
-		else if (lookAhead.value.equals(Syntax.KEYWORD_LOOP))
+		else if (lookAhead.value.equals(Syntax.Keyword.LOOP))
 		{
 			ASTLoop loop = parseLoop(parent);
 			if (loop != null)
@@ -539,7 +519,7 @@ public class Parser
 
 		// Try to parse as a variable declaration. //
 		else if (lookAhead.tokenType == TokenType.SYMBOL
-				&& nextLookAhead.value.equals(Syntax.OPERATOR_TYPESPECIFY))
+				&& nextLookAhead.value.equals(Syntax.Op.TYPEDEF))
 		{
 			ASTVariableDeclaration declaration = parseVariableDeclaration(parent);
 			if (declaration != null)
@@ -551,7 +531,7 @@ public class Parser
 		}
 
 		// Check if it contains the keyword "type" to see if we can see what type it is. //
-		else if (match(Syntax.KEYWORD_TYPE))
+		else if (match(Syntax.Keyword.TYPE))
 		{
 			// Error. //
 			unexpectedExpressionError(previous.value, "File type has already been declared, was not expecting another declaration");

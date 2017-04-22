@@ -14,8 +14,8 @@ import compiler.lib.DebugPrinter;
 public class ASTFunctionCall extends ASTParent
 {
 
-	public ASTVariableDeclaration declaration;
-	public ASTFunctionDeclaration functionDeclaration;
+	private ASTVariableDeclaration declaration;
+	private ASTFunctionDeclaration functionDeclaration;
 
 	public ASTFunctionCall(ASTParent parent, String name)
 	{
@@ -26,9 +26,9 @@ public class ASTFunctionCall extends ASTParent
 		if (symbol instanceof  ASTVariableDeclaration)
 		{
 			declaration = (ASTVariableDeclaration) symbol;
-			if (declaration.value instanceof ASTFunctionDeclaration)
+			if (declaration.getValue() instanceof ASTFunctionDeclaration)
 			{
-				functionDeclaration = (ASTFunctionDeclaration) declaration.value;
+				functionDeclaration = (ASTFunctionDeclaration) declaration.getValue();
 			}
 			else
 			{
@@ -38,6 +38,7 @@ public class ASTFunctionCall extends ASTParent
 		}
 		else
 		{
+			System.err.println("Unknown variable desu~. " + name);
 			declaration = null;
 		}
 
@@ -53,7 +54,7 @@ public class ASTFunctionCall extends ASTParent
 	public void debugSelf(DebugPrinter destination)
 	{
 
-		destination.print("Call to: " + name + "(");
+		destination.print("Call to: " + declaration.name + "(");
 		for (ASTBase arg : childAsts)
 		{
 			arg.debugSelf(destination);

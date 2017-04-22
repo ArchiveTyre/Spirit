@@ -3,7 +3,8 @@ package compiler.builtins;
 import compiler.CherryType;
 
 /**
- * Created by david on 4/12/17.
+ * @author david
+ * @date 4/12/17.
  */
 public class Builtins
 {

@@ -4,15 +4,21 @@ import compiler.CherryType;
 import compiler.lib.DebugPrinter;
 
 /**
- * Created by alex on 4/13/17.
+ * Defines a block of code to be run at an ASTIf's failure.
+ * Note that ASTElse can not exist in the AST without an owning ASTIf.
+ *
+ * @author Tyrerexus
+ * @date 4/13/17.
  */
 public class ASTElse extends ASTParent
 {
-	ASTIf ifStatement;
+	private ASTIf ifStatement;
 
 	public ASTElse(ASTParent parent)
 	{
 		super(parent, "");
+
+		// Try to find the owning ASTIf. //
 		ASTBase lastSibling = parent.childAsts.get(parent.childAsts.size() - 2);
 		if (lastSibling != null && lastSibling instanceof ASTIf)
 		{

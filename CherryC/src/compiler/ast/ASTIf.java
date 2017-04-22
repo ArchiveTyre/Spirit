@@ -4,12 +4,13 @@ import compiler.CherryType;
 import compiler.lib.DebugPrinter;
 
 /**
- * Created by alex on 4/13/17.
+ * @author Tyrerexus
+ * @date 4/13/17.
  */
 public class ASTIf extends ASTParent
 {
-	public ASTBase condition;
-	public ASTElse elseStatement = null;
+	private ASTBase condition;
+	ASTElse elseStatement = null;
 
 	public ASTIf(ASTParent parent, ASTBase condition)
 	{

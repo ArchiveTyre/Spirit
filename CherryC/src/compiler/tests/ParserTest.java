@@ -54,6 +54,8 @@ class ParserTest
 	{
 
 		System.out.println(Builtins.getBuiltin("void").getName());
+		String tmpPrint = "print : (something : int)\n";
+
 
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "a := 5\nb : int = a");
@@ -81,23 +83,23 @@ class ParserTest
 
 		// Test functions. //
 		testClassCompile("FunTest1", "a : (x : int, y : int) int = x + y");
-		testClassCompile("FunTest2", "a : ()\n\tprint! 23");
-		testClassCompile("FunTest3", "a : ()\n\tb : ()\n\t\tprint! 2\n\tb");
+		testClassCompile("FunTest2", tmpPrint + "a : ()\n\tprint! 23");
+		testClassCompile("FunTest3", tmpPrint + "a : ()\n\tb : ()\n\t\tprint! 2\n\tb");
 
 		// Test function calls. //
 		testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na! 1 2");
 		testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na! 1 2 (a! 3 4)");
 
 		// If statements. //
-		testClassCompile("IfStatement1", "A := 3\nif A:\n\tprint! A\n\tprint! A + 5\nb := 10");
-		testClassCompile("IfStatement2", "A := 3\nif A:\n\tprint! A\nelse:\n\tprint! 32");
+		testClassCompile("IfStatement1", tmpPrint + "A := 3\nif A\n\tprint! A\n\tprint! A + 5\nb := 10");
+		testClassCompile("IfStatement2", tmpPrint + "A := 3\nif A\n\tprint! A\nelse\n\tprint! 32");
 
 		// Loops. //
 
-		testClassCompile("Loops1", "loop A := 3, A < 10, i = i + 1:");
-		testClassCompile("Loops2", "loop 10:\n\tprint! 2");
-		testClassCompile("Loops3", "loop 6 + 2:\n\tprint! 2");
-		//testClassCompile("Loops4", "loop 10 as i:\n\tprint 2");
+		testClassCompile("Loops1", "loop A := 3, A < 10, i = i + 1");
+		testClassCompile("Loops2", tmpPrint + "loop 10\n\tprint! 2");
+		testClassCompile("Loops3", tmpPrint + "loop 6 + 2\n\tprint! 2");
+		//testClassCompile("Loops4", "loop 10 as i:\n\tprint! 2");
 
 
 		// File type declarations. //

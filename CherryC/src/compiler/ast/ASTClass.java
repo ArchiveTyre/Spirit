@@ -68,15 +68,15 @@ public class ASTClass extends ASTParent implements CherryType
 		}
 
 		// Validate parent. //
-		if (parent instanceof ASTParent)
-		{
-			return (ASTParent) parent;
-		}
-		else if (parent instanceof ASTVariableDeclaration)
+		if (parent instanceof ASTVariableDeclaration)
 		{
 			ASTVariableDeclaration parentAsVar = (ASTVariableDeclaration)parent;
-			if (parentAsVar.value instanceof ASTFunctionDeclaration)
-				return (ASTFunctionDeclaration)parentAsVar.value;
+			if (parentAsVar.getValue() instanceof ASTFunctionDeclaration)
+				return (ASTFunctionDeclaration)parentAsVar.getValue();
+		}
+		else if (parent instanceof ASTParent)
+		{
+			return (ASTParent) parent;
 		}
 
 		// Validation failed. There is no parent. //

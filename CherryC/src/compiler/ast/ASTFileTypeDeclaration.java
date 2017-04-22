@@ -5,7 +5,8 @@ import compiler.builtins.FileType;
 import compiler.lib.DebugPrinter;
 
 /**
- * Created by david on 4/19/17.
+ * @author david
+ * @date 4/19/17.
  */
 public class ASTFileTypeDeclaration extends ASTBase
 {

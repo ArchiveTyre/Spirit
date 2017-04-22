@@ -7,20 +7,22 @@ import compiler.lib.DebugPrinter;
  * @author Tyrerexus
  * @date 4/12/17.
  */
-public class ASTVariableDeclaration extends ASTBase
+public class ASTVariableDeclaration extends ASTParent
 {
 	CherryType type;
-	ASTBase value;
 
 	public ASTVariableDeclaration(ASTParent parent, String name, CherryType type, ASTBase value)
 	{
 		super(parent, name);
 		this.type = type;
-		this.value = value;
 		if (value != null)
-			value.setParent(null);
+			value.setParent(this);
 	}
 
+	public ASTBase getValue()
+	{
+		return childAsts.get(0);
+	}
 
 	@Override
 	public CherryType getExpressionType()
@@ -33,7 +35,7 @@ public class ASTVariableDeclaration extends ASTBase
 	{
 		destination.print("Variable: " + name +
 				" of type: " + type.getName() + " with value of ");
-		value.debugSelf(destination);
+		getValue().debugSelf(destination);
 
 	}
 }

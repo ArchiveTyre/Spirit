@@ -3,7 +3,8 @@ package compiler.builtins;
 import compiler.Syntax;
 
 /**
- * Created by david on 4/19/17.
+ * @author david
+ * @date 4/19/17.
  */
 public enum FileType
 {
@@ -15,15 +16,13 @@ public enum FileType
 
 	public static FileType toFileType(String symbol)
 	{
-		// FIXME: I don't like this function. B-baka! ^^
-
 		switch (symbol)
 		{
-			case Syntax.KEYWORD_TYPE_OBJECT:
+			case Syntax.Definable.OBJECT:
 				return OBJECT;
-			case Syntax.KEYWORD_TYPE_INTERFACE:
+			case Syntax.Definable.INTERFACE:
 				return INTERFACE;
-			case Syntax.KEYWORD_TYPE_ENUM:
+			case Syntax.Definable.ENUM:
 				return ENUM;
 			default:
 				return UNDEFINED;
