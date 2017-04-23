@@ -251,7 +251,7 @@ public class Parser
 									unspecifiedParams.clear();
 								}
 							}
-							else if (lookAheads[0].value.equals(Syntax.Op.ARG_SEP))
+							else if (lookAheads[0].value.equals(Syntax.Op.ARG_SEP) || lookAheads[0].tokenType == TokenType.RPAR)
 							{
 								unspecifiedParams.add(argName);
 							}
