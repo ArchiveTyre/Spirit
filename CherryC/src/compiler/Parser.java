@@ -227,6 +227,9 @@ public class Parser
 				if (match(TokenType.LPAR))
 				{
 					ArrayList<String> unspecifiedParams = new ArrayList<>();
+
+					// If we have defined the type for ANY arguments. //
+					boolean specifiedAnyArguments = false;
 					do
 					{
 						if (match(TokenType.SYMBOL))
@@ -236,6 +239,7 @@ public class Parser
 							{
 								CherryType argType = parseType(parent);
 								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+								specifiedAnyArguments = true;
 
 								if (!unspecifiedParams.isEmpty())
 								{
@@ -256,13 +260,16 @@ public class Parser
 
 					if (!unspecifiedParams.isEmpty())
 					{
-						String args = "";
-						for (String param: unspecifiedParams)
+						if (specifiedAnyArguments)
 						{
-							args += param + ", ";
+							String args = "";
+							for (String param : unspecifiedParams)
+							{
+								args += param + Syntax.Op.ARG_SEP + " ";
+							}
+							args = args.substring(0, args.length() - 3);
+							syntaxError("Type specification", "Some arguments did not have a specified type. [" + args + "]");
 						}
-						args = args.substring(0, args.length() - 3);
-						syntaxError("Type specification", "Some arguments did not have a specified type. [" + args + "]");
 					}
 
 					if (!match(TokenType.RPAR))
@@ -272,7 +279,17 @@ public class Parser
 
 					if (lookAheads[0].tokenType == TokenType.SYMBOL)
 					{
-						function.returnType = parseType(parent, true);
+						CherryType returnType = parseType(parent, true);
+						function.returnType = returnType;
+						if (!specifiedAnyArguments && !unspecifiedParams.isEmpty())
+						{
+							for (String param : unspecifiedParams)
+							{
+								function.args.add(new ASTVariableDeclaration(null, param, returnType, null));
+
+							}
+							unspecifiedParams.clear();
+						}
 					}
 					else
 					{
