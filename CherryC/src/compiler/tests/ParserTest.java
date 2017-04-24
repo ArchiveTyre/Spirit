@@ -52,10 +52,7 @@ class ParserTest
 	@Test
 	void firstTest()
 	{
-		System.out.println(Builtins.getBuiltin("void").getName());
 		String tmpPrint = "print : (something : int)\n";
-
-
 
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "a := 5\nb : int = a");
@@ -84,7 +81,9 @@ class ParserTest
 		// Test functions. //
 		testClassCompile("FunTest1", "a : (x : int, y : int) int = x + y");
 		testClassCompile("FunTest2", tmpPrint + "a : ()\n\tprint! 23");
-		testClassCompile("FunTest3", tmpPrint + "a : ()\n\tb : ()\n\t\tprint! 2\n\tb");
+
+		testClassCompile("FunTest3", tmpPrint + "a : ()\n\tb : ()\n\t\tprint! 2\n\tb!");
+
 		testClassCompile("FunTest4", "func : (x, y : int, b : bool, c, k : string)\n\ta := 5");
 		testClassCompile("FunTest4", "func : (x, y, z) int = x * y + z");
 
@@ -111,7 +110,14 @@ class ParserTest
 
 		testClassCompile(false, "Subclass1", "type enum\nextends MyObject");
 
-		testClassCompile("If1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5");
-		testClassCompile("Else1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5\nelse\n\tprint! 10");
+		// Crazy. //
+		testClassCompile("CrazyIf1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5");
+		testClassCompile("CrazyElse1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5\nelse\n\tprint! 10");
+		testClassCompile("CrazyCall1", tmpPrint +"a : (b, c) = 3\na! (\na! 2\n(3)) 0");
+
+		// Precedence. //
+		testClassCompile("Precedence1", "2 + 2 * 2 + 2");
+
+
 	}
 }
