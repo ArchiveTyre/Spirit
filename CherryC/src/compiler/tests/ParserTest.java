@@ -52,6 +52,7 @@ class ParserTest
 	@Test
 	void firstTest()
 	{
+
 		String tmpPrint = "print : (something : int)\n";
 
 		// Test basic assignment. //
@@ -111,12 +112,17 @@ class ParserTest
 		testClassCompile(false, "Subclass1", "type enum\nextends MyObject");
 
 		// Crazy. //
+
 		testClassCompile("CrazyIf1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5");
 		testClassCompile("CrazyElse1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5\nelse\n\tprint! 10");
 		testClassCompile("CrazyCall1", tmpPrint +"a : (b, c) = 3\na! (\na! 2\n(3)) 0");
 
 		// Precedence. //
 		testClassCompile("Precedence1", "2 + 2 * 2 + 2");
+		testClassCompile("Precedence2", "2 + 2 == 2 + 2");
+		testClassCompile("Precedence3", "2 > 2 == 2 < 2");
+		testClassCompile("Precedence2", "2 + 2 + 4 * 4 + 2 + 2");
+		testClassCompile("Precedence2", "2 * 2 + 2 * 2");
 
 
 	}

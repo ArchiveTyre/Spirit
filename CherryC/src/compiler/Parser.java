@@ -43,12 +43,17 @@ public class Parser
 		// FIXME: Complete the map!
 
 		put("==", 0);
+		put("=",  0);
 
-		put("+", 1);
-		put("-", 1);
+		put(">",  1);
+		put("<",  1);
 
-		put("*", 2);
-		put("/", 2);
+
+		put("+",  2);
+		put("-",  2);
+
+		put("*",  3);
+		put("/",  3);
 	}};
 
 	private boolean isFundamental(TokenType tokenType)
@@ -63,6 +68,9 @@ public class Parser
 
 	private ASTBase parsePrimary(ASTParent parent, boolean inPar)
 	{
+		if (inPar)
+			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
 		if (match(TokenType.SYMBOL))
 		{
 			String symbol = previous.value;
@@ -78,7 +86,11 @@ public class Parser
 		if (match(TokenType.LPAR))
 		{
 			while (match(TokenType.INDENT) || match("\n", true));
-			ASTBase expression =  parseExpression(parent, true, 0);
+			ASTBase expression =  parseExpression(parent, true);
+
+			if (inPar)
+				while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
 			if (match(TokenType.RPAR, true))
 			{
 				return expression;
@@ -86,10 +98,11 @@ public class Parser
 			else
 			{
 				syntaxError(")", "Unmatched parenthesis");
+				return null;
 			}
 		}
 
-		System.err.println("COMPILER ERROR! Trying to parse fundamental type on non-fundamental!");
+		System.err.println("COMPILER ERROR! Trying to parse primary type on non-primary!");
 		return null;
 	}
 
@@ -100,18 +113,69 @@ public class Parser
 		// Parse arguments until we find something un-parsable. //
 		while(isPrimary(lookAheads[0].tokenType))
 		{
-			parseExpression(functionCall, inPar, 0);
+			parseExpression(functionCall, inPar);
 		}
 		return functionCall;
 	}
 
-	private ASTBase parseExpression(ASTParent parent)
+	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent, boolean inPar)
 	{
-		return parseExpression(parent, false, 0);
+		if (inPar)
+			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
+		while (lookAheads[0].tokenType == TokenType.OPERATOR && !lookAheads[0].value.equals(","))
+		{
+
+			// Make sure that the operator exists in the precedence table. //
+			if (operatorPrecedenceMap.containsKey(lookAheads[0].value) == false)
+			{
+				System.err.println("COMPILER ERROR! Table does not contain precedence value of operator "
+						+ lookAheads[0].value);
+				return null;
+			}
+
+			// Find the operator in the table as well as name;
+			String opName = lookAheads[0].value;
+			int opPrecedence = operatorPrecedenceMap.get(opName);
+			step();
+
+			if (inPar)
+				while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
+			if (opPrecedence >= minPrecedence)
+			{
+				ASTBase right = parsePrimary(parent, inPar);
+				while (lookAheads[0].tokenType == TokenType.OPERATOR && !lookAheads[0].value.equals(","))
+				{
+					int otherPrecedence = operatorPrecedenceMap.get(lookAheads[0].value);
+					if (otherPrecedence > opPrecedence)
+					{
+						right = parseOpExpression(right, opPrecedence, parent, inPar);
+					}
+					else
+					{
+						break;
+					}
+					step();
+					if (inPar)
+						while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+				}
+				left = new ASTOperator(parent, opName, right, left);
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if (inPar)
+			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
+		return left;
 	}
 
 	// FIXME: Add support for strings.
-	private ASTBase parseExpression(ASTParent parent, boolean inPar, int minPrecedence)
+	private ASTBase parseExpression(ASTParent parent, boolean inPar)
 	{
 		if (inPar)
 			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
@@ -133,18 +197,9 @@ public class Parser
 			{
 				return left;
 			}
-
-			// Either we have an operator, or alternatively left is a single-node expression. //
-			else if (match(TokenType.OPERATOR, inPar))
+			else if (lookAheads[0].tokenType == TokenType.OPERATOR)
 			{
-				String opName = previous.value;
-
-				if (inPar)
-					while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
-
-				ASTBase right = parseExpression(parent, inPar, 0); // FIXME: Use right value
-
-				return new ASTOperator(parent, opName, right, left);
+				return parseOpExpression(left, 0, parent, inPar);
 			}
 			else
 			{
@@ -308,7 +363,7 @@ public class Parser
 			// Filter out any newlines. //
 			while (match(TokenType.NEWLINE));
 
-			ASTBase right = parseExpression(parent);
+			ASTBase right = parseExpression(parent, false);
 			if (right != null)
 				right.setParent(returnExpression);
 
@@ -335,7 +390,7 @@ public class Parser
 				// Try to parse initial value. //
 				if (match("="))
 				{
-					value = parseExpression(parent);
+					value = parseExpression(parent, false);
 
 					if (value == null)
 						return null;
@@ -405,14 +460,14 @@ public class Parser
 					&& lookAheads[2].tokenType != TokenType.NEWLINE)
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
-				loop.initialStatement = parseExpression(loop);
+				loop.initialStatement = parseExpression(loop, false);
 
 			if (match(","))
 			{
-				loop.conditionalStatement = parseExpression(loop);
+				loop.conditionalStatement = parseExpression(loop, false);
 				if (match(","))
 				{
-					loop.iterationalStatement = parseExpression(loop);
+					loop.iterationalStatement = parseExpression(loop, false);
 				}
 			}
 
@@ -520,16 +575,13 @@ public class Parser
 			}
 			return false;
 		}
-		// FIXME: If/ELSE does not work!
 		else if (match(Syntax.Keyword.IF))
 		{
-			ASTBase condition = parseExpression(parent);
+			ASTBase condition = parseExpression(parent, false);
 
 			new ASTIf(parent, condition);
 			return true;
 		}
-
-		// FIXME: If/ELSE does not work! Or does it?
 		else if (match(Syntax.Keyword.ELSE))
 		{
 			new ASTElse(parent);
@@ -572,7 +624,7 @@ public class Parser
 		// Otherwise it's just an expression. //
 		else
 		{
-			ASTBase expression = parseExpression(parent);
+			ASTBase expression = parseExpression(parent, false);
 			if (expression != null)
 			{
 				expression.columnNumber = line_indent;
