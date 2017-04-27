@@ -68,9 +68,6 @@ public class Parser
 
 	private ASTBase parsePrimary(ASTParent parent, boolean inPar)
 	{
-		if (inPar)
-			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
-
 		if (match(TokenType.SYMBOL))
 		{
 			String symbol = previous.value;
@@ -87,9 +84,6 @@ public class Parser
 		{
 			while (match(TokenType.INDENT) || match("\n", true));
 			ASTBase expression =  parseExpression(parent, true);
-
-			if (inPar)
-				while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
 
 			if (match(TokenType.RPAR, true))
 			{
@@ -120,9 +114,6 @@ public class Parser
 
 	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent, boolean inPar)
 	{
-		if (inPar)
-			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
-
 		while (lookAheads[0].tokenType == TokenType.OPERATOR && !lookAheads[0].value.equals(","))
 		{
 
@@ -139,9 +130,6 @@ public class Parser
 			int opPrecedence = operatorPrecedenceMap.get(opName);
 			step();
 
-			if (inPar)
-				while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
-
 			if (opPrecedence >= minPrecedence)
 			{
 				ASTBase right = parsePrimary(parent, inPar);
@@ -157,8 +145,6 @@ public class Parser
 						break;
 					}
 					step();
-					if (inPar)
-						while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
 				}
 				left = new ASTOperator(parent, opName, right, left);
 			}
@@ -167,24 +153,15 @@ public class Parser
 				break;
 			}
 		}
-
-		if (inPar)
-			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
-
 		return left;
 	}
 
 	// FIXME: Add support for strings.
 	private ASTBase parseExpression(ASTParent parent, boolean inPar)
 	{
-		if (inPar)
-			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
-
 		if (isPrimary(lookAheads[0].tokenType))
 		{
 			ASTBase left = parsePrimary(parent, inPar);
-			if (inPar)
-				while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
 
 			// Check if we have hit an end. //
 			if (lookAheads[0].value.equals(",")
