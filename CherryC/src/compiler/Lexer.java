@@ -20,6 +20,7 @@ public class Lexer
 	private int columnNumber = 0;
 	private int oldColumnNumber = 0;
 	private int lineNumber = 0;
+	private int parenthesesCount = 0;
 
 	public Lexer(PushbackInputStream input, String fileName)
 	{
@@ -37,7 +38,6 @@ public class Lexer
 		int c = readChar();
 
 
-
 		// Check if char is EOF. //
 		if (c == -1)
 		{
@@ -45,7 +45,7 @@ public class Lexer
 		}
 
 		// Try to create indent token. //
-		if (columnNumber == 0 && (c == ' ' || c == '\t'))
+		if (parenthesesCount == 0 && columnNumber == 0 && (c == ' ' || c == '\t'))
 		{
 			int indent = 0;
 			while (c == ' ' || c == '\t')
@@ -56,20 +56,26 @@ public class Lexer
 			unReadChar(c);
 			return new Token(indent, lineNumber);
 		}
-		else
-		{
-			// Remove leading whitespace. //
-			while (c == ' ' || c == '\t')
-				c = readChar();
-		}
 
 		// Check a bunch of single char tokens. //
-		if (c == '\n')
+		if (c == '\n' && parenthesesCount == 0)
+		{
 			return new Token("\n", Token.TokenType.NEWLINE, columnNumber, lineNumber);
-		else if (c == '(')
+		}
+
+		while (c == ' ' || c == '\t' || c == '\n')
+			c = readChar();
+
+		if (c == '(')
+		{
+			++parenthesesCount;
 			return new Token("(", Token.TokenType.LPAR, columnNumber, lineNumber);
+		}
 		else if (c == ')')
+		{
+			--parenthesesCount;
 			return new Token(")", Token.TokenType.RPAR, columnNumber, lineNumber);
+		}
 		else if (c == ':')
 			return new Token(":", Token.TokenType.OPERATOR, columnNumber, lineNumber);
 

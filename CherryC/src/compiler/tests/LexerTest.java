@@ -48,6 +48,7 @@ class LexerTest
 		testForTokens("a	b", new String[]{"a", "b"});
 		testForTokens("a		b", new String[]{"a", "b"});
 		testForTokens("a\n b", new String[]{"a", "\n", "", "b"});
+		testForTokens("a(\n)b", new String[]{"a", "(", ")", "b"});
 		System.out.println("Test/s successful.");
 
 
