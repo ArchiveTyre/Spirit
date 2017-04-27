@@ -4,8 +4,10 @@ import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
 
-import static compiler.Token.TokenType;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+import static compiler.Token.TokenType;
 
 /**
  * This class uses a Lexer to build an AST.
@@ -19,14 +21,10 @@ public class Parser
 
 	/** The lexer to read from. */
 	private Lexer lexer;
-
-
 	private Token[] lookAheads = new Token[3];
 	private Token previous = null;
 
 	public boolean fileTypeDeclared = false;
-
-	public Syntax syntax;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -39,138 +37,60 @@ public class Parser
 		{
 			lookAheads[i] = lexer.getToken();
 		}
-		syntax = new Syntax();
 	}
+
+	private static final HashMap<String, Integer> operatorPrecedenceMap = new HashMap<String, Integer>(){{
+		// FIXME: Complete the map!
+
+		put("==", 0);
+		put("=",  0);
+
+		put(">",  1);
+		put("<",  1);
+
+
+		put("+",  2);
+		put("-",  2);
+
+		put("*",  3);
+		put("/",  3);
+	}};
 
 	private boolean isFundamental(TokenType tokenType)
 	{
 		return tokenType == TokenType.SYMBOL || tokenType == TokenType.NUMBER || tokenType == TokenType.STRING;
 	}
 
-	private ASTBase parseFundamental(ASTParent parent)
+	private boolean isPrimary(TokenType tokenType)
 	{
+		return isFundamental(tokenType) || tokenType == TokenType.LPAR;
+	}
+
+	private ASTBase parsePrimary(ASTParent parent, boolean inPar)
+	{
+		if (inPar)
+			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
 		if (match(TokenType.SYMBOL))
-			return new ASTVariableUsage(parent, previous.value);
+		{
+			String symbol = previous.value;
+			if (match("!"))
+				return parseFunctionCall(parent, symbol, inPar);
+			else
+				return new ASTVariableUsage(parent, previous.value);
+		}
 		if (match(TokenType.NUMBER))
 			return new ASTNumber(parent, Integer.parseInt(previous.value));
 		if (match(TokenType.STRING))
 			return null; // FIXME: Not implemented yet!
-
-		System.err.println("COMPILER ERROR! Trying to parse fundamental type on non-fundamental!");
-		return null;
-	}
-
-	private ASTBase parseFundamentalWithOperator(ASTParent parent)
-	{
-		ASTBase left = parseFundamental(parent);
-		if (match(TokenType.OPERATOR))
+		if (match(TokenType.LPAR))
 		{
-			String opName = previous.value;
-			ASTBase right = parseFundamentalWithOperator(parent);
-			return new ASTOperator(parent, opName, right, left);
-		}
-		else
-		{
-			return left;
-		}
-	}
-
-	private ASTBase parseExpression(ASTParent parent)
-	{
-		return parseExpression(parent, false);
-	}
-
-	// FIXME: Add support for strings.
-	private ASTBase parseExpression(ASTParent parent, boolean inPar)
-	{
-		if (isFundamental(lookAheads[0].tokenType))
-		{
-			ASTBase left;
-
-			// Create left-hand side. //
-			// From number. //
-			if (match(TokenType.NUMBER, inPar))
-			{
-				left = new ASTNumber(parent, Integer.parseInt(previous.value));
-			}
-			// Or from a symbol... //
-			else if (match(TokenType.SYMBOL, inPar))
-			{
-				String name = previous.value;
-
-				// Check if function call. //
-				// FIXME: Replace with Syntax.somethingDesu!
-				if (match("!"))
-				{
-					ASTFunctionCall functionCall = new ASTFunctionCall(parent, name);
-
-					// Parse arguments until we find something un-parsable. //
-					while(true)
-					{
-						if (isFundamental(lookAheads[0].tokenType))
-							parseFundamentalWithOperator(functionCall);
-						else if (lookAheads[0].tokenType == TokenType.LPAR)
-							parseExpression(functionCall);
-						else
-							break;
-
-					}
-
-					return functionCall;
-				}
-				// Nope, just normal symbol. //
-				else
-				{
-					left = new ASTVariableUsage(parent, name);
-				}
-			}
-			// A compiler error has occurred. //
-			else
-			{
-				System.err.println("COMPILER ERROR! Fundamental type used is not supported!");
-				return null;
-			}
-
-			while (inPar && match("\n"));
-
-
-			// Check if we have hit an end. //
-			if (lookAheads[0].value.equals(",") || lookAheads[0].value.equals(":"))
-			{
-				return left;
-			}
-
-			// Either we have an operator, or alternatively left is single-node expression or a function call. //
-			else if (match(TokenType.OPERATOR, inPar))
-			{
-				String opName = previous.value;
-				while (inPar && match("\n", true));
-
-				ASTBase right = parseExpression(parent, inPar);
-
-				return new ASTOperator(parent, opName, right, left);
-			}
-
-
-
-			// Single-node expression. //
-			else if ((mathEOLF() && !inPar)
-					|| lookAheads[0].tokenType == TokenType.RPAR
-					|| Syntax.isKeyword(lookAheads[0].value))
-			{
-				return left;
-			}
-			else
-			{
-				syntaxError("end of expression", "Got garbage!");
-			}
-		}
-
-		// Try to parse parentheses. //
-		else if (match(TokenType.LPAR, inPar))
-		{
-			while (match("\n"));
+			while (match(TokenType.INDENT) || match("\n", true));
 			ASTBase expression =  parseExpression(parent, true);
+
+			if (inPar)
+				while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
 			if (match(TokenType.RPAR, true))
 			{
 				return expression;
@@ -178,9 +98,120 @@ public class Parser
 			else
 			{
 				syntaxError(")", "Unmatched parenthesis");
+				return null;
 			}
 		}
 
+		System.err.println("COMPILER ERROR! Trying to parse primary type on non-primary!");
+		return null;
+	}
+
+	private ASTFunctionCall parseFunctionCall(ASTParent parent, String name, boolean inPar)
+	{
+		ASTFunctionCall functionCall = new ASTFunctionCall(parent, name);
+
+		// Parse arguments until we find something un-parsable. //
+		while(isPrimary(lookAheads[0].tokenType))
+		{
+			parseExpression(functionCall, inPar);
+		}
+		return functionCall;
+	}
+
+	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent, boolean inPar)
+	{
+		if (inPar)
+			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
+		while (lookAheads[0].tokenType == TokenType.OPERATOR && !lookAheads[0].value.equals(","))
+		{
+
+			// Make sure that the operator exists in the precedence table. //
+			if (operatorPrecedenceMap.containsKey(lookAheads[0].value) == false)
+			{
+				System.err.println("COMPILER ERROR! Table does not contain precedence value of operator "
+						+ lookAheads[0].value);
+				return null;
+			}
+
+			// Find the operator in the table as well as name;
+			String opName = lookAheads[0].value;
+			int opPrecedence = operatorPrecedenceMap.get(opName);
+			step();
+
+			if (inPar)
+				while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
+			if (opPrecedence >= minPrecedence)
+			{
+				ASTBase right = parsePrimary(parent, inPar);
+				while (lookAheads[0].tokenType == TokenType.OPERATOR && !lookAheads[0].value.equals(","))
+				{
+					int otherPrecedence = operatorPrecedenceMap.get(lookAheads[0].value);
+					if (otherPrecedence > opPrecedence)
+					{
+						right = parseOpExpression(right, opPrecedence, parent, inPar);
+					}
+					else
+					{
+						break;
+					}
+					step();
+					if (inPar)
+						while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+				}
+				left = new ASTOperator(parent, opName, right, left);
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if (inPar)
+			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
+		return left;
+	}
+
+	// FIXME: Add support for strings.
+	private ASTBase parseExpression(ASTParent parent, boolean inPar)
+	{
+		if (inPar)
+			while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
+		if (isPrimary(lookAheads[0].tokenType))
+		{
+			ASTBase left = parsePrimary(parent, inPar);
+			if (inPar)
+				while (match(TokenType.INDENT) || match(TokenType.NEWLINE));
+
+			// Check if we have hit an end. //
+			if (lookAheads[0].value.equals(",")
+					|| (!inPar && eOLF())
+					|| isPrimary(lookAheads[0].tokenType) // Hmm...
+					|| lookAheads[0].tokenType == TokenType.RPAR
+					|| lookAheads[0].tokenType == TokenType.LPAR
+					|| lookAheads[0].value.equals(":")
+					|| Syntax.isKeyword(lookAheads[0].value))
+			{
+				return left;
+			}
+			else if (lookAheads[0].tokenType == TokenType.OPERATOR)
+			{
+				return parseOpExpression(left, 0, parent, inPar);
+			}
+			else
+			{
+				syntaxError("end of expression", "Got garbage!");
+			}
+		}
+
+		// Garbage is okay if it's just an EOF //
+		else if (!eOLF())
+		{
+			syntaxError("primary type", "Got garbage!");
+		}
 		return null;
 	}
 
@@ -224,15 +255,51 @@ public class Parser
 				// Make sure we match a parenthesis which is basically the function indicator. //
 				if (match(TokenType.LPAR))
 				{
+					ArrayList<String> unspecifiedParams = new ArrayList<>();
+
+					// If we have defined the type for ANY arguments. //
+					boolean specifiedAnyArguments = false;
 					do
 					{
 						if (match(TokenType.SYMBOL))
 						{
 							String argName = previous.value;
-							CherryType argType = parseType(parent);
-							function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+							if (lookAheads[0].value.equals(Syntax.Op.TYPEDEF))
+							{
+								CherryType argType = parseType(parent);
+								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+								specifiedAnyArguments = true;
+
+								if (!unspecifiedParams.isEmpty())
+								{
+									for (String param : unspecifiedParams)
+									{
+										function.args.add(new ASTVariableDeclaration(null, param, argType, null));
+
+									}
+									unspecifiedParams.clear();
+								}
+							}
+							else if (lookAheads[0].value.equals(Syntax.Op.ARG_SEP) || lookAheads[0].tokenType == TokenType.RPAR)
+							{
+								unspecifiedParams.add(argName);
+							}
 						}
-					} while (match(","));
+					} while (match(Syntax.Op.ARG_SEP));
+
+					if (!unspecifiedParams.isEmpty())
+					{
+						if (specifiedAnyArguments)
+						{
+							String args = "";
+							for (String param : unspecifiedParams)
+							{
+								args += param + Syntax.Op.ARG_SEP + " ";
+							}
+							args = args.substring(0, args.length() - 3);
+							syntaxError("Type specification", "Some arguments did not have a specified type. [" + args + "]");
+						}
+					}
 
 					if (!match(TokenType.RPAR))
 					{
@@ -241,7 +308,17 @@ public class Parser
 
 					if (lookAheads[0].tokenType == TokenType.SYMBOL)
 					{
-						function.returnType = parseType(parent, true);
+						CherryType returnType = parseType(parent, true);
+						function.returnType = returnType;
+						if (!specifiedAnyArguments && !unspecifiedParams.isEmpty())
+						{
+							for (String param : unspecifiedParams)
+							{
+								function.args.add(new ASTVariableDeclaration(null, param, returnType, null));
+
+							}
+							unspecifiedParams.clear();
+						}
 					}
 					else
 					{
@@ -286,7 +363,7 @@ public class Parser
 			// Filter out any newlines. //
 			while (match(TokenType.NEWLINE));
 
-			ASTBase right = parseExpression(parent);
+			ASTBase right = parseExpression(parent, false);
 			if (right != null)
 				right.setParent(returnExpression);
 
@@ -313,7 +390,7 @@ public class Parser
 				// Try to parse initial value. //
 				if (match("="))
 				{
-					value = parseExpression(parent);
+					value = parseExpression(parent, false);
 
 					if (value == null)
 						return null;
@@ -338,13 +415,11 @@ public class Parser
 		}
 	}
 
-
 	private boolean parseFileTypeDeclarationLine(ASTParent parent)
 	{
-
 		// Skip indentation . //
 		if (lookAheads[1].value.equals(Syntax.Keyword.TYPE))
-			match(TokenType.INDENT);
+			match(TokenType.INDENT); // FIXME: Uh eh... what?
 
 		// Skip any empty lines.
 		if (match(TokenType.NEWLINE))
@@ -385,14 +460,14 @@ public class Parser
 					&& lookAheads[2].tokenType != TokenType.NEWLINE)
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
-				loop.initialStatement = parseExpression(loop);
+				loop.initialStatement = parseExpression(loop, false);
 
 			if (match(","))
 			{
-				loop.conditionalStatement = parseExpression(loop);
+				loop.conditionalStatement = parseExpression(loop, false);
 				if (match(","))
 				{
-					loop.iterationalStatement = parseExpression(loop);
+					loop.iterationalStatement = parseExpression(loop, false);
 				}
 			}
 
@@ -432,7 +507,6 @@ public class Parser
 		}
 	}
 
-
 	private ASTSubclassExpression parseExtendDeclaration(ASTParent parent)
 	{
 		if (match(Syntax.Keyword.EXTENDS))
@@ -468,13 +542,8 @@ public class Parser
 			return true;
 		}
 
-
-
 		// Use the indent to find a new parent for the contents of this line. //
 		ASTParent parent = dest.getParentForNewCode(line_indent);
-
-
-
 
 		if (parent == null)
 		{
@@ -506,19 +575,13 @@ public class Parser
 			}
 			return false;
 		}
-		// FIXME: If/ELSE does not work!
 		else if (match(Syntax.Keyword.IF))
 		{
-			ASTBase condition = parseExpression(parent);
+			ASTBase condition = parseExpression(parent, false);
 
 			new ASTIf(parent, condition);
 			return true;
-
-
-
 		}
-
-		// FIXME: If/ELSE does not work! Or does it?
 		else if (match(Syntax.Keyword.ELSE))
 		{
 			new ASTElse(parent);
@@ -561,7 +624,7 @@ public class Parser
 		// Otherwise it's just an expression. //
 		else
 		{
-			ASTBase expression = parseExpression(parent);
+			ASTBase expression = parseExpression(parent, false);
 			if (expression != null)
 			{
 				expression.columnNumber = line_indent;
@@ -624,9 +687,9 @@ public class Parser
 	 * Matches end of line and and of file.
 	 * @return If we matched.
 	 */
-	private boolean mathEOLF()
+	private boolean eOLF()
 	{
-		return match(TokenType.EOF) || match (TokenType.NEWLINE);
+		return lookAheads[0].tokenType == TokenType.EOF || lookAheads[0].tokenType == TokenType.NEWLINE;
 	}
 
 	private boolean match(String value)
@@ -636,8 +699,6 @@ public class Parser
 
 	private boolean match(String value, boolean ignoreNewline)
 	{
-		while (ignoreNewline && (match(TokenType.NEWLINE) || match(TokenType.INDENT)));
-
 		if (value.equals(lookAheads[0].value))
 		{
 			step();
@@ -649,7 +710,6 @@ public class Parser
 
 	private boolean match(TokenType value, boolean ignoreNewline)
 	{
-		while (ignoreNewline && (match(TokenType.NEWLINE) || match(TokenType.INDENT)));
 		if (value == lookAheads[0].tokenType)
 		{
 			step();

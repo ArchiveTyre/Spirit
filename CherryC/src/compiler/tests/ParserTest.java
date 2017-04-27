@@ -52,10 +52,8 @@ class ParserTest
 	@Test
 	void firstTest()
 	{
-		System.out.println(Builtins.getBuiltin("void").getName());
+
 		String tmpPrint = "print : (something : int)\n";
-
-
 
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "a := 5\nb : int = a");
@@ -84,13 +82,18 @@ class ParserTest
 		// Test functions. //
 		testClassCompile("FunTest1", "a : (x : int, y : int) int = x + y");
 		testClassCompile("FunTest2", tmpPrint + "a : ()\n\tprint! 23");
-		testClassCompile("FunTest3", tmpPrint + "a : ()\n\tb : ()\n\t\tprint! 2\n\tb");
+
+		testClassCompile("FunTest3", tmpPrint + "a : ()\n\tb : ()\n\t\tprint! 2\n\tb!");
+
+		testClassCompile("FunTest4", "func : (x, y : int, b : bool, c, k : string)\n\ta := 5");
+		testClassCompile("FunTest4", "func : (x, y, z) int = x * y + z");
 
 		// Test function calls. //
 		testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na! 1 2");
 		testClassCompile("FunCall2", "a : (x : int, y : int) int = x + y\na! 1 2 (a! 3 4)");
-
 		testClassCompile("FunCall3", "a : ()");
+		testClassCompile("FunCall4", "a : (x, y : int) int = x + y\na! 1 2 (a! 3 4)");
+
 
 		// If statements. //
 		testClassCompile("IfStatement1", tmpPrint + "A := 3\nif A\n\tprint! A\n\tprint! A + 5\nb := 10");
@@ -110,7 +113,19 @@ class ParserTest
 
 		testClassCompile(false, "Subclass1", "type enum\nextends MyObject");
 
-		testClassCompile("If1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5");
-		testClassCompile("Else1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5\nelse\n\tprint! 10");
+		// Crazy. //
+
+		testClassCompile("CrazyIf1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5");
+		testClassCompile("CrazyElse1", tmpPrint + "if (\n5 \n==\n 5\n)\n\tprint! 5\nelse\n\tprint! 10");
+		testClassCompile("CrazyCall1", tmpPrint +"a : (b, c) = 3\na! (\na! 2\n(3)) 0");
+
+		// Precedence. //
+		testClassCompile("Precedence1", "2 + 2 * 2 + 2");
+		testClassCompile("Precedence2", "2 + 2 == 2 + 2");
+		testClassCompile("Precedence3", "2 > 2 == 2 < 2");
+		testClassCompile("Precedence2", "2 + 2 + 4 * 4 + 2 + 2");
+		testClassCompile("Precedence2", "2 * 2 + 2 * 2");
+
+
 	}
 }

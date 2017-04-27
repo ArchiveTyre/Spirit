@@ -74,6 +74,7 @@ public class Syntax
 		public static final String TYPEDEF	= 	":"	;
 		public static final String FUNCVAL	= 	"=" ;
 		public static final String MAP		= 	"=>";
+		public static final String ARG_SEP	=	","	;
 
 
 	}
