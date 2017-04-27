@@ -70,11 +70,13 @@ public class Parser
 	{
 		if (match(TokenType.SYMBOL))
 		{
-			String symbol = previous.value;
-			if (match("!"))
-				return parseFunctionCall(parent, symbol, inPar);
-			else
-				return new ASTVariableUsage(parent, previous.value);
+
+			if (lookAheads[0].tokenType != TokenType.OPERATOR && lookAheads[0].tokenType != TokenType.EOF && lookAheads[0].tokenType != TokenType.NEWLINE)
+			{
+				System.out.println("PARSING FUNCALL: " + previous.value + ", " + lookAheads[1].tokenType.toString() + ", " + lookAheads[1].value);
+				return parseFunctionCall(parent, previous.value, false);
+			}
+			return new ASTVariableUsage(parent, previous.value);
 		}
 		if (match(TokenType.NUMBER))
 			return new ASTNumber(parent, Integer.parseInt(previous.value));
@@ -83,16 +85,37 @@ public class Parser
 		if (match(TokenType.LPAR))
 		{
 			while (match(TokenType.INDENT) || match("\n", true));
-			ASTBase expression =  parseExpression(parent, true);
 
-			if (match(TokenType.RPAR, true))
+			// Check if we are looking for a function call. //
+			if (match(TokenType.SYMBOL) && lookAheads[0].tokenType != TokenType.OPERATOR)
 			{
-				return expression;
-			}
-			else
+				ASTFunctionCall call = parseFunctionCall(parent, previous.value, true);
+
+				if (match(TokenType.RPAR))
+				{
+					return call;
+				}
+				else
+				{
+					syntaxError(")", "Unmatched parenthesis.");
+				}
+
+			} else
 			{
-				syntaxError(")", "Unmatched parenthesis");
-				return null;
+
+
+				ASTBase expression = parseExpression(parent, true);
+
+
+				if (match(TokenType.RPAR, true))
+				{
+					return expression;
+				}
+				else
+				{
+					syntaxError(")", "Unmatched parenthesis.");
+					return null;
+				}
 			}
 		}
 

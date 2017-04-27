@@ -54,7 +54,12 @@ public class ASTFunctionCall extends ASTParent
 	public void debugSelf(DebugPrinter destination)
 	{
 
-		destination.print("Call to: " + declaration.name + "(");
+		String space = (childAsts.isEmpty()) ? "" : " ";
+		if (getParent() instanceof ASTFunctionCall)
+		{
+			space = "";
+		}
+		destination.print(declaration.name + "(" + space);
 		for (ASTBase arg : childAsts)
 		{
 			arg.debugSelf(destination);
@@ -63,7 +68,7 @@ public class ASTFunctionCall extends ASTParent
 				destination.print(", ");
 			}
 		}
-		destination.print(")");
+		destination.print(space + ")");
 	}
 
 }

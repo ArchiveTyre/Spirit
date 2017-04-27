@@ -33,8 +33,8 @@ public class ASTVariableDeclaration extends ASTParent
 	@Override
 	public void debugSelf(DebugPrinter destination)
 	{
-		destination.print("Variable: " + name +
-				" of type: " + type.getName() + " with value of ");
+		destination.print("var " + type.getName() + " " + name +
+				" = ");
 		getValue().debugSelf(destination);
 
 	}
