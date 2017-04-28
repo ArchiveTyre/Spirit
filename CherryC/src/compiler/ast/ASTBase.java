@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * The base class for any AST node.
@@ -12,17 +13,30 @@ import compiler.lib.DebugPrinter;
 public abstract class ASTBase
 {
 
-	/** If the AST has a name (optional). */
+	/**
+	 * If the AST has a name (optional).
+	 */
 	String name = "";
 
-	/** Line number on which it was defined on. */
+	/**
+	 * Line number on which it was defined on.
+	 */
 	public int lineNumber;
 
-	/** Column number on which it was defined on. */
+	/**
+	 * Column number on which it was defined on.
+	 */
 	public int columnNumber;
 
-	/** Parent of this node. */
+	/**
+	 * Parent of this node.
+	 */
 	private ASTParent parent;
+
+	public String getName()
+	{
+		return name;
+	}
 
 	public void setParent(ASTParent newParent)
 	{
@@ -60,8 +74,10 @@ public abstract class ASTBase
 	 * Prints the AST onto a stream.
 	 *
 	 * When implementing, make sure that the print does not end with a newline.
-	 * @param destination The DebugPrinter on which to print to.
+	 * @param destination The IndentPrinter on which to print to.
 	 */
-	abstract public void debugSelf(DebugPrinter destination);
+	abstract public void debugSelf(IndentPrinter destination);
+
+	public abstract void compileSelf(LangCompiler compiler);
 
 }

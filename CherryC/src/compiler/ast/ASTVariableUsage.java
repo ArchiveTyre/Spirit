@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * @author david
@@ -24,12 +25,18 @@ public class ASTVariableUsage extends ASTBase
 	@Override
 	public CherryType getExpressionType()
 	{
-		return null;
+		return declaration.getExpressionType();
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print(name);
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileVariableUsage(this);
 	}
 }

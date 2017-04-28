@@ -40,7 +40,7 @@ public class FileCompiler
 			parser.parseFile(parent);
 
 
-			DebugPrinter printer = new DebugPrinter(System.out);
+			IndentPrinter printer = new IndentPrinter(System.out);
 
 			parent.debugSelf(printer);
 

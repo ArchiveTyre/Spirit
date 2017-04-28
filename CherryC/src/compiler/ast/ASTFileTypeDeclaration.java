@@ -1,13 +1,16 @@
 package compiler.ast;
 
 import compiler.CherryType;
+import compiler.LangCompiler;
 import compiler.builtins.FileType;
-import compiler.lib.DebugPrinter;
+import compiler.lib.IndentPrinter;
 
 /**
  * @author david
  * @date 4/19/17.
  */
+
+// FIXME: Move to just class...
 public class ASTFileTypeDeclaration extends ASTBase
 {
 
@@ -25,8 +28,14 @@ public class ASTFileTypeDeclaration extends ASTBase
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		destination.println("File type: " + type.name());
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		// Do nothing ... //
 	}
 }

@@ -1,10 +1,9 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.ast.ASTBase;
-import compiler.ast.ASTParent;
+import compiler.LangCompiler;
 import compiler.builtins.Builtins;
-import compiler.lib.DebugPrinter;
+import compiler.lib.IndentPrinter;
 
 /**
  * @author david
@@ -29,8 +28,14 @@ public class ASTString extends ASTBase
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileString(this);
 	}
 }

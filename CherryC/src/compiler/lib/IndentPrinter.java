@@ -3,16 +3,18 @@ package compiler.lib;
 import java.io.PrintStream;
 
 /**
+ * This class can print strings and objects while indenting lines by a counter.
+ *
  * @author Tyrerexus
  * @date 4/12/17.
  */
-public class DebugPrinter
+public class IndentPrinter
 {
 	private PrintStream destination;
 	public int indentation;
 	private boolean new_line_clean = true;
 
-	public DebugPrinter(PrintStream destination)
+	public IndentPrinter(PrintStream destination)
 	{
 		this.destination = destination;
 	}

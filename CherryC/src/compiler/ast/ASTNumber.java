@@ -1,10 +1,9 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.ast.ASTBase;
-import compiler.ast.ASTParent;
+import compiler.LangCompiler;
 import compiler.builtins.Builtins;
-import compiler.lib.DebugPrinter;
+import compiler.lib.IndentPrinter;
 
 /**
  * Puts a number into an AST.
@@ -30,8 +29,14 @@ public class ASTNumber extends ASTBase
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print(value);
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileNumber(this);
 	}
 }

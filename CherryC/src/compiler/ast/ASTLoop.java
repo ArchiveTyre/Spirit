@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * A simple for loop.
@@ -29,11 +30,13 @@ public class ASTLoop extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		if (preparationalStatement != null)
+		{
 			preparationalStatement.debugSelf(destination);
-		destination.println();
+			destination.println();
+		}
 		destination.print("for (");
 		if (initialStatement != null)
 			initialStatement.debugSelf(destination);
@@ -60,5 +63,11 @@ public class ASTLoop extends ASTParent
 		destination.indentation--;
 		destination.print("}");
 
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileLoop(this);
 	}
 }

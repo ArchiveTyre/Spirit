@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * @author Tyrerexus
@@ -31,11 +32,17 @@ public class ASTVariableDeclaration extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
-		destination.print("var " + type.getName() + " " + name +
+		destination.print("var " + type.getTypeName() + " " + name +
 				" = ");
 		getValue().debugSelf(destination);
 
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileVariableDeclaration(this);
 	}
 }

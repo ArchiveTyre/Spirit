@@ -1,9 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
-
-import java.util.ArrayList;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * Created by alex on 4/21/17.
@@ -14,6 +13,16 @@ public class ASTOperator extends ASTParent
 
 	ASTBase rightExpression;
 	ASTBase leftExpression;
+
+	public ASTBase getRightExpression()
+	{
+		return rightExpression;
+	}
+
+	public ASTBase getLeftExpression()
+	{
+		return leftExpression;
+	}
 
 	public ASTOperator(ASTParent parent, String operatorName, ASTBase rightExpression, ASTBase leftExpression)
 	{
@@ -43,7 +52,7 @@ public class ASTOperator extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print("(");
 		if (leftExpression != null)
@@ -52,5 +61,11 @@ public class ASTOperator extends ASTParent
 		if (rightExpression != null)
 			rightExpression.debugSelf(destination);
 		destination.print(")");
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileOperator(this);
 	}
 }

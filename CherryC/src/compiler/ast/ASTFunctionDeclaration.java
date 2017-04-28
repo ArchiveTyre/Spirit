@@ -1,8 +1,9 @@
 package compiler.ast;
 
 import compiler.CherryType;
+import compiler.LangCompiler;
 import compiler.builtins.Builtins;
-import compiler.lib.DebugPrinter;
+import compiler.lib.IndentPrinter;
 
 import java.util.ArrayList;
 
@@ -33,18 +34,18 @@ public class ASTFunctionDeclaration extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		if (isNestedFunction)
 			destination.print("nested ");
 		destination.print("(");
 		for (ASTVariableDeclaration arg : args)
 		{
-			destination.print(arg.name + " : " + arg.type.getName());
+			destination.print(arg.name + " : " + arg.type.getTypeName());
 			if (arg != args.get(args.size() - 1))
 				destination.print(", ");
 		}
-		destination.println(") -> " + returnType.getName());
+		destination.println(") -> " + returnType.getTypeName());
 		destination.println("{");
 		destination.indentation++;
 		for (ASTBase child : childAsts)
@@ -63,5 +64,11 @@ public class ASTFunctionDeclaration extends ASTParent
 			return null;
 
 		return super.getParent();
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileFunctionDeclaration(this);
 	}
 }

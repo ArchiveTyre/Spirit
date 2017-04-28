@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * Defines a block of code to be run at an ASTIf's failure.
@@ -42,7 +43,7 @@ public class ASTElse extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		/*
 		 * This does nothing because it's printed out by the owning "if" statement.
@@ -53,5 +54,11 @@ public class ASTElse extends ASTParent
 	public ASTParent getParent()
 	{
 		return ifStatement;
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		// Do nothing. //
 	}
 }

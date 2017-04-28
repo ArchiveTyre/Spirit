@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * Creates an AST node representing a function call to another node.
@@ -51,7 +52,7 @@ public class ASTFunctionCall extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 
 		String space = (childAsts.isEmpty()) ? "" : " ";
@@ -71,4 +72,9 @@ public class ASTFunctionCall extends ASTParent
 		destination.print(space + ")");
 	}
 
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileFunctionCall(this);
+	}
 }

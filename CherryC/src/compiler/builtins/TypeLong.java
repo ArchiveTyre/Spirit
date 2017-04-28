@@ -12,7 +12,7 @@ public class TypeLong implements CherryType
 {
 
 	@Override
-	public String getName()
+	public String getTypeName()
 	{
 		return "long";
 	}

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class TypeShort implements CherryType
 {
 	@Override
-	public String getName()
+	public String getTypeName()
 	{
 		return "short";
 	}

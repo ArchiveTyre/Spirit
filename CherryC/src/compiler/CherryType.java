@@ -10,6 +10,6 @@ import java.util.ArrayList;
  */
 public interface CherryType
 {
-	String getName();
+	String getTypeName();
 	ArrayList<ASTBase> getChildNodes();
 }

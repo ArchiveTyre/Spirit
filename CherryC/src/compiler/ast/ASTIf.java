@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * @author Tyrerexus
@@ -10,13 +11,18 @@ import compiler.lib.DebugPrinter;
 public class ASTIf extends ASTParent
 {
 	private ASTBase condition;
-	ASTElse elseStatement = null;
+	public ASTElse elseStatement = null;
 
 	public ASTIf(ASTParent parent, ASTBase condition)
 	{
 		super(parent, "");
 		this.condition = condition;
 		condition.setParent(this);
+	}
+
+	public ASTBase getCondition()
+	{
+		return condition;
 	}
 
 	@Override
@@ -26,7 +32,7 @@ public class ASTIf extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print("if (");
 		condition.debugSelf(destination);
@@ -57,5 +63,11 @@ public class ASTIf extends ASTParent
 			destination.indentation--;
 		}
 		destination.print("}");
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileIf(this);
 	}
 }

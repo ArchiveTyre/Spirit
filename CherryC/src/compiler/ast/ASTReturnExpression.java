@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
  * Created by david on 4/20/17.
@@ -20,10 +21,16 @@ public class ASTReturnExpression extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print("Return (");
 		childAsts.get(0).debugSelf(destination);
 		destination.println(")");
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileReturnExpression(this);
 	}
 }

@@ -1,7 +1,8 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public class ASTClass extends ASTParent implements CherryType
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter to)
+	public void debugSelf(IndentPrinter to)
 	{
 		to.println(name);
 		to.println("{");
@@ -85,7 +86,7 @@ public class ASTClass extends ASTParent implements CherryType
 
 
 	@Override
-	public String getName()
+	public String getTypeName()
 	{
 		return name;
 	}
@@ -94,5 +95,11 @@ public class ASTClass extends ASTParent implements CherryType
 	public ArrayList<ASTBase> getChildNodes()
 	{
 		return childAsts;
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		compiler.compileClass(this);
 	}
 }

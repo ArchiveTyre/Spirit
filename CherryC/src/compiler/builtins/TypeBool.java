@@ -12,7 +12,7 @@ public class TypeBool implements CherryType
 {
 
 	@Override
-	public String getName()
+	public String getTypeName()
 	{
 		return "bool";
 	}

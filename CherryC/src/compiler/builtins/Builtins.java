@@ -28,7 +28,7 @@ public class Builtins
 
 		for (CherryType type : builtins)
 		{
-			if (name.equals(type.getName()))
+			if (name.equals(type.getTypeName()))
 			{
 				return type;
 			}

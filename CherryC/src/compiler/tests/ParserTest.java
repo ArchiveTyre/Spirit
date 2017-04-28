@@ -3,16 +3,13 @@ package compiler.tests;
 import compiler.Lexer;
 import compiler.Parser;
 import compiler.ast.ASTClass;
-import compiler.builtins.Builtins;
-import compiler.lib.DebugPrinter;
+import compiler.lib.IndentPrinter;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -37,7 +34,7 @@ class ParserTest
 
 		parser.parseFile(astClass);
 
-		DebugPrinter printer = new DebugPrinter(System.out);
+		IndentPrinter printer = new IndentPrinter(System.out);
 
 		astClass.debugSelf(printer);
 		printer.println();
