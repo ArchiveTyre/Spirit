@@ -133,5 +133,10 @@ class ParserTest
 		testClassCompile("Precedence2", "2 * 2 + 2 * 2");
 
 
+		// Imports. //
+		testClassCompile("Import1", "import a");
+		testClassCompile("Import2", "from b import a");
+		testClassCompile("Import2", "from b import a, b, c");
+
 	}
 }

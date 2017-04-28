@@ -3,6 +3,7 @@ package compiler;
 import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
+import sun.tools.java.SyntaxError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -527,6 +528,66 @@ public class Parser
 		return null;
 	}
 
+	// Parse an import expression
+	private ASTImportExpression parseImportExpression(ASTParent parent)
+	{
+		String packageName;
+		String[] packageFiles;
+		if (match(Syntax.Keyword.IMPORT))
+		{
+			if (match(TokenType.SYMBOL))
+			{
+				packageName = previous.value;
+				packageFiles = new String[] {"*"};
+			}
+			else
+			{
+				syntaxError("Package ID", "Need a package ID to import, but I didn't get one. :(");
+				return null;
+			}
+		}
+		else if (match(Syntax.Keyword.FROM))
+		{
+			if (match(TokenType.SYMBOL))
+			{
+				packageName = previous.value;
+				ArrayList<String> files = new ArrayList<>();
+				if (match(Syntax.Keyword.IMPORT))
+				{
+					do
+					{
+						if (match(TokenType.SYMBOL))
+						{
+							files.add(previous.value);
+						}
+					} while (match(Syntax.Op.ARG_SEP));
+				}
+
+				if (files.isEmpty())
+				{
+					syntaxError("filename or wildcard", "Need files to import.");
+					return null;
+				}
+
+				packageFiles = new String[files.size()];
+				packageFiles = files.toArray(packageFiles);
+			}
+			else
+			{
+				syntaxError("Package ID", "Need a package ID to import, but I didn't get one. :(");
+				return null;
+			}
+		}
+		else
+		{
+			System.err.println("COMPILER ERROR! There was no import expression");
+			return null;
+		}
+
+
+		return new ASTImportExpression(parent, packageName, packageFiles);
+	}
+
 	private boolean parseLine(ASTClass dest)
 	{
 		// Extract indents to get a parent. //
@@ -621,6 +682,18 @@ public class Parser
 			return false;
 		}
 
+		// Check if it is an import expression. //
+		else if (look (0, Syntax.Keyword.IMPORT) || look (0,Syntax.Keyword.FROM))
+		{
+			ASTImportExpression exp = parseImportExpression(parent);
+			if (exp != null)
+			{
+				exp.columnNumber = line_indent;
+				return true;
+			}
+			return false;
+		}
+
 		// Otherwise it's just an expression. //
 		else
 		{
@@ -633,6 +706,8 @@ public class Parser
 			return false;
 		}
 	}
+
+
 
 	/**
 	 * Parses the whole content of the Lexer
@@ -722,6 +797,16 @@ public class Parser
 	private boolean match(Token.TokenType value)
 	{
 		return match(value, false);
+	}
+
+	private boolean look(int index, String value)
+	{
+		return lookAheads[index].value.equals(value);
+	}
+
+	private boolean look(int index, TokenType type)
+	{
+		return lookAheads[index].tokenType == type;
 	}
 
 	private void syntaxError(String expected, String message)
