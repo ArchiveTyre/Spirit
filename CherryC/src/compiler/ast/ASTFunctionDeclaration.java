@@ -69,6 +69,6 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
-		compiler.compileFunctionDeclaration(this);
+		compiler.compileFunctionDeclaration((ASTVariableDeclaration) this.getParent());
 	}
 }

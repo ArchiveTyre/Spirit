@@ -21,7 +21,8 @@ public class CompilerCPP extends LangCompiler
 
 	public boolean isSemicolonless(ASTBase ast)
 	{
-		return ast instanceof ASTIf || ast instanceof ASTLoop || ast instanceof ASTElse;
+		return ast instanceof ASTIf || ast instanceof ASTLoop || ast instanceof ASTElse
+				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionDeclaration);
 	}
 
 	@Override
@@ -69,7 +70,7 @@ public class CompilerCPP extends LangCompiler
 			cppOutput.indentation--;
 			cppOutput.print("}");
 		}
-		
+
 	}
 
 	@Override
@@ -104,14 +105,24 @@ public class CompilerCPP extends LangCompiler
 			}
 		}
 		cppOutput.indentation--;
-		cppOutput.print("}");
-		
+		cppOutput.println("}");
+
 	}
 
 	@Override
 	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
 	{
+		cppOutput.print(astFunctionCall.getName() + "(");
 
+		for (int i = 0; i < astFunctionCall.childAsts.size(); i++)
+		{
+			ASTBase child = astFunctionCall.childAsts.get(i);
+			child.compileSelf(this);
+
+			if (i != astFunctionCall.childAsts.size() - 1)
+				cppOutput.print(", ");
+		}
+		cppOutput.print(")");
 	}
 
 	@Override
@@ -144,9 +155,29 @@ public class CompilerCPP extends LangCompiler
 	}
 
 	@Override
-	public void compileFunctionDeclaration(ASTFunctionDeclaration declaration)
+	public void compileFunctionDeclaration(ASTVariableDeclaration variableDeclaration)
 	{
+		ASTFunctionDeclaration declaration = (ASTFunctionDeclaration) variableDeclaration.childAsts.get(0);
+		cppOutput.print(declaration.returnType.getTypeName() + " " + variableDeclaration.getName() + "(");
+		String args = "";
+		boolean shouldSubstr = false;
+		for (ASTVariableDeclaration child : declaration.args)
+		{
+			args += child.getExpressionType().getTypeName() + " " + child.getName() + ", ";
+			shouldSubstr = true;
+		}
+		if (shouldSubstr)
+			args = args.substring(0, args.length() - 2);
 
+		cppOutput.println(args + ")\n{");
+		cppOutput.indentation++;
+		for (ASTBase child : declaration.childAsts)
+		{
+			child.compileSelf(this);
+			cppOutput.println(isSemicolonless(child) ? ' ' : ';');
+		}
+		cppOutput.indentation--;
+		cppOutput.println("}");
 	}
 
 	@Override
