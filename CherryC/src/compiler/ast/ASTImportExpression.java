@@ -1,10 +1,12 @@
 package compiler.ast;
 
 import compiler.CherryType;
-import compiler.lib.DebugPrinter;
+import compiler.LangCompiler;
+import compiler.lib.IndentPrinter;
 
 /**
- * Created by david on 4/28/17.
+ * @author david
+ * @date 4/28/17.
  */
 public class ASTImportExpression extends ASTBase
 {
@@ -33,7 +35,13 @@ public class ASTImportExpression extends ASTBase
 	}
 
 	@Override
-	public void debugSelf(DebugPrinter destination)
+	public void compileSelf(LangCompiler compiler)
+	{
+
+	}
+
+	@Override
+	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print("from " + this.importPackage[0] + " import ");
 		for (int i = 0; i < importFiles.length; i++)

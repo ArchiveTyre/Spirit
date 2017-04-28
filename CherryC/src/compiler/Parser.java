@@ -3,7 +3,6 @@ package compiler;
 import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
-import sun.tools.java.SyntaxError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +66,7 @@ public class Parser
 		return isFundamental(tokenType) || tokenType == TokenType.LPAR;
 	}
 
-	private ASTBase parsePrimary(ASTParent parent, boolean inPar)
+	private ASTBase parsePrimary(ASTParent parent)
 	{
 		if (match(TokenType.SYMBOL))
 		{
@@ -85,7 +84,7 @@ public class Parser
 			return null; // FIXME: Not implemented yet!
 		if (match(TokenType.LPAR))
 		{
-			while (match(TokenType.INDENT) || match("\n", true));
+			while (match(TokenType.INDENT) || match("\n"));
 
 			// Check if we are looking for a function call. //
 			if (match(TokenType.SYMBOL) && lookAheads[0].tokenType != TokenType.OPERATOR)
@@ -108,7 +107,7 @@ public class Parser
 				ASTBase expression = parseExpression(parent, true);
 
 
-				if (match(TokenType.RPAR, true))
+				if (match(TokenType.RPAR))
 				{
 					return expression;
 				}
@@ -136,13 +135,13 @@ public class Parser
 		return functionCall;
 	}
 
-	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent, boolean inPar)
+	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent)
 	{
-		while (lookAheads[0].tokenType == TokenType.OPERATOR && !lookAheads[0].value.equals(","))
+		while (look(0,TokenType.OPERATOR) && !look(0, ","))
 		{
 
 			// Make sure that the operator exists in the precedence table. //
-			if (operatorPrecedenceMap.containsKey(lookAheads[0].value) == false)
+			if (!operatorPrecedenceMap.containsKey(lookAheads[0].value))
 			{
 				System.err.println("COMPILER ERROR! Table does not contain precedence value of operator "
 						+ lookAheads[0].value);
@@ -156,13 +155,13 @@ public class Parser
 
 			if (opPrecedence >= minPrecedence)
 			{
-				ASTBase right = parsePrimary(parent, inPar);
-				while (lookAheads[0].tokenType == TokenType.OPERATOR && !lookAheads[0].value.equals(","))
+				ASTBase right = parsePrimary(parent);
+				while (look(0, TokenType.OPERATOR) && !look(0, ","))
 				{
 					int otherPrecedence = operatorPrecedenceMap.get(lookAheads[0].value);
 					if (otherPrecedence > opPrecedence)
 					{
-						right = parseOpExpression(right, opPrecedence, parent, inPar);
+						right = parseOpExpression(right, opPrecedence, parent);
 					}
 					else
 					{
@@ -185,22 +184,22 @@ public class Parser
 	{
 		if (isPrimary(lookAheads[0].tokenType))
 		{
-			ASTBase left = parsePrimary(parent, inPar);
+			ASTBase left = parsePrimary(parent);
 
 			// Check if we have hit an end. //
-			if (lookAheads[0].value.equals(",")
+			if (look(0, ",")
 					|| (!inPar && eOLF())
 					|| isPrimary(lookAheads[0].tokenType) // Hmm...
-					|| lookAheads[0].tokenType == TokenType.RPAR
-					|| lookAheads[0].tokenType == TokenType.LPAR
-					|| lookAheads[0].value.equals(":")
+					|| look(0, TokenType.RPAR)
+					|| look(0, TokenType.LPAR)
+					|| look(0, ":")
 					|| Syntax.isKeyword(lookAheads[0].value))
 			{
 				return left;
 			}
-			else if (lookAheads[0].tokenType == TokenType.OPERATOR)
+			else if (look(0, TokenType.OPERATOR))
 			{
-				return parseOpExpression(left, 0, parent, inPar);
+				return parseOpExpression(left, 0, parent);
 			}
 			else
 			{
@@ -265,7 +264,7 @@ public class Parser
 						if (match(TokenType.SYMBOL))
 						{
 							String argName = previous.value;
-							if (lookAheads[0].value.equals(Syntax.Op.TYPEDEF))
+							if (look(0, Syntax.Op.TYPEDEF))
 							{
 								CherryType argType = parseType(parent);
 								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
@@ -281,7 +280,7 @@ public class Parser
 									unspecifiedParams.clear();
 								}
 							}
-							else if (lookAheads[0].value.equals(Syntax.Op.ARG_SEP) || lookAheads[0].tokenType == TokenType.RPAR)
+							else if (look(0, Syntax.Op.ARG_SEP) || look(0, TokenType.RPAR))
 							{
 								unspecifiedParams.add(argName);
 							}
@@ -292,12 +291,14 @@ public class Parser
 					{
 						if (specifiedAnyArguments)
 						{
-							String args = "";
+							StringBuilder builderArgs = new StringBuilder("");
 							for (String param : unspecifiedParams)
 							{
-								args += param + Syntax.Op.ARG_SEP + " ";
+								builderArgs.append(param);
+								builderArgs.append(Syntax.Op.ARG_SEP);
+								builderArgs.append(' ');
 							}
-							args = args.substring(0, args.length() - 3);
+							String args = builderArgs.substring(0, builderArgs.length() - 3);
 							syntaxError("Type specification", "Some arguments did not have a specified type. [" + args + "]");
 						}
 					}
@@ -307,7 +308,7 @@ public class Parser
 						syntaxError(")", "Unmatched parenthesis");
 					}
 
-					if (lookAheads[0].tokenType == TokenType.SYMBOL)
+					if (look(0, TokenType.SYMBOL))
 					{
 						CherryType returnType = parseType(parent, true);
 						function.returnType = returnType;
@@ -325,7 +326,7 @@ public class Parser
 					{
 						function.returnType = Builtins.getBuiltin("void");
 					}
-					if (lookAheads[0].value.equals(Syntax.Op.FUNCVAL))
+					if (look(0, Syntax.Op.FUNCVAL))
 					{
 						ASTReturnExpression call = parseReturnExpression(parent);
 						if (call != null)
@@ -382,7 +383,7 @@ public class Parser
 		if (match(TokenType.SYMBOL))
 		{
 			String name = previous.value;
-			if (lookAheads[0].value.equals(Syntax.Op.TYPEDEF))
+			if (look(0, Syntax.Op.TYPEDEF))
 			{
 				CherryType cherryType = parseType(parent);
 				ASTBase value = null;
@@ -419,7 +420,7 @@ public class Parser
 	private boolean parseFileTypeDeclarationLine(ASTParent parent)
 	{
 		// Skip indentation . //
-		if (lookAheads[1].value.equals(Syntax.Keyword.TYPE))
+		if (look(1, Syntax.Keyword.TYPE))
 			match(TokenType.INDENT); // FIXME: Uh eh... what?
 
 		// Skip any empty lines.
@@ -457,8 +458,8 @@ public class Parser
 		if (match(Syntax.Keyword.LOOP))
 		{
 			ASTLoop loop = new ASTLoop(parent);
-			if (lookAheads[1].value.equals(Syntax.Op.TYPEDEF)
-					&& lookAheads[2].tokenType != TokenType.NEWLINE)
+			if (look(1, Syntax.Op.TYPEDEF)
+					&& !look(2, TokenType.NEWLINE))
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
 				loop.initialStatement = parseExpression(loop, false);
@@ -613,7 +614,7 @@ public class Parser
 		}
 
 		// Check if we are extending a class. //
-		if (lookAheads[0].value.equals(Syntax.Keyword.EXTENDS))
+		if (look(0, Syntax.Keyword.EXTENDS))
 		{
 			ASTSubclassExpression subclassExpression = parseExtendDeclaration(parent);
 			if (subclassExpression != null)
@@ -624,9 +625,9 @@ public class Parser
 			return false;
 		}
 		// Check if we are defining a function. //
-		else if (lookAheads[0].tokenType == TokenType.SYMBOL
-				&& lookAheads[1].value.equals(Syntax.Op.TYPEDEF)
-				&& lookAheads[2].tokenType == TokenType.LPAR)
+		else if (  look(0, TokenType.SYMBOL)
+				&& look(1, Syntax.Op.TYPEDEF)
+				&& look(2, TokenType.LPAR))
 		{
 			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
 			if (function != null)
@@ -649,7 +650,7 @@ public class Parser
 			return true;
 		}
 
-		else if (lookAheads[0].value.equals(Syntax.Keyword.LOOP))
+		else if (look(0, Syntax.Keyword.LOOP))
 		{
 			ASTLoop loop = parseLoop(parent);
 			if (loop != null)
@@ -662,8 +663,8 @@ public class Parser
 
 		// Try to parse as a variable declaration. //
 
-		else if (lookAheads[0].tokenType == TokenType.SYMBOL
-				&& lookAheads[1].value.equals(Syntax.Op.TYPEDEF))
+		else if (look(0, TokenType.SYMBOL)
+				&& look(1, Syntax.Op.TYPEDEF))
 		{
 			ASTVariableDeclaration declaration = parseVariableDeclaration(parent);
 			if (declaration != null)
@@ -750,11 +751,7 @@ public class Parser
 	private void step()
 	{
 		previous = lookAheads[0];
-		for (int i = 0; i < lookAheads.length - 1; i++)
-		{
-			lookAheads[i] = lookAheads[i+1];
-		}
-
+		System.arraycopy(lookAheads, 1, lookAheads, 0, lookAheads.length - 1);
 		lookAheads[lookAheads.length - 1] = lexer.getToken();
 	}
 
@@ -769,11 +766,6 @@ public class Parser
 
 	private boolean match(String value)
 	{
-		return match(value, false);
-	}
-
-	private boolean match(String value, boolean ignoreNewline)
-	{
 		if (value.equals(lookAheads[0].value))
 		{
 			step();
@@ -783,7 +775,7 @@ public class Parser
 		return false;
 	}
 
-	private boolean match(TokenType value, boolean ignoreNewline)
+	private boolean match(TokenType value)
 	{
 		if (value == lookAheads[0].tokenType)
 		{
@@ -792,11 +784,6 @@ public class Parser
 		}
 
 		return false;
-	}
-
-	private boolean match(Token.TokenType value)
-	{
-		return match(value, false);
 	}
 
 	private boolean look(int index, String value)
