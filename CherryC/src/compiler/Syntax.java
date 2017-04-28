@@ -19,6 +19,7 @@ public class Syntax
 		public static final String LOOP		= "loop"		;
 		public static final String MY		= "my"			;
 		public static final String IMPORT	= "import"		;
+		public static final String FROM		= "from"		;
 		public static final String USE		= "use"			;
 		public static final String THEN		= "then"		;
 		public static final String TYPE		= "type"		;
@@ -118,9 +119,10 @@ public class Syntax
 			//case Keyword.USE_NAMESPACE:
 			case Keyword.THEN			:
 			case Keyword.TYPE			:
-			case Type.OBJECT		:
-			case Type.INTERFACE	:
-			case Type.ENUM		:
+			case Type.OBJECT			:
+			case Type.INTERFACE			:
+			case Type.ENUM				:
+			case Keyword.FROM			:
 				return true;
 			default:
 				return false;
