@@ -12,11 +12,13 @@ public class CompilerCPP extends LangCompiler
 {
 
 	private IndentPrinter cppOutput;
+	private IndentPrinter hppOutput;
 
-	public CompilerCPP(IndentPrinter cppOutput)
+	public CompilerCPP(IndentPrinter cppOutput, IndentPrinter hppOutput)
 	{
 		super();
 		this.cppOutput = cppOutput;
+		this.hppOutput = hppOutput;
 	}
 
 	public boolean isSemicolonless(ASTBase ast)
@@ -38,6 +40,40 @@ public class CompilerCPP extends LangCompiler
 				cppOutput.print(isSemicolonless(child) ? ' ' : ';');
 
 		}
+
+		hppOutput.println("class " + astClass.getName());
+		hppOutput.println("{");
+		hppOutput.println("public:");
+		hppOutput.indentation++;
+		for (ASTBase child : astClass.childAsts)
+		{
+			if (child instanceof ASTVariableDeclaration)
+			{
+				ASTVariableDeclaration varChild = (ASTVariableDeclaration)child;
+				if (varChild.getValue() instanceof ASTFunctionDeclaration)
+				{
+					ASTFunctionDeclaration declaration = (ASTFunctionDeclaration) varChild.getValue();
+					hppOutput.print(declaration.returnType.getTypeName() + " " + varChild.getName() + "(");
+					String args = "";
+					boolean shouldSubstr = false;
+					for (ASTVariableDeclaration childArg : declaration.args)
+					{
+						args += childArg.getExpressionType().getTypeName() + " " + childArg.getName() + ", ";
+						shouldSubstr = true;
+					}
+					if (shouldSubstr)
+						args = args.substring(0, args.length() - 2);
+
+					hppOutput.println(args + ");");
+				}
+				else
+				{
+
+				}
+			}
+		}
+		hppOutput.indentation--;
+		hppOutput.println("}");
 	}
 
 	@Override
@@ -158,7 +194,8 @@ public class CompilerCPP extends LangCompiler
 	public void compileFunctionDeclaration(ASTVariableDeclaration variableDeclaration)
 	{
 		ASTFunctionDeclaration declaration = (ASTFunctionDeclaration) variableDeclaration.childAsts.get(0);
-		cppOutput.print(declaration.returnType.getTypeName() + " " + variableDeclaration.getName() + "(");
+		String funNamespace = variableDeclaration.getParent() instanceof ASTClass ? variableDeclaration.getParent().getName() + "::" : "";
+		cppOutput.print(declaration.returnType.getTypeName() + " " + funNamespace + variableDeclaration.getName() + "(");
 		String args = "";
 		boolean shouldSubstr = false;
 		for (ASTVariableDeclaration child : declaration.args)
@@ -169,7 +206,8 @@ public class CompilerCPP extends LangCompiler
 		if (shouldSubstr)
 			args = args.substring(0, args.length() - 2);
 
-		cppOutput.println(args + ")\n{");
+		cppOutput.println(args + ")");
+		cppOutput.println("{");
 		cppOutput.indentation++;
 		for (ASTBase child : declaration.childAsts)
 		{
