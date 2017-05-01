@@ -19,6 +19,7 @@ public abstract class LangCompiler
 	public abstract void compileNumber(ASTNumber astNumber);
 	public abstract void compileString(ASTString astString);
 	public abstract void compileReturnExpression(ASTReturnExpression astReturnExpression);
+	public abstract void compileMemberAccess(ASTMemberAccess astMemberAccess);
 
 	public LangCompiler()
 	{

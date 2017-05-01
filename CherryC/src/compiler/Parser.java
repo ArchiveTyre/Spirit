@@ -42,18 +42,20 @@ public class Parser
 	private static final HashMap<String, Integer> operatorPrecedenceMap = new HashMap<String, Integer>(){{
 		// FIXME: Complete the map!
 
-		put("==", 0);
-		put("=",  0);
+		put(".",  0);
 
-		put(">",  1);
-		put("<",  1);
+		put("==", 1);
+		put("=",  1);
+
+		put(">",  2);
+		put("<",  2);
 
 
-		put("+",  2);
-		put("-",  2);
+		put("+",  3);
+		put("-",  3);
 
-		put("*",  3);
-		put("/",  3);
+		put("*",  4);
+		put("/",  4);
 	}};
 
 	private boolean isFundamental(TokenType tokenType)
@@ -70,13 +72,15 @@ public class Parser
 	{
 		if (match(TokenType.SYMBOL))
 		{
-
-			if (lookAheads[0].tokenType != TokenType.OPERATOR && lookAheads[0].tokenType != TokenType.EOF && lookAheads[0].tokenType != TokenType.NEWLINE)
+			String symbol = previous.value;
+			if (!look(0,TokenType.OPERATOR) && !look(0, TokenType.EOF) && !look(0,TokenType.NEWLINE))
 			{
-				System.out.println("PARSING FUNCALL: " + previous.value + ", " + lookAheads[1].tokenType.toString() + ", " + lookAheads[1].value);
-				return parseFunctionCall(parent, previous.value, false);
+				return parseFunctionCall(parent, symbol, false);
 			}
-			return new ASTVariableUsage(parent, previous.value);
+			else
+			{
+				return new ASTVariableUsage(parent, symbol);
+			}
 		}
 		if (match(TokenType.NUMBER))
 			return new ASTNumber(parent, Integer.parseInt(previous.value));
@@ -84,10 +88,8 @@ public class Parser
 			return null; // FIXME: Not implemented yet!
 		if (match(TokenType.LPAR))
 		{
-			while (match(TokenType.INDENT) || match("\n"));
-
 			// Check if we are looking for a function call. //
-			if (match(TokenType.SYMBOL) && lookAheads[0].tokenType != TokenType.OPERATOR)
+			if (match(TokenType.SYMBOL) && !look(0, TokenType.OPERATOR))
 			{
 				ASTFunctionCall call = parseFunctionCall(parent, previous.value, true);
 
@@ -100,12 +102,10 @@ public class Parser
 					syntaxError(")", "Unmatched parenthesis.");
 				}
 
-			} else
+			}
+			else
 			{
-
-
 				ASTBase expression = parseExpression(parent, true);
-
 
 				if (match(TokenType.RPAR))
 				{
@@ -155,6 +155,13 @@ public class Parser
 
 			if (opPrecedence >= minPrecedence)
 			{
+				if (opName.equals("."))
+				{
+					String memberName = lookAheads[0].value;
+					step();
+					left = new ASTMemberAccess(parent, left, memberName);
+					break;
+				}
 				ASTBase right = parsePrimary(parent);
 				while (look(0, TokenType.OPERATOR) && !look(0, ","))
 				{
@@ -334,7 +341,6 @@ public class Parser
 							call.setParent(function);
 						}
 					}
-					System.err.println("Debug: " + function.returnType);
 					return variableDeclaration;
 				}
 				else

@@ -236,4 +236,13 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.print("return ");
 		astReturnExpression.childAsts.get(0).compileSelf(this);
 	}
+
+	@Override
+	public void compileMemberAccess(ASTMemberAccess astMemberAccess)
+	{
+		astMemberAccess.ofObject.compileSelf(this);
+		cppOutput.print("->");
+		cppOutput.print(astMemberAccess.getMember().getName());
+
+	}
 }

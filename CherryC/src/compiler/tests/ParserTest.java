@@ -20,8 +20,14 @@ import java.nio.charset.StandardCharsets;
 class ParserTest
 {
 
-	private void testClassCompile(boolean incompleteClass, String name, String testString)
+	private void testClassCompile(boolean incompleteClass, String name, String testString, String importedString)
 	{
+		System.out.flush();
+		System.err.flush();
+
+		System.out.println("=== " + name + " ===");
+
+
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
 
@@ -32,17 +38,36 @@ class ParserTest
 
 		ASTClass astClass = new ASTClass(name, null);
 
+		// Parse imported-class. //
+		{
+			InputStream inputStream2 = new ByteArrayInputStream(importedString.getBytes(StandardCharsets.UTF_8));
+			PushbackInputStream pushbackInputStream2 = new PushbackInputStream(inputStream2);
+
+			Lexer lexer2 = new Lexer(pushbackInputStream2, name + "Sub.cherry");
+
+			Parser parser2 = new Parser(lexer2);
+			parser2.fileTypeDeclared = true;
+
+			ASTClass importedClass = new ASTClass("other", astClass);
+			parser2.parseFile(importedClass);
+		}
+
+		// Parse the rest. //
 		parser.parseFile(astClass);
 
 		IndentPrinter printer = new IndentPrinter(System.out);
 
 		astClass.debugSelf(printer);
 		printer.println();
+		System.out.println();
+
+		System.out.flush();
+		System.err.flush();
 	}
 
 	private void testClassCompile(String name, String testString)
 	{
-		testClassCompile(true, name, testString);
+		testClassCompile(true, name, testString, "");
 	}
 
 
@@ -55,6 +80,9 @@ class ParserTest
 		String tmpInt = "tmp : () int = 5\n";
 		String tmpParam = "tmp2 : (x) int = x * 2";
 
+
+		// Empty. //
+		testClassCompile("Empty1", "");
 
 		// Test basic assignment. //
 		testClassCompile("AssignTest1", "a := 5\nb : int = a");
@@ -110,10 +138,10 @@ class ParserTest
 
 
 		// File type declarations. //
-		testClassCompile(false, "FileType1", "type enum");
-		testClassCompile(false, "FileType2", "type object");
+		testClassCompile(false, "FileType1", "type enum", "");
+		testClassCompile(false, "FileType2", "type object", "");
 
-		testClassCompile(false, "Subclass1", "type enum\nextends MyObject");
+		testClassCompile(false, "Subclass1", "type enum\nextends MyObject", "");
 
 		// Crazy. //
 
@@ -134,6 +162,11 @@ class ParserTest
 		testClassCompile("Import1", "import a");
 		testClassCompile("Import2", "from b import a");
 		testClassCompile("Import2", "from b import a, b, c");
+
+		// Member access. //
+		testClassCompile("MemberAccess1", "a : int = 0\na.toString");
+		testClassCompile(true, "MemberAccess2", "b : other = other", "fun : ()");
+		testClassCompile(true, "MemberAccess3", "b : other = other\nb.fun", "fun : ()");
 
 	}
 }

@@ -11,15 +11,13 @@ import compiler.lib.IndentPrinter;
 public class ASTVariableUsage extends ASTBase
 {
 
-	public ASTVariableDeclaration declaration;
+	public ASTBase declaration;
 
 
 	public ASTVariableUsage(ASTParent parent, String name)
 	{
 		super(parent, name);
-		ASTBase possibleResult = parent.findSymbol(name);
-		if (possibleResult != null)
-			declaration = (ASTVariableDeclaration)possibleResult;
+		declaration = parent.findSymbol(name);
 	}
 
 	@Override

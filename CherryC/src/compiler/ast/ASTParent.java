@@ -1,5 +1,7 @@
 package compiler.ast;
 
+import compiler.CherryType;
+
 import java.util.ArrayList;
 
 /**
@@ -27,7 +29,7 @@ public abstract class ASTParent extends ASTBase
 		// FIXME: More like findVariable!
 
 		for (ASTBase child : childAsts) {
-			if (child.name.equals(symbolName) && child instanceof ASTVariableDeclaration) {
+			if (child.name.equals(symbolName) && (child instanceof ASTVariableDeclaration || child instanceof CherryType)) {
 				return child;
 			}
 		}
