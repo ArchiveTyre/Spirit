@@ -68,7 +68,10 @@ public class CompilerCPP extends LangCompiler
 				}
 				else
 				{
-
+					hppOutput.print(varChild.getExpressionType().getTypeName());
+					hppOutput.print(" ");
+					hppOutput.print(varChild.getName());
+					hppOutput.println(";");
 				}
 			}
 		}
