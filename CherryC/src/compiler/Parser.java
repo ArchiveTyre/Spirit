@@ -515,13 +515,14 @@ public class Parser
 		}
 	}
 
-	private ASTSubclassExpression parseExtendDeclaration(ASTParent parent)
+	private boolean parseExtendDeclaration(ASTClass astClass)
 	{
 		if (match(Syntax.Keyword.EXTENDS))
 		{
 			if (match(TokenType.SYMBOL))
 			{
-				return new ASTSubclassExpression(parent, previous.value);
+				astClass.extendsClass = previous.value;
+				return true;
 			}
 			else
 			{
@@ -532,32 +533,46 @@ public class Parser
 		{
 			System.err.println("COMPILER ERROR! There was no subclass expression!");
 		}
-		return null;
+		return false;
+	}
+
+	private String parseImportPath()
+	{
+		StringBuilder path = new StringBuilder(lookAheads[0].value);
+		step();
+		while(match("."))
+		{
+			path.append(".");
+			path.append(lookAheads[0].value);
+			step();
+		}
+
+		return path.toString();
 	}
 
 	// Parse an import expression
-	private ASTImportExpression parseImportExpression(ASTParent parent)
+	private boolean parseImportExpression(ASTClass astClass)
 	{
 		String packageName;
-		String[] packageFiles;
+		String[] packageSymbols;
 		if (match(Syntax.Keyword.IMPORT))
 		{
-			if (match(TokenType.SYMBOL))
+			if (look(0, TokenType.SYMBOL))
 			{
-				packageName = previous.value;
-				packageFiles = new String[] {"*"};
+				packageName = parseImportPath();
+				packageSymbols = new String[] {"*"};
 			}
 			else
 			{
 				syntaxError("Package ID", "Need a package ID to import, but I didn't get one. :(");
-				return null;
+				return false;
 			}
 		}
 		else if (match(Syntax.Keyword.FROM))
 		{
-			if (match(TokenType.SYMBOL))
+			if (look(0, TokenType.SYMBOL))
 			{
-				packageName = previous.value;
+				packageName = parseImportPath();
 				ArrayList<String> files = new ArrayList<>();
 				if (match(Syntax.Keyword.IMPORT))
 				{
@@ -573,26 +588,26 @@ public class Parser
 				if (files.isEmpty())
 				{
 					syntaxError("filename or wildcard", "Need files to import.");
-					return null;
+					return false;
 				}
 
-				packageFiles = new String[files.size()];
-				packageFiles = files.toArray(packageFiles);
+				packageSymbols = new String[files.size()];
+				packageSymbols = files.toArray(packageSymbols);
 			}
 			else
 			{
 				syntaxError("Package ID", "Need a package ID to import, but I didn't get one. :(");
-				return null;
+				return false;
 			}
 		}
 		else
 		{
 			System.err.println("COMPILER ERROR! There was no import expression");
-			return null;
+			return false;
 		}
 
-
-		return new ASTImportExpression(parent, packageName, packageFiles);
+		astClass.classImports.add(astClass.new ImportDeclaration(packageName, packageSymbols));
+		return true;
 	}
 
 	private boolean parseLine(ASTClass dest)
@@ -622,13 +637,7 @@ public class Parser
 		// Check if we are extending a class. //
 		if (look(0, Syntax.Keyword.EXTENDS))
 		{
-			ASTSubclassExpression subclassExpression = parseExtendDeclaration(parent);
-			if (subclassExpression != null)
-			{
-				subclassExpression.columnNumber = line_indent;
-				return true;
-			}
-			return false;
+			return parseExtendDeclaration(dest);
 		}
 		// Check if we are defining a function. //
 		else if (  look(0, TokenType.SYMBOL)
@@ -692,13 +701,7 @@ public class Parser
 		// Check if it is an import expression. //
 		else if (look (0, Syntax.Keyword.IMPORT) || look (0,Syntax.Keyword.FROM))
 		{
-			ASTImportExpression exp = parseImportExpression(parent);
-			if (exp != null)
-			{
-				exp.columnNumber = line_indent;
-				return true;
-			}
-			return false;
+			return parseImportExpression(dest);
 		}
 
 		// Otherwise it's just an expression. //
@@ -726,7 +729,8 @@ public class Parser
 		previous = new Token("", TokenType.UNKNOWN, 0, 1);
 
 		// Begin by parsing file type. //
-		while (parseFileTypeDeclarationLine(dest));
+		while (parseFileTypeDeclarationLine(dest))
+			;
 
 		// Parse as many lines as possible. //
 		while (parseLine(dest));
@@ -777,7 +781,6 @@ public class Parser
 			step();
 			return true;
 		}
-
 		return false;
 	}
 
@@ -788,7 +791,6 @@ public class Parser
 			step();
 			return true;
 		}
-
 		return false;
 	}
 

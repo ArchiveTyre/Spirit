@@ -1,8 +1,12 @@
 package compiler;
 
 import compiler.lib.Utils;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class is used to extract tokens out of a stream.
@@ -26,6 +30,14 @@ public class Lexer
 	{
 		this.input = input;
 		this.fileName = fileName;
+	}
+
+	public Lexer(String input, String fileName)
+	{
+		this(new PushbackInputStream (
+				new ByteArrayInputStream (
+						input.getBytes(StandardCharsets.UTF_8))),
+				fileName);
 	}
 
 	public int getLineNumber()

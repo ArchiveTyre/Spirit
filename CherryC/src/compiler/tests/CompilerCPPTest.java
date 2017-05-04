@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author alex
+ * @author Tyrerexus
  * @date 28/04/17.
  */
 class CompilerCPPTest
@@ -54,6 +54,8 @@ class CompilerCPPTest
 		testCompiler("Function_Declaration0", "a : () int = 5");
 		testCompiler("Function_Declaration1", "a : (x, y : int)\n\tb := 5\na 5 10\na 10 10");
 		testCompiler("ReturnVal", "a : () = 42");
+
+		testCompiler("Imports", "import Hello.World");
 
 	}
 }

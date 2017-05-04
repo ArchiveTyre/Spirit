@@ -1,10 +1,12 @@
 package compiler.ast;
 
+import com.sun.xml.internal.ws.wsdl.writer.document.Import;
 import compiler.CherryType;
 import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Creates a basic class.
@@ -14,6 +16,23 @@ import java.util.ArrayList;
  */
 public class ASTClass extends ASTParent implements CherryType
 {
+
+	public class ImportDeclaration
+	{
+		public String importPackage;
+		public String[] importSymbols;
+
+		public ImportDeclaration(String importPackage, String[] importSymbols)
+		{
+			this.importPackage = importPackage;
+			this.importSymbols = importSymbols;
+		}
+	}
+
+	public ArrayList<ImportDeclaration> classImports = new ArrayList<>();
+
+	public String extendsClass = null;
+
 	public ASTClass(String name, ASTParent parent)
 	{
 		super(parent, name);
@@ -28,6 +47,10 @@ public class ASTClass extends ASTParent implements CherryType
 	@Override
 	public void debugSelf(IndentPrinter to)
 	{
+		for (ImportDeclaration declaration : classImports)
+		{
+			to.println("from " + declaration.importPackage + " import " + Arrays.toString(declaration.importSymbols));
+		}
 		to.println(name);
 		to.println("{");
 		to.indentation++;
@@ -40,10 +63,14 @@ public class ASTClass extends ASTParent implements CherryType
 		to.print("}");
 	}
 
+	/**
+	 * This method is an important part of the parser. Perhaps it should be moved there.
+	 * However, this method finds the correct parent for a new AST node inside of this class.
+	 * @param line_indent The scanned indent for the new AST.
+	 * @return The found parent.
+	 */
 	public ASTParent getParentForNewCode(int line_indent)
 	{
-
-
 		if (childAsts.size() == 0)
 			return this;
 

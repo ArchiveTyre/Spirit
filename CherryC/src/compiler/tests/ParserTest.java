@@ -161,7 +161,9 @@ class ParserTest
 		// Imports. //
 		testClassCompile("Import1", "import a");
 		testClassCompile("Import2", "from b import a");
-		testClassCompile("Import2", "from b import a, b, c");
+		testClassCompile("Import3", "from b import a, b, c");
+		testClassCompile("Import4", "from hello.world.now import alpha, beta");
+		testClassCompile("Import5", "import a.b.c");
 
 		// Member access. //
 		testClassCompile("MemberAccess1", "a : int = 0\na.toString");

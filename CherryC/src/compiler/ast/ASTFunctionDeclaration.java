@@ -22,6 +22,7 @@ public class ASTFunctionDeclaration extends ASTParent
 	public ASTFunctionDeclaration(ASTParent parent, CherryType returnType)
 	{
 		super(parent, "");
+		this.returnType = returnType;
 		isNestedFunction = !(parent.getParent() instanceof ASTClass);
 		if (isNestedFunction)
 			System.out.println("Defining a nested function.");

@@ -1,11 +1,13 @@
 package compiler.backends;
 
 import compiler.LangCompiler;
+import compiler.Main;
 import compiler.ast.*;
 import compiler.lib.IndentPrinter;
+import compiler.lib.PathFind;
 
 /**
- * @author alex
+ * @author Tyrerexus
  * @date 28/04/17.
  */
 public class CompilerCPP extends LangCompiler
@@ -30,6 +32,31 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileClass(ASTClass astClass)
 	{
+
+		hppOutput.println("#pragma once");
+		cppOutput.println("");
+		// Compile the imports. //
+		{
+			String path = System.getenv(Main.RAVEN_PKG_PATH);
+			if (path == null)
+				path = System.getProperty("user.home") + "/RavenPackages:./";
+
+			for (ASTClass.ImportDeclaration declaration : astClass.classImports)
+			{
+				String pkgPath = PathFind.findInPath(path, "out/" +
+						declaration.importPackage.replace('.', '/') + ".raven.hpp");
+				if (pkgPath == null)
+				{
+					System.err.println("ERROR: Could not find package: " + declaration.importPackage);
+					System.err.println("     : Search path: " + path);
+				}
+				else
+				{
+					hppOutput.println("#include \"" + pkgPath + "\"");
+				}
+			}
+		}
+
 		for (ASTBase child : astClass.childAsts)
 		{
 			child.compileSelf(this);
@@ -42,6 +69,8 @@ public class CompilerCPP extends LangCompiler
 		}
 
 		hppOutput.println("class " + astClass.getName());
+		if (astClass.extendsClass != null)
+			hppOutput.print(" : public " + astClass.extendsClass);
 		hppOutput.println("{");
 		hppOutput.println("public:");
 		hppOutput.indentation++;

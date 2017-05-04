@@ -1,0 +1,110 @@
+package compiler.backends;
+
+import compiler.CherryType;
+import compiler.LangCompiler;
+import compiler.Main;
+import compiler.ast.*;
+import compiler.lib.IndentPrinter;
+
+import java.util.ArrayList;
+
+/**
+ * @author Tyrerexus
+ * @date 5/4/17.
+ */
+public class CompilerSYM extends LangCompiler
+{
+	public IndentPrinter symOutput = null;
+
+	@Override
+	public void compileClass(ASTClass astClass)
+	{
+		symOutput.println("ClassName: " + astClass.getName());
+		symOutput.println("CompilerVersion: " + Main.VERSION);
+		symOutput.println("ExtendsClass: " + astClass.extendsClass);
+		symOutput.println();
+		for (ASTBase node : astClass.childAsts)
+		{
+			node.compileSelf(this);
+			symOutput.println();
+		}
+	}
+
+	@Override
+	public void compileVariableDeclaration(ASTVariableDeclaration astVariableDeclaration)
+	{
+		symOutput.println("Var: " +
+				astVariableDeclaration.getName() + " " +
+				astVariableDeclaration.getExpressionType().getTypeName());
+	}
+
+	@Override
+	public void compileFunctionDeclaration(ASTVariableDeclaration declaration)
+	{
+		ArrayList<ASTVariableDeclaration> args = ((ASTFunctionDeclaration)declaration.getValue()).args;
+		for (ASTVariableDeclaration arg : args)
+		{
+			symOutput.println("Arg: " +
+					arg.getName() + " " +
+					arg.getExpressionType().getTypeName());
+		}
+		CherryType returnType = ((ASTFunctionDeclaration) declaration.getValue()).returnType;
+		symOutput.println("Fun: " +
+				declaration.getName() + " " +
+				returnType.getTypeName());
+	}
+
+	@Override
+	public void compileIf(ASTIf astIf)
+	{
+
+	}
+
+	@Override
+	public void compileLoop(ASTLoop astLoop)
+	{
+
+	}
+
+	@Override
+	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
+	{
+
+	}
+
+	@Override
+	public void compileVariableUsage(ASTVariableUsage astVariableUsage)
+	{
+
+	}
+
+	@Override
+	public void compileOperator(ASTOperator astOperator)
+	{
+
+	}
+
+	@Override
+	public void compileNumber(ASTNumber astNumber)
+	{
+
+	}
+
+	@Override
+	public void compileString(ASTString astString)
+	{
+
+	}
+
+	@Override
+	public void compileReturnExpression(ASTReturnExpression astReturnExpression)
+	{
+
+	}
+
+	@Override
+	public void compileMemberAccess(ASTMemberAccess astMemberAccess)
+	{
+
+	}
+}

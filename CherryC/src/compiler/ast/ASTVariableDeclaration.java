@@ -36,7 +36,10 @@ public class ASTVariableDeclaration extends ASTParent
 	{
 		destination.print("var " + type.getTypeName() + " " + name +
 				" = ");
-		getValue().debugSelf(destination);
+		if (childAsts.size() > 0)
+			getValue().debugSelf(destination);
+		else
+			destination.print("undefined");
 
 	}
 

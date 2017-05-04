@@ -21,6 +21,7 @@ public class Main
 	public static final String VERSION = "0.0.1 ALPHA";
 	public static final String COMPILER_NAME = "Cherry";
 	public static final String COPYRIGHT = "© 2017 TYREREXUS AND DAVID ALL RIGHTS RESERVED";
+	public static final String RAVEN_PKG_PATH = "RAVEN_PKG_PATH";
 
 	public static void main(String[] args)
 	{

@@ -9,7 +9,7 @@ import compiler.lib.IndentPrinter;
  *
  * Can also be used as an operator if the infix variable is set to true.
  *
- * @author alex
+ * @author Tyrerexus
  * @date 4/12/17.
  */
 public class ASTFunctionCall extends ASTParent
