@@ -1,13 +1,6 @@
 package compiler;
 
-import compiler.ast.ASTClass;
-import compiler.lib.FileCompiler;
-import compiler.lib.FileHandler;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -23,12 +16,12 @@ public class Main
 	public static final String COPYRIGHT = "© 2017 TYREREXUS AND DAVID ALL RIGHTS RESERVED";
 	public static final String RAVEN_PKG_PATH = "RAVEN_PKG_PATH";
 
+	public static File outDir = new File("out/");
+
 	public static void main(String[] args)
 	{
 
 		ArrayList<String> fileNames = new ArrayList<>();
-
-		String outputFileName = "";
 
 		for (int i = 0; i < args.length; i++)
 		{
@@ -39,7 +32,7 @@ public class Main
 				case "-o":
 				case "--output":
 					i++;
-					outputFileName = args[i];
+					outDir = new File(args[i]);
 					break;
 				case "-h":
 				case "--help":
@@ -57,7 +50,7 @@ public class Main
 
 		for (String file : fileNames)
 		{
-			FileCompiler.compileFile(file);
+			FileCompiler.importFile(file);
 		}
 
 

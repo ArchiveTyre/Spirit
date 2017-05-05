@@ -6,6 +6,8 @@ import compiler.Main;
 import compiler.ast.*;
 import compiler.lib.IndentPrinter;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 /**
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 public class CompilerSYM extends LangCompiler
 {
 	public IndentPrinter symOutput = null;
+	private PrintStream symStream = null;
 
 	@Override
 	public void compileClass(ASTClass astClass)
@@ -106,5 +109,27 @@ public class CompilerSYM extends LangCompiler
 	public void compileMemberAccess(ASTMemberAccess astMemberAccess)
 	{
 
+	}
+
+	@Override
+	public void createFileStreams(String fileName)
+	{
+		try
+		{
+			symStream = new PrintStream("out/" + fileName + ".sym");
+			symOutput = new IndentPrinter(symStream);
+		}
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void closeStreams()
+	{
+		symStream.flush();
+		symStream.close();
 	}
 }

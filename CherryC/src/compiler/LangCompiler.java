@@ -21,6 +21,9 @@ public abstract class LangCompiler
 	public abstract void compileReturnExpression(ASTReturnExpression astReturnExpression);
 	public abstract void compileMemberAccess(ASTMemberAccess astMemberAccess);
 
+	public abstract void createFileStreams(String fileName);
+	public abstract void closeStreams();
+
 	public LangCompiler()
 	{
 

@@ -6,15 +6,26 @@ import compiler.ast.*;
 import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
 
+import java.io.*;
+
 /**
  * @author Tyrerexus
  * @date 28/04/17.
  */
 public class CompilerCPP extends LangCompiler
 {
+	private String hppLocation = null;
+
+	private PrintStream cppStream = null;
+	private PrintStream hppStream = null;
 
 	private IndentPrinter cppOutput;
 	private IndentPrinter hppOutput;
+
+	public CompilerCPP()
+	{
+
+	}
 
 	public CompilerCPP(IndentPrinter cppOutput, IndentPrinter hppOutput)
 	{
@@ -23,7 +34,7 @@ public class CompilerCPP extends LangCompiler
 		this.hppOutput = hppOutput;
 	}
 
-	public boolean isSemicolonless(ASTBase ast)
+	private boolean isSemicolonless(ASTBase ast)
 	{
 		return ast instanceof ASTIf || ast instanceof ASTLoop || ast instanceof ASTElse
 				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionDeclaration);
@@ -32,9 +43,9 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileClass(ASTClass astClass)
 	{
-
 		hppOutput.println("#pragma once");
-		cppOutput.println("");
+		cppOutput.println("#include \"" + hppLocation + "\"");
+
 		// Compile the imports. //
 		{
 			String path = System.getenv(Main.RAVEN_PKG_PATH);
@@ -65,7 +76,6 @@ public class CompilerCPP extends LangCompiler
 				cppOutput.println(isSemicolonless(child) ? ' ' : ';');
 			else
 				cppOutput.print(isSemicolonless(child) ? ' ' : ';');
-
 		}
 
 		hppOutput.println("class " + astClass.getName());
@@ -138,7 +148,6 @@ public class CompilerCPP extends LangCompiler
 			cppOutput.indentation--;
 			cppOutput.print("}");
 		}
-
 	}
 
 	@Override
@@ -275,6 +284,43 @@ public class CompilerCPP extends LangCompiler
 		astMemberAccess.ofObject.compileSelf(this);
 		cppOutput.print("->");
 		cppOutput.print(astMemberAccess.getMember().getName());
+	}
 
+	@Override
+	public void createFileStreams(String fileName)
+	{
+		try
+		{
+			// Assure that the output directory exists. //
+			if (!Main.outDir.exists())
+				Main.outDir.mkdirs();
+			String parent = new File(fileName).getParent();
+			if (parent != null)
+				new File(Main.outDir.getPath() + '/' + parent).mkdirs();
+
+			// Set location. //
+			hppLocation = Main.outDir.getPath() + '/' + fileName + ".hpp";
+
+			// Create the output streams. //
+			cppStream = new PrintStream(Main.outDir.getPath() + '/' + fileName + ".cpp");
+			hppStream = new PrintStream(hppLocation);
+
+			cppOutput = new IndentPrinter(cppStream);
+			hppOutput = new IndentPrinter(hppStream);
+		}
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void closeStreams()
+	{
+		cppStream.flush();
+		hppStream.flush();
+		cppStream.close();
+		hppStream.close();
 	}
 }
