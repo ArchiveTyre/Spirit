@@ -1,6 +1,5 @@
 package compiler.ast;
 
-import com.sun.xml.internal.ws.wsdl.writer.document.Import;
 import compiler.CherryType;
 import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
@@ -54,7 +53,7 @@ public class ASTClass extends ASTParent implements CherryType
 		to.println(name);
 		to.println("{");
 		to.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTNode child : childAsts)
 		{
 			child.debugSelf(to);
 			to.println("");
@@ -75,9 +74,9 @@ public class ASTClass extends ASTParent implements CherryType
 			return this;
 
 		// Get last child node. //
-		ASTBase newly_inserted_code = childAsts.get(childAsts.size() - 1);
+		ASTNode newly_inserted_code = childAsts.get(childAsts.size() - 1);
 
-		ASTBase parent;
+		ASTNode parent;
 
 		// Find parent. //
 		if (line_indent > newly_inserted_code.columnNumber)
@@ -119,7 +118,7 @@ public class ASTClass extends ASTParent implements CherryType
 	}
 
 	@Override
-	public ArrayList<ASTBase> getChildNodes()
+	public ArrayList<ASTNode> getChildNodes()
 	{
 		return childAsts;
 	}

@@ -9,7 +9,7 @@ import compiler.lib.IndentPrinter;
  * @author david
  * @date 4/12/17.
  */
-public class ASTString extends ASTBase
+public class ASTString extends ASTNode
 {
 	public String value;
 

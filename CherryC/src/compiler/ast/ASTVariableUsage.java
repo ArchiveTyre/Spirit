@@ -8,10 +8,10 @@ import compiler.lib.IndentPrinter;
  * @author david
  * @date 4/12/17.
  */
-public class ASTVariableUsage extends ASTBase
+public class ASTVariableUsage extends ASTNode
 {
 
-	public ASTBase declaration;
+	public ASTNode declaration;
 
 
 	public ASTVariableUsage(ASTParent parent, String name)

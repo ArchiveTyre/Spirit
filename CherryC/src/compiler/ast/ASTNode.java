@@ -10,7 +10,7 @@ import compiler.lib.IndentPrinter;
  * @author Tyrerexus
  * @date 4/11/17.
  */
-public abstract class ASTBase
+public abstract class ASTNode
 {
 
 	/**
@@ -53,7 +53,7 @@ public abstract class ASTBase
 		return parent;
 	}
 
-	public ASTBase(ASTParent parent)
+	public ASTNode(ASTParent parent)
 	{
 		if (parent != null)
 		{
@@ -62,7 +62,7 @@ public abstract class ASTBase
 		}
 	}
 
-	public ASTBase(ASTParent parent, String name)
+	public ASTNode(ASTParent parent, String name)
 	{
 		this(parent);
 		this.name = name;

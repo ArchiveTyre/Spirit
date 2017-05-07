@@ -8,11 +8,11 @@ import java.util.ArrayList;
  * Defines an AST that can have child ASTs.
  *
  * @author Tyrerexus
- * @date 11/04/17
+ * @date 11/04/17`
  */
-public abstract class ASTParent extends ASTBase
+public abstract class ASTParent extends ASTNode
 {
-	public ArrayList<ASTBase> childAsts = new ArrayList<>();
+	public ArrayList<ASTNode> childAsts = new ArrayList<>();
 
 	public ASTParent(ASTParent parent, String name)
 	{
@@ -24,11 +24,11 @@ public abstract class ASTParent extends ASTBase
 	 * @param symbolName The name of the symbol we want to find.
 	 * @return The symbol was found. Null if none.
 	 */
-	public ASTBase findSymbol(String symbolName)
+	public ASTNode findSymbol(String symbolName)
 	{
 		// FIXME: More like findVariable!
 
-		for (ASTBase child : childAsts) {
+		for (ASTNode child : childAsts) {
 			if (child.name.equals(symbolName) && (child instanceof ASTVariableDeclaration || child instanceof CherryType)) {
 				return child;
 			}

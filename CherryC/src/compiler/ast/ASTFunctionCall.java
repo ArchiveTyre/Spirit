@@ -23,7 +23,7 @@ public class ASTFunctionCall extends ASTParent
 		super(parent, name);
 		//System.out.println("Creating call with name: " + name);
 
-		ASTBase symbol = parent.findSymbol(name);
+		ASTNode symbol = parent.findSymbol(name);
 		if (symbol instanceof  ASTVariableDeclaration)
 		{
 			declaration = (ASTVariableDeclaration) symbol;
@@ -61,7 +61,7 @@ public class ASTFunctionCall extends ASTParent
 			space = "";
 		}
 		destination.print(declaration.name + "(" + space);
-		for (ASTBase arg : childAsts)
+		for (ASTNode arg : childAsts)
 		{
 			arg.debugSelf(destination);
 			if (arg != childAsts.get(childAsts.size() - 1))

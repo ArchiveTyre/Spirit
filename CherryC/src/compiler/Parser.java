@@ -68,7 +68,7 @@ public class Parser
 		return isFundamental(tokenType) || tokenType == TokenType.LPAR;
 	}
 
-	private ASTBase parsePrimary(ASTParent parent)
+	private ASTNode parsePrimary(ASTParent parent)
 	{
 		if (match(TokenType.SYMBOL))
 		{
@@ -105,7 +105,7 @@ public class Parser
 			}
 			else
 			{
-				ASTBase expression = parseExpression(parent, true);
+				ASTNode expression = parseExpression(parent, true);
 
 				if (match(TokenType.RPAR))
 				{
@@ -135,7 +135,7 @@ public class Parser
 		return functionCall;
 	}
 
-	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent)
+	private ASTNode parseOpExpression(ASTNode left, int minPrecedence, ASTParent parent)
 	{
 		while (look(0,TokenType.OPERATOR) && !look(0, ","))
 		{
@@ -162,7 +162,7 @@ public class Parser
 					left = new ASTMemberAccess(parent, left, memberName);
 					break;
 				}
-				ASTBase right = parsePrimary(parent);
+				ASTNode right = parsePrimary(parent);
 				while (look(0, TokenType.OPERATOR) && !look(0, ","))
 				{
 					int otherPrecedence = operatorPrecedenceMap.get(lookAheads[0].value);
@@ -187,11 +187,11 @@ public class Parser
 	}
 
 	// FIXME: Add support for strings.
-	private ASTBase parseExpression(ASTParent parent, boolean inPar)
+	private ASTNode parseExpression(ASTParent parent, boolean inPar)
 	{
 		if (isPrimary(lookAheads[0].tokenType))
 		{
-			ASTBase left = parsePrimary(parent);
+			ASTNode left = parsePrimary(parent);
 
 			// Check if we have hit an end. //
 			if (look(0, ",")
@@ -371,7 +371,7 @@ public class Parser
 			// Filter out any newlines. //
 			while (match(TokenType.NEWLINE));
 
-			ASTBase right = parseExpression(parent, false);
+			ASTNode right = parseExpression(parent, false);
 			if (right != null)
 				right.setParent(returnExpression);
 
@@ -392,7 +392,7 @@ public class Parser
 			if (look(0, Syntax.Op.TYPEDEF))
 			{
 				CherryType cherryType = parseType(parent);
-				ASTBase value = null;
+				ASTNode value = null;
 
 
 				// Try to parse initial value. //
@@ -486,7 +486,7 @@ public class Parser
 			}
 			else
 			{
-				ASTBase until = loop.initialStatement;
+				ASTNode until = loop.initialStatement;
 				if (until.getExpressionType() != Builtins.getBuiltin("int"))
 				{
 					syntaxError("int", "Can only loop without index with type \"int\".");
@@ -654,7 +654,7 @@ public class Parser
 		}
 		else if (match(Syntax.Keyword.IF))
 		{
-			ASTBase condition = parseExpression(parent, false);
+			ASTNode condition = parseExpression(parent, false);
 
 			new ASTIf(parent, condition);
 			return true;
@@ -714,7 +714,7 @@ public class Parser
 		// Otherwise it's just an expression. //
 		else
 		{
-			ASTBase expression = parseExpression(parent, false);
+			ASTNode expression = parseExpression(parent, false);
 			if (expression != null)
 			{
 				expression.columnNumber = line_indent;
@@ -754,7 +754,7 @@ public class Parser
 	{
 		// FIXME: Is this really the best place?
 
-		ASTBase f = perspective.findSymbol(name);
+		ASTNode f = perspective.findSymbol(name);
 		if (f instanceof ASTClass)
 			return (ASTClass) f;
 

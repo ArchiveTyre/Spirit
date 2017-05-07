@@ -1,7 +1,7 @@
 package compiler.builtins;
 
 import compiler.CherryType;
-import compiler.ast.ASTBase;
+import compiler.ast.ASTNode;
 
 import java.util.ArrayList;
 
@@ -18,7 +18,7 @@ public class TypeLong implements CherryType
 	}
 
 	@Override
-	public ArrayList<ASTBase> getChildNodes()
+	public ArrayList<ASTNode> getChildNodes()
 	{
 		return null;
 	}

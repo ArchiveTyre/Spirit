@@ -20,7 +20,7 @@ public class ASTElse extends ASTParent
 		super(parent, "");
 
 		// Try to find the owning ASTIf. //
-		ASTBase lastSibling = parent.childAsts.get(parent.childAsts.size() - 2);
+		ASTNode lastSibling = parent.childAsts.get(parent.childAsts.size() - 2);
 		if (lastSibling != null && lastSibling instanceof ASTIf)
 		{
 			ifStatement = (ASTIf)lastSibling;

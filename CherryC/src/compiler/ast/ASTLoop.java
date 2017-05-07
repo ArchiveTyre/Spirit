@@ -13,10 +13,10 @@ import compiler.lib.IndentPrinter;
 public class ASTLoop extends ASTParent
 {
 
-	public ASTBase preparationalStatement = null;
-	public ASTBase initialStatement = null;
-	public ASTBase conditionalStatement = null;
-	public ASTBase iterationalStatement = null;
+	public ASTNode preparationalStatement = null;
+	public ASTNode initialStatement = null;
+	public ASTNode conditionalStatement = null;
+	public ASTNode iterationalStatement = null;
 
 	public ASTLoop(ASTParent parent)
 	{
@@ -49,7 +49,7 @@ public class ASTLoop extends ASTParent
 		destination.println(")");
 		destination.println("{");
 		destination.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTNode child : childAsts)
 		{
 			if (child != preparationalStatement
 					&& child != initialStatement

@@ -10,17 +10,17 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTIf extends ASTParent
 {
-	private ASTBase condition;
+	private ASTNode condition;
 	public ASTElse elseStatement = null;
 
-	public ASTIf(ASTParent parent, ASTBase condition)
+	public ASTIf(ASTParent parent, ASTNode condition)
 	{
 		super(parent, "");
 		this.condition = condition;
 		condition.setParent(this);
 	}
 
-	public ASTBase getCondition()
+	public ASTNode getCondition()
 	{
 		return condition;
 	}
@@ -39,7 +39,7 @@ public class ASTIf extends ASTParent
 		destination.println(")");
 		destination.println("{");
 		destination.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTNode child : childAsts)
 		{
 			if (child != condition)
 			{
@@ -55,7 +55,7 @@ public class ASTIf extends ASTParent
 			destination.println("else");
 			destination.println("{");
 			destination.indentation++;
-			for (ASTBase child : elseStatement.childAsts)
+			for (ASTNode child : elseStatement.childAsts)
 			{
 				child.debugSelf(destination);
 				destination.println("");
