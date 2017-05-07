@@ -71,11 +71,12 @@ public class Syntax
 			public static final String DEC	= "--"	;
 		}
 
-		public static final String ACCESS	=	"."	;
-		public static final String TYPEDEF	= 	":"	;
-		public static final String FUNCVAL	= 	"=" ;
-		public static final String MAP		= 	"=>";
-		public static final String ARG_SEP	=	","	;
+		public static final String 	ACCESS	=	"."	;
+		public static final String 	TYPEDEF	= 	":"	;
+		public static final String 	FUNCVAL	= 	"=" ;
+		public static final String 	MAP		= 	"=>";
+		public static final String 	ARG_SEP	=	","	;
+		public static final char 	MACRO =	'#'	;
 
 
 	}
@@ -99,7 +100,13 @@ public class Syntax
 		public static final String OBJECT		= "object"		;
 		public static final String ENUM			= "enum"		;
 		public static final String INTERFACE	= "interface"	;
-		public static final String FUNC			= "function"	;
+		public static final String FUNC			= "    function"	;
+
+	}
+
+	public class Macro
+	{
+		public static final String BACKEND	=	"backend";
 
 	}
 

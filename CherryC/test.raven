@@ -1,14 +1,12 @@
 
-import raven
 
 type object
 
-factorization : (x) int
-	if x == 1
-		= x
-	else
-		= x * factorization x - 1
 
-init : ()
-	print! (factorization! 5)
+add : (x, y) int = x + y
+
+main : ()
+	num1 := 10
+	num2 := 10
+	print (add num1 num2)
 

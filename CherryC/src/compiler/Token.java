@@ -19,6 +19,7 @@ public class Token
 		LPAR,
 		RPAR,
 		EOF,
+		INLINE,
 	}
 
 	public String value;

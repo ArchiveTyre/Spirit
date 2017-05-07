@@ -2,40 +2,38 @@ package compiler.ast;
 
 import compiler.CherryType;
 import compiler.LangCompiler;
-import compiler.builtins.Builtins;
 import compiler.lib.IndentPrinter;
 
 /**
- * @author david
- * @date 4/12/17.
+ * Created by david on 5/5/17.
  */
-public class ASTString extends ASTBase
+public class ASTInline extends ASTBase
 {
-	public String value;
 
-	public ASTString(ASTParent parent, String value)
+	String code;
+	public ASTInline(ASTParent parent, String code)
 	{
 		super(parent);
-		this.value = value;
-
+		this.code = code;
 
 	}
 
 	@Override
 	public CherryType getExpressionType()
 	{
-		return Builtins.getBuiltin("string");
+		return null;
 	}
 
 	@Override
 	public void debugSelf(IndentPrinter destination)
 	{
-		destination.print("\"" + value + "\"");
+		destination.println("#backend");
+		destination.println(code);
+		destination.println("#end-backend");
 	}
 
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
-		compiler.compileString(this);
 	}
 }

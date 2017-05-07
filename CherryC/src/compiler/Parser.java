@@ -20,9 +20,9 @@ public class Parser
 {
 
 	/** The lexer to read from. */
-	private Lexer lexer;
+	public Lexer lexer;
 	private Token[] lookAheads = new Token[3];
-	private Token previous = null;
+	public Token previous = null;
 
 	public boolean fileTypeDeclared = false;
 
@@ -85,7 +85,7 @@ public class Parser
 		if (match(TokenType.NUMBER))
 			return new ASTNumber(parent, Integer.parseInt(previous.value));
 		if (match(TokenType.STRING))
-			return null; // FIXME: Not implemented yet!
+			return new ASTString(parent, previous.value);
 		if (match(TokenType.LPAR))
 		{
 			// Check if we are looking for a function call. //
@@ -702,6 +702,13 @@ public class Parser
 		else if (look (0, Syntax.Keyword.IMPORT) || look (0,Syntax.Keyword.FROM))
 		{
 			return parseImportExpression(dest);
+		}
+
+		else if (look(0, TokenType.INLINE))
+		{
+			new ASTInline(parent, lexer.getToken().value);
+			match(TokenType.INLINE);
+			return true;
 		}
 
 		// Otherwise it's just an expression. //

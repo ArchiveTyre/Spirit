@@ -76,6 +76,7 @@ class ParserTest
 	{
 
 		String tmpPrint = "print : (something : int)\n";
+		String tmpStrPrint = "print : (what : string)\n";
 		String tmpVoid = "void : ()\n";
 		String tmpInt = "tmp : () int = 5\n";
 		String tmpParam = "tmp2 : (x) int = x * 2";
@@ -169,6 +170,12 @@ class ParserTest
 		testClassCompile("MemberAccess1", "a : int = 0\na.toString");
 		testClassCompile(true, "MemberAccess2", "b : other = other", "fun : ()");
 		testClassCompile(true, "MemberAccess3", "b : other = other\nb.fun", "fun : ()");
+
+
+		// String test. //
+		testClassCompile("Strings1", "a := \"Hello\"");
+		testClassCompile("Strings2", tmpStrPrint + "print \"Hii\"");
+
 
 	}
 }

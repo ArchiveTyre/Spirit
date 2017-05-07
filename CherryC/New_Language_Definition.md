@@ -21,18 +21,85 @@ Raven has 11 basic types. They are as follows
 | bool       | 1 bit   | Boolean                   | A 1 bit value which is either true, or False                | 0 to 1                                                  |
 | string     | --      | string                    | A sequence of characters                                    | --                                                      |
 
+
 ## 1.0 Raven reserved words
 
 ## 2.0 Raven Variables
 
-## 3.0 If statements
+## 3.0 Comments
 
-## 4.0 Loops
+A comment in raven is simply telling the compiler to ignore whatever
+you put after the comment.
+This is very useful, if you for example want to leave
+a note of what you are doing, explain further or
+temporarily disable pieces of code.
 
-## 5.0 Functions
+A single line comment in raven starts with a `-]`.
+Everything after this is ignored, and you may put
+whatever you want there.
 
-## 6.0 Match cases
+```raven
+-] Check if the user is logged in.
+if logged_in
+    -] Display the admin panel
+    display_admin_panel user.name
+```
 
-## 7.0 Imports
+The other type of comment is a multiline comments. These comments
+are not restricted to a single line, but starts with a 
+`[=`, and ends with a `=]`. Everything between these characters
+is ignored and will not be compiled.
 
-## 8.0 Type definition
+**User.raven**
+```raven
+[=
+ = The purpose of this class is to allow the
+ = user to interact with the admin panel.
+ =]
+```
+
+Note that the equal signs between `[=` and `=]`
+are not necessary. They are only there because in Raven it is
+a convention to put an equal sign at the start of each line in a
+mulitline comment. This is also valid:
+```raven
+[=This
+is a perfectly
+		find and valid
+multiline
+comment.
+			=]
+```
+
+
+`[==]`
+
+## 4.0 Strings
+
+There are three types ways to use text as data in raven.
+
+The first one is through a normal string like this:
+```raven
+my_string := "This is a string"
+
+```
+Strings are enclosed within double quotes: `"`
+
+
+Multiline: <* String *>
+
+Multiline raw: <** String **>
+
+
+
+## 5.0 If statements
+
+## 6.0 Loops
+
+## 7.0 Functions
+
+## 8.0 Match cases
+
+## 9.0 Imports
+
+## 10.0 Type definition

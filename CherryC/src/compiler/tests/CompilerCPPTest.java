@@ -32,6 +32,7 @@ class CompilerCPPTest
 		LangCompiler c = new CompilerCPP(new IndentPrinter(System.out), new IndentPrinter(System.err));
 
 
+
 		Lexer l = new Lexer(i, testName);
 		Parser p = new Parser(l);
 
