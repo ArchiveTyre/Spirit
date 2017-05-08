@@ -12,7 +12,7 @@ public class ASTVariableDeclaration extends ASTParent
 {
 	CherryType type;
 
-	public ASTVariableDeclaration(ASTParent parent, String name, CherryType type, ASTBase value)
+	public ASTVariableDeclaration(ASTParent parent, String name, CherryType type, ASTNode value)
 	{
 		super(parent, name);
 		this.type = type;
@@ -20,7 +20,7 @@ public class ASTVariableDeclaration extends ASTParent
 			value.setParent(this);
 	}
 
-	public ASTBase getValue()
+	public ASTNode getValue()
 	{
 		return childAsts.get(0);
 	}
@@ -28,7 +28,14 @@ public class ASTVariableDeclaration extends ASTParent
 	@Override
 	public CherryType getExpressionType()
 	{
-		return this.type;
+		if (childAsts.get(0) instanceof ASTFunctionDeclaration)
+		{
+			return ((ASTFunctionDeclaration) childAsts.get(0)).returnType;
+		}
+		else
+		{
+			return this.type;
+		}
 	}
 
 	@Override

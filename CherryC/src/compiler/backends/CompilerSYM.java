@@ -26,7 +26,7 @@ public class CompilerSYM extends LangCompiler
 		symOutput.println("CompilerVersion: " + Main.VERSION);
 		symOutput.println("ExtendsClass: " + astClass.extendsClass);
 		symOutput.println();
-		for (ASTBase node : astClass.childAsts)
+		for (ASTNode node : astClass.childAsts)
 		{
 			node.compileSelf(this);
 			symOutput.println();

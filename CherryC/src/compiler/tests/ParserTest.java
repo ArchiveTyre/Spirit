@@ -68,11 +68,11 @@ class ParserTest
 	void firstTest()
 	{
 		String tmpPrint = "print : (something : int)\n";
+		String tmpStrPrint = "print : (what : string)\n";
 		String tmpVoid = "void : ()\n";
 		String tmpInt = "tmp : () int = 5\n";
 		String tmpParam = "tmp2 : (x) int = x * 2";
 
-		/*
 		// Empty. //
 		testClassCompile("Empty1", "");
 
@@ -104,11 +104,9 @@ class ParserTest
 		// Test functions. //
 		testClassCompile("FunTest1", "a : (x : int, y : int) int = x + y");
 		testClassCompile("FunTest2", tmpPrint + "a : ()\n\tprint 23");
-
 		testClassCompile("FunTest3", tmpPrint + "a : ()\n\tb : ()\n\t\tprint 2\n\tb");
-
 		testClassCompile("FunTest4", "func : (x, y : int, b : bool, c, k : string)\n\ta := 5");
-		testClassCompile("FunTest4", "func : (x, y, z) int = x * y + z");
+		testClassCompile("FunTest5", "func : (x, y, z) int = x * y + z");
 
 		// Test function calls. //
 		testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na 1 2");
@@ -117,13 +115,13 @@ class ParserTest
 		testClassCompile("FunCall4", "a : (x, y : int) int = x + y\na 1 2 (a 3 4)");
 		testClassCompile("FunCall5", tmpInt + "a : int = (tmp)");
 		testClassCompile("FunCall6", tmpPrint + tmpParam + "print (tmp2 5)");
+		testClassCompile("FunCall7", "d : ( a : int, b : int) = a + b\nm : (a : int, b : string, c : int) int = 42\nm (d 1 2) \"Hi\" 12");
 
 		// If statements. //
 		testClassCompile("IfStatement1", tmpPrint + "A := 3\nif A\n\tprint A\n\tprint A + 5\nb := 10");
 		testClassCompile("IfStatement2", tmpPrint + "A := 3\nif A\n\tprint A\nelse\n\tprint 32");
 
 		// Loops. //
-
 		testClassCompile("Loops1", "loop A := 3, A < 10, i = i + 1");
 		testClassCompile("Loops2", tmpPrint + "loop 10\n\tprint 2");
 		testClassCompile("Loops3", tmpPrint + "loop 6 + 2\n\tprint 2");
@@ -159,10 +157,15 @@ class ParserTest
 		testClassCompile("Import5", "import a.b.c");
 
 		// Member access. //
+
 		testClassCompile("MemberAccess1", "a : int = 0\na.toString");
 		testClassCompile(true, "MemberAccess2", "b : Other = Other", "fun : ()");
 		testClassCompile(true, "MemberAccess3", "b : Other = Other\nb.fun", "fun : ()");
-		*/
+
 		testClassCompile(true, "MemberAccess4", "b : Other = Other\nb.fun 12", "fun : (x : int)");
+
+		// String test. //
+		testClassCompile("Strings1", "a := \"Hello\"");
+		testClassCompile("Strings2", tmpStrPrint + "print \"Hii\"");
 	}
 }

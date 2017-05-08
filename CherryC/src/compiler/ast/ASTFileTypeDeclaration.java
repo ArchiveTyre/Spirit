@@ -11,7 +11,7 @@ import compiler.lib.IndentPrinter;
  */
 
 // FIXME: Move to just class...
-public class ASTFileTypeDeclaration extends ASTBase
+public class ASTFileTypeDeclaration extends ASTNode
 {
 
 	public FileType type;

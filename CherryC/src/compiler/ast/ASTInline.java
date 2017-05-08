@@ -2,41 +2,38 @@ package compiler.ast;
 
 import compiler.CherryType;
 import compiler.LangCompiler;
-import compiler.builtins.Builtins;
 import compiler.lib.IndentPrinter;
 
 /**
- * Puts a number into an AST.
- *
- * @author Tyrerexus
- * @date 4/12/17.
+ * Created by david on 5/5/17.
  */
-public class ASTNumber extends ASTNode
+public class ASTInline extends ASTNode
 {
 
-	public int value;
-
-	public ASTNumber(ASTParent parent, int value)
+	String code;
+	public ASTInline(ASTParent parent, String code)
 	{
 		super(parent);
-		this.value = value;
+		this.code = code;
+
 	}
 
 	@Override
 	public CherryType getExpressionType()
 	{
-		return Builtins.getBuiltin("int");
+		return null;
 	}
 
 	@Override
 	public void debugSelf(IndentPrinter destination)
 	{
-		destination.print(value);
+		destination.println("#backend");
+		destination.println(code);
+		destination.println("#end-backend");
 	}
 
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
-		compiler.compileNumber(this);
 	}
 }

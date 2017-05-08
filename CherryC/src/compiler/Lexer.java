@@ -4,7 +4,6 @@ import compiler.lib.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -25,6 +24,8 @@ public class Lexer
 	private int oldColumnNumber = 0;
 	private int lineNumber = 0;
 	private int parenthesesCount = 0;
+
+	private boolean inMacro = false;
 
 	public Lexer(PushbackInputStream input, String fileName)
 	{
@@ -106,6 +107,7 @@ public class Lexer
 			return new Token(digit.toString(), Token.TokenType.NUMBER, columnNumber, lineNumber);
 		}
 
+
 		// check if we are reading a symbol. //
 		else if (Character.isAlphabetic((char) c) || c == '_')
 		{
@@ -121,6 +123,20 @@ public class Lexer
 
 			unReadChar(c);
 			return new Token(string.toString(), Token.TokenType.SYMBOL, columnNumber, lineNumber);
+		}
+
+		// Check if we are reading a string. //
+		else if (c == '"')
+		{
+			StringBuilder string = new StringBuilder();
+			c = readChar();
+			while (c != '"')
+			{
+				if (c != '\t' && c != '\n') string.append((char) c);
+				c = readChar();
+			}
+
+			return new Token(string.toString(), Token.TokenType.STRING, columnNumber, lineNumber);
 		}
 
 		// Otherwise it's an operator. //
@@ -142,7 +158,6 @@ public class Lexer
 	{
 		int character;
 
-
 		try
 		{
 			character =  input.read();
@@ -159,7 +174,6 @@ public class Lexer
 			character = -1;
 			e.printStackTrace();
 		}
-
 
 
 		return character;

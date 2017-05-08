@@ -1,8 +1,5 @@
 package compiler;
 
-import compiler.CherryType;
-import compiler.Lexer;
-import compiler.Token;
 import compiler.ast.*;
 import compiler.builtins.Builtins;
 
@@ -38,7 +35,7 @@ public class ParserSYM
 	{
 		String name = grab();
 
-		ASTBase f = perspective.findSymbol(name);
+		ASTNode f = perspective.findSymbol(name);
 		if (f instanceof ASTClass)
 			return (ASTClass) f;
 

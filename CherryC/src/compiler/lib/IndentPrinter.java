@@ -49,4 +49,6 @@ public class IndentPrinter
 		destination.print(what);
 		new_line_clean = false;
 	}
+
+
 }

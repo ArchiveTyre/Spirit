@@ -14,41 +14,56 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTFunctionCall extends ASTParent
 {
+	private ASTNode declarationName;
 
-	private ASTVariableDeclaration declaration;
-	private ASTFunctionDeclaration functionDeclaration;
-
-	public ASTFunctionCall(ASTParent parent, String name)
+	public ASTFunctionCall(ASTParent parent, ASTNode name)
 	{
-		super(parent, name);
+		super(parent, "");
+		declarationName = name;
+		declarationName.setParent(this);
 		//System.out.println("Creating call with name: " + name);
 
-		ASTBase symbol = parent.findSymbol(name);
-		if (symbol instanceof  ASTVariableDeclaration)
+		/*declaration = (ASTVariableDeclaration) name;
+		if (declaration.getValue() instanceof ASTFunctionDeclaration)
 		{
-			declaration = (ASTVariableDeclaration) symbol;
-			if (declaration.getValue() instanceof ASTFunctionDeclaration)
-			{
-				functionDeclaration = (ASTFunctionDeclaration) declaration.getValue();
-			}
-			else
-			{
-				System.err.print("Can't call non-function. ");
-				functionDeclaration = null;
-			}
+			functionDeclaration = (ASTFunctionDeclaration) declaration.getValue();
 		}
 		else
 		{
-			System.err.println("Unknown variable desu~. " + name);
-			declaration = null;
+			System.err.print("Can't call non-function. ");
+			functionDeclaration = null;
 		}
+		*/
+		/*if (name instanceof ASTVariableUsage)
+		{
 
+			ASTNode symbol = parent.findSymbol(name.getName());
+			if (symbol instanceof ASTVariableDeclaration)
+			{
+				declaration = (ASTVariableDeclaration) symbol;
+				if (declaration.getValue() instanceof ASTFunctionDeclaration)
+				{
+					functionDeclaration = (ASTFunctionDeclaration) declaration.getValue();
+				}
+				else
+				{
+					System.err.print("Can't call non-function. ");
+					functionDeclaration = null;
+				}
+			}
+			else
+			{
+				System.err.println("Unknown variable desu~. " + name);
+				declaration = null;
+			}
+		}
+		*/
 	}
 
 	@Override
 	public CherryType getExpressionType()
 	{
-			return functionDeclaration.returnType;
+			return declarationName.getExpressionType();
 	}
 
 	@Override
@@ -60,13 +75,17 @@ public class ASTFunctionCall extends ASTParent
 		{
 			space = "";
 		}
-		destination.print(declaration.name + "(" + space);
-		for (ASTBase arg : childAsts)
+		declarationName.debugSelf(destination);
+		destination.print("(" + space);
+		for (ASTNode arg : childAsts)
 		{
-			arg.debugSelf(destination);
-			if (arg != childAsts.get(childAsts.size() - 1))
+			if (arg != declarationName)
 			{
-				destination.print(", ");
+				arg.debugSelf(destination);
+				if (arg != childAsts.get(childAsts.size() - 1))
+				{
+					destination.print(", ");
+				}
 			}
 		}
 		destination.print(space + ")");

@@ -49,7 +49,7 @@ public class ASTFunctionDeclaration extends ASTParent
 		destination.println(") -> " + returnType.getTypeName());
 		destination.println("{");
 		destination.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTNode child : childAsts)
 		{
 			child.debugSelf(destination);
 			destination.println("");

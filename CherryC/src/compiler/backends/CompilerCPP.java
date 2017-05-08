@@ -34,7 +34,7 @@ public class CompilerCPP extends LangCompiler
 		this.hppOutput = hppOutput;
 	}
 
-	private boolean isSemicolonless(ASTBase ast)
+	private boolean isSemicolonless(ASTNode ast)
 	{
 		return ast instanceof ASTIf || ast instanceof ASTLoop || ast instanceof ASTElse
 				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionDeclaration);
@@ -68,7 +68,7 @@ public class CompilerCPP extends LangCompiler
 			}
 		}
 
-		for (ASTBase child : astClass.childAsts)
+		for (ASTNode child : astClass.childAsts)
 		{
 			child.compileSelf(this);
 
@@ -84,7 +84,7 @@ public class CompilerCPP extends LangCompiler
 		hppOutput.println("{");
 		hppOutput.println("public:");
 		hppOutput.indentation++;
-		for (ASTBase child : astClass.childAsts)
+		for (ASTNode child : astClass.childAsts)
 		{
 			if (child instanceof ASTVariableDeclaration)
 			{
@@ -126,7 +126,7 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.println(")");
 		cppOutput.println("{");
 		cppOutput.indentation++;
-		for (ASTBase child : astIf.childAsts)
+		for (ASTNode child : astIf.childAsts)
 		{
 			child.compileSelf(this);
 			cppOutput.println(isSemicolonless(child) ? ' ' : ';');
@@ -140,7 +140,7 @@ public class CompilerCPP extends LangCompiler
 			cppOutput.println("else");
 			cppOutput.println("{");
 			cppOutput.indentation++;
-			for (ASTBase child : astIf.elseStatement.childAsts)
+			for (ASTNode child : astIf.elseStatement.childAsts)
 			{
 				child.compileSelf(this);
 				cppOutput.println(isSemicolonless(child) ? ' ' : ';');
@@ -170,7 +170,7 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.println(")");
 		cppOutput.println("{");
 		cppOutput.indentation++;
-		for (ASTBase child : astLoop.childAsts)
+		for (ASTNode child : astLoop.childAsts)
 		{
 			if (child != astLoop.preparationalStatement
 					&& child != astLoop.initialStatement
@@ -193,7 +193,7 @@ public class CompilerCPP extends LangCompiler
 
 		for (int i = 0; i < astFunctionCall.childAsts.size(); i++)
 		{
-			ASTBase child = astFunctionCall.childAsts.get(i);
+			ASTNode child = astFunctionCall.childAsts.get(i);
 			child.compileSelf(this);
 
 			if (i != astFunctionCall.childAsts.size() - 1)
@@ -250,7 +250,7 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.println(args + ")");
 		cppOutput.println("{");
 		cppOutput.indentation++;
-		for (ASTBase child : declaration.childAsts)
+		for (ASTNode child : declaration.childAsts)
 		{
 			child.compileSelf(this);
 			cppOutput.println(isSemicolonless(child) ? ' ' : ';');
