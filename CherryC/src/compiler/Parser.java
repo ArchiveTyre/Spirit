@@ -25,6 +25,7 @@ public class Parser
 	private Token previous = null;
 
 	public boolean fileTypeDeclared = false;
+	public boolean ignoreImport = false;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -183,6 +184,7 @@ public class Parser
 				break;
 			}
 		}
+
 		return left;
 	}
 
@@ -606,7 +608,8 @@ public class Parser
 			return false;
 		}
 
-		astClass.classImports.add(astClass.new ImportDeclaration(packageName, packageSymbols));
+		if (!ignoreImport)
+			astClass.importClass(packageName, packageSymbols);
 		return true;
 	}
 

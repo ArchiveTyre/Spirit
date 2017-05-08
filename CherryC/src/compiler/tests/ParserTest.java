@@ -19,48 +19,42 @@ import java.nio.charset.StandardCharsets;
  */
 class ParserTest
 {
-
 	private void testClassCompile(boolean incompleteClass, String name, String testString, String importedString)
 	{
 		System.out.flush();
 		System.err.flush();
-
 		System.out.println("=== " + name + " ===");
 
+		IndentPrinter printer = new IndentPrinter(System.out);
 
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
-
-		Lexer lexer = new Lexer(pushbackInputStream, name + ".cherry");
+		Lexer lexer = new Lexer(pushbackInputStream, name + ".raven");
+		ASTClass astClass = new ASTClass(name, null);
 
 		Parser parser = new Parser(lexer);
 		parser.fileTypeDeclared = incompleteClass;
-
-		ASTClass astClass = new ASTClass(name, null);
+		parser.ignoreImport = true;
 
 		// Parse imported-class. //
 		{
 			InputStream inputStream2 = new ByteArrayInputStream(importedString.getBytes(StandardCharsets.UTF_8));
 			PushbackInputStream pushbackInputStream2 = new PushbackInputStream(inputStream2);
-
-			Lexer lexer2 = new Lexer(pushbackInputStream2, name + "Sub.cherry");
+			Lexer lexer2 = new Lexer(pushbackInputStream2, name + "Sub.raven");
+			ASTClass importedClass = new ASTClass("Other", astClass);
 
 			Parser parser2 = new Parser(lexer2);
 			parser2.fileTypeDeclared = true;
-
-			ASTClass importedClass = new ASTClass("other", astClass);
+			parser2.ignoreImport = true;
 			parser2.parseFile(importedClass);
 		}
 
 		// Parse the rest. //
 		parser.parseFile(astClass);
-
-		IndentPrinter printer = new IndentPrinter(System.out);
-
 		astClass.debugSelf(printer);
 		printer.println();
-		System.out.println();
 
+		System.out.println();
 		System.out.flush();
 		System.err.flush();
 	}
@@ -70,17 +64,15 @@ class ParserTest
 		testClassCompile(true, name, testString, "");
 	}
 
-
 	@Test
 	void firstTest()
 	{
-
 		String tmpPrint = "print : (something : int)\n";
 		String tmpVoid = "void : ()\n";
 		String tmpInt = "tmp : () int = 5\n";
 		String tmpParam = "tmp2 : (x) int = x * 2";
 
-
+		/*
 		// Empty. //
 		testClassCompile("Empty1", "");
 
@@ -99,6 +91,7 @@ class ParserTest
 		// Just expressions. //
 		testClassCompile("ExpressionTest3", "a := 3\na=4");
 
+		// Parenthesis. //
 		testClassCompile("ParTest1", "a := (1 * 2)");
 
 		// Tabbing. //
@@ -167,8 +160,9 @@ class ParserTest
 
 		// Member access. //
 		testClassCompile("MemberAccess1", "a : int = 0\na.toString");
-		testClassCompile(true, "MemberAccess2", "b : other = other", "fun : ()");
-		testClassCompile(true, "MemberAccess3", "b : other = other\nb.fun", "fun : ()");
-
+		testClassCompile(true, "MemberAccess2", "b : Other = Other", "fun : ()");
+		testClassCompile(true, "MemberAccess3", "b : Other = Other\nb.fun", "fun : ()");
+		*/
+		testClassCompile(true, "MemberAccess4", "b : Other = Other\nb.fun 12", "fun : (x : int)");
 	}
 }
