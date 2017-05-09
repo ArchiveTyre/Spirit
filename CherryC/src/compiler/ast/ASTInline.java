@@ -7,7 +7,7 @@ import compiler.lib.IndentPrinter;
 /**
  * Created by david on 5/5/17.
  */
-public class ASTInline extends ASTNode
+public class ASTInline extends ASTBase
 {
 
 	String code;

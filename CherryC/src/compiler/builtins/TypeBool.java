@@ -1,7 +1,7 @@
 package compiler.builtins;
 
 import compiler.CherryType;
-import compiler.ast.ASTNode;
+import compiler.ast.ASTBase;
 
 import java.util.ArrayList;
 
@@ -18,7 +18,7 @@ public class TypeBool implements CherryType
 	}
 
 	@Override
-	public ArrayList<ASTNode> getChildNodes()
+	public ArrayList<ASTBase> getChildNodes()
 	{
 		return null;
 	}

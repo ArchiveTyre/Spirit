@@ -1,7 +1,7 @@
 package compiler.ast;
 
+import com.sun.xml.internal.ws.wsdl.writer.document.Import;
 import compiler.CherryType;
-import compiler.FileCompiler;
 import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
@@ -33,12 +33,6 @@ public class ASTClass extends ASTParent implements CherryType
 
 	public String extendsClass = null;
 
-	public void importClass(String importPackage, String[] importSymbols)
-	{
-		classImports.add(new ImportDeclaration(importPackage, importSymbols));
-		FileCompiler.importFile(importPackage + ".raven", (ASTClass)getParent());
-	}
-
 	public ASTClass(String name, ASTParent parent)
 	{
 		super(parent, name);
@@ -60,7 +54,7 @@ public class ASTClass extends ASTParent implements CherryType
 		to.println(name);
 		to.println("{");
 		to.indentation++;
-		for (ASTNode child : childAsts)
+		for (ASTBase child : childAsts)
 		{
 			child.debugSelf(to);
 			to.println("");
@@ -81,9 +75,9 @@ public class ASTClass extends ASTParent implements CherryType
 			return this;
 
 		// Get last child node. //
-		ASTNode newly_inserted_code = childAsts.get(childAsts.size() - 1);
+		ASTBase newly_inserted_code = childAsts.get(childAsts.size() - 1);
 
-		ASTNode parent;
+		ASTBase parent;
 
 		// Find parent. //
 		if (line_indent > newly_inserted_code.columnNumber)
@@ -125,7 +119,7 @@ public class ASTClass extends ASTParent implements CherryType
 	}
 
 	@Override
-	public ArrayList<ASTNode> getChildNodes()
+	public ArrayList<ASTBase> getChildNodes()
 	{
 		return childAsts;
 	}

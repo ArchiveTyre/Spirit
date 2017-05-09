@@ -28,7 +28,6 @@ public class ASTFunctionDeclaration extends ASTParent
 			System.out.println("Defining a nested function.");
 	}
 
-
 	@Override
 	public CherryType getExpressionType()
 	{
@@ -50,7 +49,7 @@ public class ASTFunctionDeclaration extends ASTParent
 		destination.println(") -> " + returnType.getTypeName());
 		destination.println("{");
 		destination.indentation++;
-		for (ASTNode child : childAsts)
+		for (ASTBase child : childAsts)
 		{
 			child.debugSelf(destination);
 			destination.println("");

@@ -5,7 +5,6 @@ import compiler.Lexer;
 import compiler.Parser;
 import compiler.ParserSYM;
 import compiler.ast.ASTClass;
-import compiler.ast.ASTParent;
 import compiler.backends.CompilerCPP;
 import compiler.backends.CompilerSYM;
 import compiler.lib.IndentPrinter;
@@ -28,7 +27,7 @@ public class FileCompiler
 	 * @param fileName
 	 * @return
 	 */
-	public static ASTClass importFile(String fileName, ASTClass parent)
+	public static ASTClass importFile(String fileName)
 	{
 		/*
 		String[] splitFileName = fileName.split("\\.");
@@ -39,9 +38,8 @@ public class FileCompiler
 
 		try
 		{
-			ASTClass loadedClass = loadClassAST(fileName, parent);
+			ASTClass loadedClass = loadClassAST(fileName, null);
 			loadedClass.debugSelf(printer);
-			printer.println();
 
 			if (shouldCompile(fileName))
 			{

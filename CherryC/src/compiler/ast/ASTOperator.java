@@ -11,20 +11,20 @@ public class ASTOperator extends ASTParent
 {
 
 
-	ASTNode rightExpression;
-	ASTNode leftExpression;
+	ASTBase rightExpression;
+	ASTBase leftExpression;
 
-	public ASTNode getRightExpression()
+	public ASTBase getRightExpression()
 	{
 		return rightExpression;
 	}
 
-	public ASTNode getLeftExpression()
+	public ASTBase getLeftExpression()
 	{
 		return leftExpression;
 	}
 
-	public ASTOperator(ASTParent parent, String operatorName, ASTNode rightExpression, ASTNode leftExpression)
+	public ASTOperator(ASTParent parent, String operatorName, ASTBase rightExpression, ASTBase leftExpression)
 	{
 		super(parent, operatorName);
 

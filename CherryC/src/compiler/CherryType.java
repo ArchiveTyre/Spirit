@@ -1,6 +1,6 @@
 package compiler;
 
-import compiler.ast.ASTNode;
+import compiler.ast.ASTBase;
 
 import java.util.ArrayList;
 
@@ -11,5 +11,5 @@ import java.util.ArrayList;
 public interface CherryType
 {
 	String getTypeName();
-	ArrayList<ASTNode> getChildNodes();
+	ArrayList<ASTBase> getChildNodes();
 }

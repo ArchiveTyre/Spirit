@@ -11,7 +11,7 @@ import compiler.lib.IndentPrinter;
  * @author Tyrerexus
  * @date 4/12/17.
  */
-public class ASTNumber extends ASTNode
+public class ASTNumber extends ASTBase
 {
 
 	public int value;

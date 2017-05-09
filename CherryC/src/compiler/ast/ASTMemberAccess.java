@@ -12,26 +12,26 @@ import java.util.ArrayList;
  */
 public class ASTMemberAccess extends ASTParent
 {
-	public ASTNode ofObject;
-	ASTNode member = null;
+	public ASTBase ofObject;
+	ASTBase member = null;
 	String memberName;
 
-	public ASTNode getMember()
+	public ASTBase getMember()
 	{
 		return member;
 	}
 
-	public ASTMemberAccess(ASTParent parent, ASTNode ofObject, String memberName)
+	public ASTMemberAccess(ASTParent parent, ASTBase ofObject, String memberName)
 	{
 		super(parent, "");
 		this.ofObject = ofObject;
 		ofObject.setParent(this);
 		this.memberName = memberName;
 
-		ArrayList<ASTNode> members =  ofObject.getExpressionType().getChildNodes();
+		ArrayList<ASTBase> members =  ofObject.getExpressionType().getChildNodes();
 		if (members != null)
 		{
-			for (ASTNode member : members)
+			for (ASTBase member : members)
 			{
 				if (member.getName().equals(memberName))
 				{
