@@ -1,5 +1,8 @@
 package compiler;
 
+import compiler.ast.ASTClass;
+import compiler.ast.ASTParent;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -15,12 +18,10 @@ public class Main
 	public static final String COMPILER_NAME = "Cherry";
 	public static final String COPYRIGHT = "© 2017 TYREREXUS AND DAVID ALL RIGHTS RESERVED";
 	public static final String RAVEN_PKG_PATH = "RAVEN_PKG_PATH";
-
 	public static File outDir = new File("out/");
 
 	public static void main(String[] args)
 	{
-
 		ArrayList<String> fileNames = new ArrayList<>();
 
 		for (int i = 0; i < args.length; i++)
@@ -47,13 +48,11 @@ public class Main
 			}
 		}
 
-
+		ASTClass root = new ASTClass("root", null);
 		for (String file : fileNames)
 		{
-			FileCompiler.importFile(file);
+			FileCompiler.importFile(file, root);
 		}
-
-
 	}
 
 	public static void printVersion()

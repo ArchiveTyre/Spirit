@@ -58,5 +58,7 @@ class CompilerCPPTest
 
 		testCompiler("Imports", "import Hello.World");
 
+		testCompiler("Function Overloading", "fun : (x) int = 5\n\nfun : (y) string = \"hello\"");
+
 	}
 }

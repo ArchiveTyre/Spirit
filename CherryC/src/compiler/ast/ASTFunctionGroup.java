@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * This classes purpose is to serve
  * as a group for overloaded functions.
  */
-public class ASTFunctionGroup extends ASTNode
+public class ASTFunctionGroup extends ASTParent
 {
 
 	public ArrayList<ASTVariableDeclaration> functions = new ArrayList<>();
@@ -45,7 +45,10 @@ public class ASTFunctionGroup extends ASTNode
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
-
+		for (ASTVariableDeclaration var : functions)
+		{
+			var.compileSelf(compiler);
+		}
 	}
 
 	public boolean addFunction(ASTVariableDeclaration func)

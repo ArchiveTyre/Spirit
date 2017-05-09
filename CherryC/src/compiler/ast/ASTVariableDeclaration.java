@@ -28,7 +28,14 @@ public class ASTVariableDeclaration extends ASTParent
 	@Override
 	public CherryType getExpressionType()
 	{
-		return this.type;
+		if (childAsts.get(0) instanceof ASTFunctionDeclaration)
+		{
+			return ((ASTFunctionDeclaration) childAsts.get(0)).returnType;
+		}
+		else
+		{
+			return this.type;
+		}
 	}
 
 	@Override

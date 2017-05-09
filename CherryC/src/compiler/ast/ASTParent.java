@@ -63,6 +63,31 @@ public abstract class ASTParent extends ASTNode
 		return null;
 	}
 
+	public boolean inFunction()
+	{
+		return inFunction(this);
+	}
+
+	private boolean inFunction(ASTParent currentParent)
+	{
+		if (currentParent instanceof ASTVariableDeclaration)
+		{
+			ASTVariableDeclaration var = (ASTVariableDeclaration) currentParent;
+
+			if (var.childAsts.get(0) instanceof ASTFunctionDeclaration)
+			{
+				return true;
+			}
+		}
+		System.out.println("STATUS: " + (currentParent.getParent() != null));
+
+
+		return currentParent.getParent() != null && inFunction(currentParent.getParent());
+
+	}
+
+
+
 
 
 }
