@@ -226,6 +226,7 @@ public class Parser
 		return null;
 	}
 
+	/*
 	private ASTVariableDeclaration parseFunctionDeclaration(ASTParent parent)
 	{
 
@@ -343,6 +344,136 @@ public class Parser
 			return null;
 		}
 	}
+	*/
+
+	private ASTVariableDeclaration parseFunctionDeclaration(ASTParent parent)
+	{
+
+		// Functions always start with a name as their identifier. //
+		if (match(TokenType.SYMBOL))
+		{
+			String name = previous.value;
+			ASTFunctionGroup group;
+			ASTBase possibleGroupDeclaration = parent.findSymbol(name);
+			if (possibleGroupDeclaration instanceof ASTVariableDeclaration
+					&& ((ASTVariableDeclaration) possibleGroupDeclaration).getValue() != null
+					&& ((ASTVariableDeclaration) possibleGroupDeclaration).getValue() instanceof  ASTFunctionGroup)
+				group = (ASTFunctionGroup) ((ASTVariableDeclaration) possibleGroupDeclaration).getValue();
+			else
+			{
+				ASTVariableDeclaration variableDeclaration =
+						new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("function"), null);
+				group = new ASTFunctionGroup(variableDeclaration, name);
+			}
+
+			ASTFunctionDeclaration function =
+					new ASTFunctionDeclaration(group, Builtins.getBuiltin("void"));
+
+			// Check that we specify the return type of the function (and the parameters). //
+			if (match(Syntax.Op.TYPEDEF))
+			{
+				// Make sure we match a parenthesis which is basically the function indicator. //
+				if (match(TokenType.LPAR))
+				{
+					ArrayList<String> unspecifiedParams = new ArrayList<>();
+
+					// If we have defined the type for ANY arguments. //
+					boolean specifiedAnyArguments = false;
+					do
+					{
+						if (match(TokenType.SYMBOL))
+						{
+							String argName = previous.value;
+							if (look(0, Syntax.Op.TYPEDEF))
+							{
+								CherryType argType = parseType(parent);
+								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+								specifiedAnyArguments = true;
+
+								if (!unspecifiedParams.isEmpty())
+								{
+									for (String param : unspecifiedParams)
+									{
+										function.args.add(new ASTVariableDeclaration(null, param, argType, null));
+
+									}
+									unspecifiedParams.clear();
+								}
+							}
+							else if (look(0, Syntax.Op.ARG_SEP) || look(0, TokenType.RPAR))
+							{
+								unspecifiedParams.add(argName);
+							}
+						}
+					} while (match(Syntax.Op.ARG_SEP));
+
+					if (!unspecifiedParams.isEmpty())
+					{
+						if (specifiedAnyArguments)
+						{
+							StringBuilder builderArgs = new StringBuilder("");
+							for (String param : unspecifiedParams)
+							{
+								builderArgs.append(param);
+								builderArgs.append(Syntax.Op.ARG_SEP);
+								builderArgs.append(' ');
+							}
+							String args = builderArgs.substring(0, builderArgs.length() - 3);
+							syntaxError("Type specification", "Some arguments did not have a specified type. [" + args + "]");
+						}
+					}
+
+					if (!match(TokenType.RPAR))
+					{
+						syntaxError(")", "Unmatched parenthesis");
+					}
+
+					if (look(0, TokenType.SYMBOL))
+					{
+						CherryType returnType = parseType(parent, true);
+						function.returnType = returnType;
+						if (!specifiedAnyArguments && !unspecifiedParams.isEmpty())
+						{
+							for (String param : unspecifiedParams)
+							{
+								function.args.add(new ASTVariableDeclaration(null, param, returnType, null));
+
+							}
+							unspecifiedParams.clear();
+						}
+					}
+					else
+					{
+						function.returnType = Builtins.getBuiltin("void");
+					}
+					if (look(0, Syntax.Op.FUNCVAL))
+					{
+						ASTReturnExpression call = parseReturnExpression(parent);
+						if (call != null)
+						{
+							call.setParent(function);
+						}
+					}
+					return (ASTVariableDeclaration)group.getParent();
+				}
+				else
+				{
+					syntaxError("(", "All function type declarations need to start with a parenthesis");
+					return null;
+				}
+			}
+			else
+			{
+				syntaxError(":", "You need to specify a type for the function, void functions use () as their type ");
+				return null;
+			}
+		}
+		else
+		{
+			System.err.println("COMPILER ERROR! Trying to parse function declaration from non-symbol!");
+			return null;
+		}
+	}
 
 	private ASTReturnExpression parseReturnExpression(ASTParent parent)
 	{
@@ -387,8 +518,8 @@ public class Parser
 					else if (cherryType == null)
 						cherryType = value.getExpressionType();
 						// Check that the types match. //
-					else if (cherryType != value.getExpressionType() && value.getExpressionType() != null)
-						error("ERROR: Type miss-match at line: " + previous.lineNumber);
+					//else if (cherryType != value.getExpressionType() && value.getExpressionType() != null)
+					//	error("ERROR: Type miss-match at line: " + previous.lineNumber);
 				}
 
 				return new ASTVariableDeclaration(parent, name, cherryType, value);

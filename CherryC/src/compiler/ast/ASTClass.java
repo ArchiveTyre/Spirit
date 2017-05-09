@@ -105,8 +105,8 @@ public class ASTClass extends ASTParent implements CherryType
 		if (parent instanceof ASTVariableDeclaration)
 		{
 			ASTVariableDeclaration parentAsVar = (ASTVariableDeclaration)parent;
-			if (parentAsVar.getValue() instanceof ASTFunctionDeclaration)
-				return (ASTFunctionDeclaration)parentAsVar.getValue();
+			if (parentAsVar.getValue() instanceof ASTFunctionGroup)
+				return (ASTFunctionGroup)parentAsVar.getValue();
 		}
 		else if (parent instanceof ASTParent)
 		{
