@@ -12,6 +12,7 @@ public abstract class LangCompiler
 	public abstract void compileIf(ASTIf astIf);
 	public abstract void compileLoop(ASTLoop astLoop);
 	public abstract void compileFunctionCall(ASTFunctionCall astFunctionCall);
+	public abstract void compileFunctionGroup(ASTFunctionGroup astFunctionGroup);
 	public abstract void compileVariableUsage(ASTVariableUsage astVariableUsage);
 	public abstract void compileVariableDeclaration(ASTVariableDeclaration astVariableDeclaration);
 	public abstract void compileOperator(ASTOperator astOperator);

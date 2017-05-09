@@ -1,7 +1,7 @@
 package compiler.ast;
 
-import com.sun.xml.internal.ws.wsdl.writer.document.Import;
 import compiler.CherryType;
+import compiler.FileCompiler;
 import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
@@ -32,6 +32,12 @@ public class ASTClass extends ASTParent implements CherryType
 	public ArrayList<ImportDeclaration> classImports = new ArrayList<>();
 
 	public String extendsClass = null;
+
+	public void importClass(String importPackage, String[] importSymbols)
+	{
+		classImports.add(new ImportDeclaration(importPackage, importSymbols));
+		FileCompiler.importFile(importPackage + ".raven", (ASTClass)getParent());
+	}
 
 	public ASTClass(String name, ASTParent parent)
 	{

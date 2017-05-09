@@ -203,6 +203,17 @@ public class CompilerCPP extends LangCompiler
 	}
 
 	@Override
+	public void compileFunctionGroup(ASTFunctionGroup astFunctionGroup)
+	{
+		for (ASTBase node : astFunctionGroup.childAsts)
+		{
+			node.compileSelf(this);
+			cppOutput.println();
+			hppOutput.println();
+		}
+	}
+
+	@Override
 	public void compileVariableUsage(ASTVariableUsage astVariableUsage)
 	{
 		cppOutput.print(astVariableUsage.getName());

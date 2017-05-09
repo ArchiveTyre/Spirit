@@ -76,6 +76,15 @@ public class CompilerSYM extends LangCompiler
 	}
 
 	@Override
+	public void compileFunctionGroup(ASTFunctionGroup astFunctionGroup)
+	{
+		for (ASTBase node : astFunctionGroup.childAsts)
+		{
+			node.compileSelf(this);
+		}
+	}
+
+	@Override
 	public void compileVariableUsage(ASTVariableUsage astVariableUsage)
 	{
 

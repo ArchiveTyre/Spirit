@@ -25,6 +25,7 @@ public class Parser
 	public Token previous = null;
 
 	public boolean fileTypeDeclared = false;
+	public boolean ignoreImport = false;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -73,14 +74,7 @@ public class Parser
 		if (match(TokenType.SYMBOL))
 		{
 			String symbol = previous.value;
-			if (!look(0,TokenType.OPERATOR) && !look(0, TokenType.EOF) && !look(0,TokenType.NEWLINE))
-			{
-				return parseFunctionCall(parent, symbol, false);
-			}
-			else
-			{
-				return new ASTVariableUsage(parent, symbol);
-			}
+			return new ASTVariableUsage(parent, symbol);
 		}
 		if (match(TokenType.NUMBER))
 			return new ASTNumber(parent, Integer.parseInt(previous.value));
@@ -88,34 +82,15 @@ public class Parser
 			return new ASTString(parent, previous.value);
 		if (match(TokenType.LPAR))
 		{
-			// Check if we are looking for a function call. //
-			if (match(TokenType.SYMBOL) && !look(0, TokenType.OPERATOR))
+			ASTBase expression = parseExpression(parent);
+			if (match(TokenType.RPAR))
 			{
-				ASTFunctionCall call = parseFunctionCall(parent, previous.value, true);
-
-				if (match(TokenType.RPAR))
-				{
-					return call;
-				}
-				else
-				{
-					syntaxError(")", "Unmatched parenthesis.");
-				}
-
+				return expression;
 			}
 			else
 			{
-				ASTBase expression = parseExpression(parent, true);
-
-				if (match(TokenType.RPAR))
-				{
-					return expression;
-				}
-				else
-				{
-					syntaxError(")", "Unmatched parenthesis.");
-					return null;
-				}
+				syntaxError(")", "Unmatched parenthesis.");
+				return null;
 			}
 		}
 
@@ -123,14 +98,15 @@ public class Parser
 		return null;
 	}
 
-	private ASTFunctionCall parseFunctionCall(ASTParent parent, String name, boolean inPar)
+	private ASTFunctionCall parseFunctionCall(ASTParent parent, ASTBase functionVariableUsage)
 	{
-		ASTFunctionCall functionCall = new ASTFunctionCall(parent, name);
+		ASTFunctionCall functionCall = new ASTFunctionCall(parent, functionVariableUsage);
 
 		// Parse arguments until we find something un-parsable. //
 		while(isPrimary(lookAheads[0].tokenType))
 		{
-			parseExpression(functionCall, inPar);
+			ASTBase left = parsePrimary(parent);
+			parseOpExpression(left, 0, functionCall);
 		}
 		return functionCall;
 	}
@@ -153,15 +129,17 @@ public class Parser
 			int opPrecedence = operatorPrecedenceMap.get(opName);
 			step();
 
+			if (opName.equals("."))
+			{
+				String memberName = lookAheads[0].value;
+				step();
+				left = new ASTMemberAccess(parent, left, memberName);
+				continue;
+			}
+
 			if (opPrecedence >= minPrecedence)
 			{
-				if (opName.equals("."))
-				{
-					String memberName = lookAheads[0].value;
-					step();
-					left = new ASTMemberAccess(parent, left, memberName);
-					break;
-				}
+
 				ASTBase right = parsePrimary(parent);
 				while (look(0, TokenType.OPERATOR) && !look(0, ","))
 				{
@@ -176,6 +154,7 @@ public class Parser
 					}
 					step();
 				}
+
 				left = new ASTOperator(parent, opName, right, left);
 			}
 			else
@@ -183,35 +162,38 @@ public class Parser
 				break;
 			}
 		}
+		left.setParent(parent);
 		return left;
 	}
 
+	private boolean isFunctionCall(ASTBase check)
+	{
+		//previous.tokenType == TokenType.SYMBOL && !Syntax.isKeyword(lookAheads[0].value)
+		return check instanceof ASTVariableUsage || check instanceof  ASTMemberAccess;
+	}
+
 	// FIXME: Add support for strings.
-	private ASTBase parseExpression(ASTParent parent, boolean inPar)
+	private ASTBase parseExpression(ASTParent parent)
 	{
 		if (isPrimary(lookAheads[0].tokenType))
 		{
 			ASTBase left = parsePrimary(parent);
 
-			// Check if we have hit an end. //
-			if (look(0, ",")
-					|| (!inPar && eOLF())
-					|| isPrimary(lookAheads[0].tokenType) // Hmm...
-					|| look(0, TokenType.RPAR)
-					|| look(0, TokenType.LPAR)
-					|| look(0, ":")
-					|| Syntax.isKeyword(lookAheads[0].value))
+			if (look(0, TokenType.OPERATOR))
 			{
-				return left;
+				left = parseOpExpression(left, 0, parent);
 			}
-			else if (look(0, TokenType.OPERATOR))
-			{
-				return parseOpExpression(left, 0, parent);
-			}
+
+			// TODO: Move this check.
+			if (isFunctionCall(left))
+				return parseFunctionCall(parent, left);
 			else
 			{
-				syntaxError("end of expression", "Got garbage!");
+				left.setParent(parent);
+				return left;
 			}
+
+			//syntaxError("end of expression", "Got garbage!");
 		}
 
 		// Garbage is okay if it's just an EOF //
@@ -371,7 +353,7 @@ public class Parser
 			// Filter out any newlines. //
 			while (match(TokenType.NEWLINE));
 
-			ASTBase right = parseExpression(parent, false);
+			ASTBase right = parseExpression(parent);
 			if (right != null)
 				right.setParent(returnExpression);
 
@@ -398,7 +380,7 @@ public class Parser
 				// Try to parse initial value. //
 				if (match("="))
 				{
-					value = parseExpression(parent, false);
+					value = parseExpression(parent);
 
 					if (value == null)
 						return null;
@@ -468,14 +450,14 @@ public class Parser
 					&& !look(2, TokenType.NEWLINE))
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
-				loop.initialStatement = parseExpression(loop, false);
+				loop.initialStatement = parseExpression(loop);
 
 			if (match(","))
 			{
-				loop.conditionalStatement = parseExpression(loop, false);
+				loop.conditionalStatement = parseExpression(loop);
 				if (match(","))
 				{
-					loop.iterationalStatement = parseExpression(loop, false);
+					loop.iterationalStatement = parseExpression(loop);
 				}
 			}
 
@@ -606,7 +588,8 @@ public class Parser
 			return false;
 		}
 
-		astClass.classImports.add(astClass.new ImportDeclaration(packageName, packageSymbols));
+		if (!ignoreImport)
+			astClass.importClass(packageName, packageSymbols);
 		return true;
 	}
 
@@ -654,7 +637,7 @@ public class Parser
 		}
 		else if (match(Syntax.Keyword.IF))
 		{
-			ASTBase condition = parseExpression(parent, false);
+			ASTBase condition = parseExpression(parent);
 
 			new ASTIf(parent, condition);
 			return true;
@@ -714,7 +697,7 @@ public class Parser
 		// Otherwise it's just an expression. //
 		else
 		{
-			ASTBase expression = parseExpression(parent, false);
+			ASTBase expression = parseExpression(parent);
 			if (expression != null)
 			{
 				expression.columnNumber = line_indent;

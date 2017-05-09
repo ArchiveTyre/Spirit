@@ -15,40 +15,21 @@ import compiler.lib.IndentPrinter;
 public class ASTFunctionCall extends ASTParent
 {
 
-	private ASTVariableDeclaration declaration;
-	private ASTFunctionDeclaration functionDeclaration;
 
-	public ASTFunctionCall(ASTParent parent, String name)
+
+	private ASTBase declarationName;
+
+	public ASTFunctionCall(ASTParent parent, ASTBase name)
 	{
-		super(parent, name);
-		//System.out.println("Creating call with name: " + name);
-
-		ASTBase symbol = parent.findSymbol(name);
-		if (symbol instanceof  ASTVariableDeclaration)
-		{
-			declaration = (ASTVariableDeclaration) symbol;
-			if (declaration.getValue() instanceof ASTFunctionDeclaration)
-			{
-				functionDeclaration = (ASTFunctionDeclaration) declaration.getValue();
-			}
-			else
-			{
-				System.err.print("Can't call non-function. ");
-				functionDeclaration = null;
-			}
-		}
-		else
-		{
-			System.err.println("Unknown variable desu~. " + name);
-			declaration = null;
-		}
-
+		super(parent, "");
+		declarationName = name;
+		declarationName.setParent(this);
 	}
 
 	@Override
 	public CherryType getExpressionType()
 	{
-			return functionDeclaration.returnType;
+			return declarationName.getExpressionType();
 	}
 
 	@Override
@@ -60,7 +41,8 @@ public class ASTFunctionCall extends ASTParent
 		{
 			space = "";
 		}
-		destination.print(declaration.name + "(" + space);
+		declarationName.debugSelf(destination);
+		destination.print("(" + space);
 		for (ASTBase arg : childAsts)
 		{
 			arg.debugSelf(destination);

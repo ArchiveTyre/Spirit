@@ -29,7 +29,7 @@ public abstract class ASTParent extends ASTBase
 		// FIXME: More like findVariable!
 
 		for (ASTBase child : childAsts) {
-			if (child.name.equals(symbolName) && (child instanceof ASTVariableDeclaration || child instanceof CherryType)) {
+			if (child.name.equals(symbolName) && (child instanceof ASTFunctionGroup || child instanceof ASTVariableDeclaration || child instanceof CherryType)) {
 				return child;
 			}
 		}
