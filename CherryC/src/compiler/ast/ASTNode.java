@@ -80,4 +80,14 @@ public abstract class ASTNode
 
 	public abstract void compileSelf(LangCompiler compiler);
 
+	/**
+	 * Removes the parent from the
+	 */
+	public void removeSelf()
+	{
+		this.getParent().childAsts.remove(this);
+	}
+
 }
+
+

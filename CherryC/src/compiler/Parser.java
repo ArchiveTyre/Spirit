@@ -256,6 +256,48 @@ public class Parser
 			ASTFunctionDeclaration function =
 					new ASTFunctionDeclaration(variableDeclaration, Builtins.getBuiltin("void"));
 
+			ASTNode overload;
+			// Check if the function already exists. //
+			if ((overload = variableDeclaration.findSymbolInParent(variableDeclaration.getParent(), name)) != null)
+			{
+				// Check that it is a variabledeclaration (can also be function). //
+				if (overload instanceof ASTVariableDeclaration)
+				{
+					ASTVariableDeclaration variable = (ASTVariableDeclaration) overload;
+
+					// Check if it is a function. //
+					if (isFunction(variable))
+					{
+						// Remove the function declaration from the variable declaration. //
+						variableDeclaration.removeSelf();
+
+						// Remove the found overload function. //
+						variable.removeSelf();
+
+						// Create an ASTFunctionGroup, and add the two functions. //
+						ASTFunctionGroup group = new ASTFunctionGroup(parent, name, variable);
+						group.addFunction(variableDeclaration);
+
+					}
+					else if (overload instanceof ASTFunctionGroup)
+					{
+						ASTFunctionGroup group = (ASTFunctionGroup) overload;
+
+						// Remove the variableDeclaration. //
+						variableDeclaration.removeSelf();
+
+						if (group.)
+						group.addFunction(variableDeclaration);
+					}
+					else
+					{
+						// FIXME: Better error message //
+						System.err.println("[RAVEN] ERROR: Cannot have a function with the same name as a variable.");
+					}
+
+				}
+			}
+
 			// Check that we specify the return type of the function (and the parameters). //
 			if (match(Syntax.Op.TYPEDEF))
 			{
@@ -771,6 +813,18 @@ public class Parser
 		System.arraycopy(lookAheads, 1, lookAheads, 0, lookAheads.length - 1);
 		lookAheads[lookAheads.length - 1] = lexer.getToken();
 	}
+
+
+	/**
+	 * Checks if a variable declaration is a function.
+	 * @param var	The variable declaration to check if it is a function.
+	 * @return		If the variable declaration is a function.
+	 */
+	private boolean isFunction(ASTVariableDeclaration var)
+	{
+		return var.childAsts.get(0) instanceof ASTFunctionDeclaration;
+	}
+
 
 	/**
 	 * Matches end of line and and of file.

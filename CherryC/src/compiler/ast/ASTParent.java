@@ -29,7 +29,7 @@ public abstract class ASTParent extends ASTNode
 		// FIXME: More like findVariable!
 
 		for (ASTNode child : childAsts) {
-			if (child.name.equals(symbolName) && (child instanceof ASTVariableDeclaration || child instanceof CherryType)) {
+			if (child.name.equals(symbolName) && (child instanceof ASTVariableDeclaration || child instanceof CherryType || child instanceof ASTFunctionGroup)) {
 				return child;
 			}
 		}
@@ -37,6 +37,29 @@ public abstract class ASTParent extends ASTNode
 		if (getParent() != null)
 			return getParent().findSymbol(symbolName);
 
+		return null;
+	}
+
+	/**
+	 * A recursive search that searches the parent/s for a symbol.
+	 * @param currentParent	This node.
+	 * @param symbolName	The name of the symbol to be found.
+	 * @return				The found symbol, null if none found.
+	 */
+	public ASTNode findSymbolInParent(ASTParent currentParent, String symbolName)
+	{
+		for (ASTNode child : currentParent.childAsts)
+		{
+			if (child.name.equals(symbolName) && !child.equals(this) && (child instanceof ASTVariableDeclaration || child instanceof CherryType || child instanceof ASTFunctionGroup))
+			{
+				return child;
+			}
+		}
+
+		if (currentParent.getParent() != null)
+		{
+			return findSymbolInParent(currentParent.getParent(), symbolName);
+		}
 		return null;
 	}
 

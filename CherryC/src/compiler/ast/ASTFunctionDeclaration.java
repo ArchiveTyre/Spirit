@@ -28,6 +28,7 @@ public class ASTFunctionDeclaration extends ASTParent
 			System.out.println("Defining a nested function.");
 	}
 
+
 	@Override
 	public CherryType getExpressionType()
 	{

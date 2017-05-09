@@ -176,6 +176,8 @@ class ParserTest
 		testClassCompile("Strings1", "a := \"Hello\"");
 		testClassCompile("Strings2", tmpStrPrint + "print \"Hii\"");
 
+		testClassCompile("Function overloading", "fun : (x, y) int = 5\n\nfun : (x, y) string = 10\n\nfun : (x) int = 10");
+
 
 	}
 }
