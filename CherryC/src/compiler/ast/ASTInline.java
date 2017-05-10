@@ -5,7 +5,8 @@ import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 /**
- * Created by david on 5/5/17.
+ * @author david
+ * @date 5/5/17
  */
 public class ASTInline extends ASTBase
 {

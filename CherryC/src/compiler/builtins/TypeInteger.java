@@ -6,7 +6,8 @@ import compiler.ast.ASTBase;
 import java.util.ArrayList;
 
 /**
- * Created by david on 4/12/17.
+ * @author david
+ * @date 4/12/17
  */
 public class TypeInteger implements CherryType
 {

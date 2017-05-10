@@ -5,7 +5,8 @@ import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 /**
- * Created by alex on 5/9/17.
+ * @author Tyrerexus
+ * @date 5/9/17.
  */
 public class ASTFunctionGroup extends ASTParent
 {

@@ -3,7 +3,8 @@ package compiler;
 import java.io.PrintStream;
 
 /**
- * Created by david on 5/5/17.
+ * @author david
+ * @date 5/5/17
  */
 public class ErrorPrint
 {

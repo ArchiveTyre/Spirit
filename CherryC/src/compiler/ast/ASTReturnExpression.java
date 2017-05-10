@@ -5,7 +5,8 @@ import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 /**
- * Created by david on 4/20/17.
+ * @author david
+ * @date 4/20/17
  */
 public class ASTReturnExpression extends ASTParent
 {

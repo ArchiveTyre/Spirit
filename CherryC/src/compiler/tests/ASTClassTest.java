@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * Created by alex on 4/12/17.
+ * @author Tyrerexus
+ * @date 4/12/17.
  */
 class ASTClassTest
 {

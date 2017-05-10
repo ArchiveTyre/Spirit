@@ -11,7 +11,8 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Created by david on 4/12/17.
+ * @author david
+ * @date 4/12/17.
  */
 class LexerTest
 {

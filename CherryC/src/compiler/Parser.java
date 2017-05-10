@@ -106,6 +106,8 @@ public class Parser
 		while(isPrimary(lookAheads[0].tokenType))
 		{
 			ASTBase left = parsePrimary(parent);
+			if (left == null)
+				return null;
 			parseOpExpression(left, 0, functionCall);
 		}
 		return functionCall;

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 /**
  * @author david
- * @date 4/13/17.
+ * @date 4/13/17
  */
 public class TypeFunction implements CherryType
 {

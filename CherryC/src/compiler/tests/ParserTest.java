@@ -65,6 +65,12 @@ class ParserTest
 	}
 
 	@Test
+	void singleTest()
+	{
+		testClassCompile("S", "begin : ()\n\tsomething\nsomething : ()");
+	}
+
+	@Test
 	void firstTest()
 	{
 		String tmpPrint = "print : (something : int)\n";
@@ -116,6 +122,7 @@ class ParserTest
 		testClassCompile("FunCall5", tmpInt + "a : int = (tmp)");
 		testClassCompile("FunCall6", tmpPrint + tmpParam + "print (tmp2 5)");
 		testClassCompile("FunCall7", "d : ( a : int, b : int) = a + b\nm : (a : int, b : string, c : int) int = 42\nm (d 1 2) \"Hi\" 12");
+		testClassCompile("FunCall8", "begin : ()\n\tsomething\nsomething : ()");
 
 		// If statements. //
 		testClassCompile("IfStatement1", tmpPrint + "A := 3\nif A\n\tprint A\n\tprint A + 5\nb := 10");

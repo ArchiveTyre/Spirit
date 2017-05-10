@@ -5,7 +5,8 @@ import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 /**
- * Created by alex on 4/21/17.
+ * @author Tyrerexus
+ * @date 4/21/17.
  */
 public class ASTOperator extends ASTParent
 {
