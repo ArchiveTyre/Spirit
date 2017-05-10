@@ -46,7 +46,7 @@ public class ParserSYM
 		if (type != null)
 			return type;
 
-		return null;
+		throw new RuntimeException("Malformed .sym file. Please delete or fix it!");
 	}
 
 	ArrayList<ASTVariableDeclaration> freeArgs = new ArrayList<>();

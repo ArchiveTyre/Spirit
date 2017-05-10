@@ -37,7 +37,7 @@ public class CompilerCPP extends LangCompiler
 	private boolean isSemicolonless(ASTBase ast)
 	{
 		return ast instanceof ASTIf || ast instanceof ASTLoop || ast instanceof ASTElse
-				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionDeclaration);
+				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionGroup);
 	}
 
 	@Override
@@ -72,13 +72,14 @@ public class CompilerCPP extends LangCompiler
 		{
 			child.compileSelf(this);
 
-			if (child != astClass.childAsts.get(astClass.childAsts.size() - 1))
+			if (child != astClass.lastChild())
 				cppOutput.println(isSemicolonless(child) ? ' ' : ';');
 			else
 				cppOutput.print(isSemicolonless(child) ? ' ' : ';');
 		}
 
-		hppOutput.println("class " + astClass.getName());
+		hppOutput.println("#define " + astClass.getName() + " ___Raw" + astClass.getName() + "*");
+		hppOutput.println("class ___Raw" + astClass.getName());
 		if (astClass.extendsClass != null)
 			hppOutput.print(" : public " + astClass.extendsClass);
 		hppOutput.println("{");
@@ -89,9 +90,11 @@ public class CompilerCPP extends LangCompiler
 			if (child instanceof ASTVariableDeclaration)
 			{
 				ASTVariableDeclaration varChild = (ASTVariableDeclaration)child;
-				if (varChild.getValue() instanceof ASTFunctionDeclaration)
+				if (varChild.getValue() instanceof ASTFunctionGroup)
 				{
-					ASTFunctionDeclaration declaration = (ASTFunctionDeclaration) varChild.getValue();
+					ASTFunctionGroup group = (ASTFunctionGroup) varChild.getValue();
+					ASTFunctionDeclaration declaration = (ASTFunctionDeclaration) group.childAsts.get(0);
+
 					hppOutput.print(declaration.returnType.getTypeName() + " " + varChild.getName() + "(");
 					String args = "";
 					boolean shouldSubstr = false;
@@ -189,16 +192,20 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
 	{
-		cppOutput.print(astFunctionCall.getName() + "(");
+		astFunctionCall.getDeclarationName().compileSelf(this);
+		cppOutput.print("(");
 
-		for (int i = 0; i < astFunctionCall.childAsts.size(); i++)
+		for (ASTBase child : astFunctionCall.childAsts)
 		{
-			ASTBase child = astFunctionCall.childAsts.get(i);
-			child.compileSelf(this);
-
-			if (i != astFunctionCall.childAsts.size() - 1)
-				cppOutput.print(", ");
+			if (astFunctionCall.compileChild(child))
+			{
+				child.compileSelf(this);
+				if (child != astFunctionCall.lastChild())
+					cppOutput.print(", ");
+			}
 		}
+
+
 		cppOutput.print(")");
 	}
 
@@ -208,8 +215,11 @@ public class CompilerCPP extends LangCompiler
 		for (ASTBase node : astFunctionGroup.childAsts)
 		{
 			node.compileSelf(this);
-			cppOutput.println();
-			hppOutput.println();
+			if (node != astFunctionGroup.lastChild())
+			{
+				cppOutput.println();
+				hppOutput.println();
+			}
 		}
 	}
 
@@ -243,14 +253,16 @@ public class CompilerCPP extends LangCompiler
 	}
 
 	@Override
-	public void compileFunctionDeclaration(ASTVariableDeclaration variableDeclaration)
+	public void compileFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration)
 	{
-		ASTFunctionDeclaration declaration = (ASTFunctionDeclaration) variableDeclaration.childAsts.get(0);
-		String funNamespace = variableDeclaration.getParent() instanceof ASTClass ? variableDeclaration.getParent().getName() + "::" : "";
-		cppOutput.print(declaration.returnType.getTypeName() + " " + funNamespace + variableDeclaration.getName() + "(");
+		ASTVariableDeclaration variableDeclaration = (ASTVariableDeclaration)astFunctionDeclaration.getParent().getParent();
+		String funNamespace = variableDeclaration.getParent() instanceof ASTClass
+				? "___Raw" + variableDeclaration.getParent().getName() + "::"
+				: "";
+		cppOutput.print(astFunctionDeclaration.returnType.getTypeName() + " " + funNamespace + variableDeclaration.getName() + "(");
 		String args = "";
 		boolean shouldSubstr = false;
-		for (ASTVariableDeclaration child : declaration.args)
+		for (ASTVariableDeclaration child : astFunctionDeclaration.args)
 		{
 			args += child.getExpressionType().getTypeName() + " " + child.getName() + ", ";
 			shouldSubstr = true;
@@ -261,7 +273,7 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.println(args + ")");
 		cppOutput.println("{");
 		cppOutput.indentation++;
-		for (ASTBase child : declaration.childAsts)
+		for (ASTBase child : astFunctionDeclaration.childAsts)
 		{
 			child.compileSelf(this);
 			cppOutput.println(isSemicolonless(child) ? ' ' : ';');

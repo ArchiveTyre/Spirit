@@ -42,18 +42,18 @@ public class CompilerSYM extends LangCompiler
 	}
 
 	@Override
-	public void compileFunctionDeclaration(ASTVariableDeclaration declaration)
+	public void compileFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration)
 	{
-		ArrayList<ASTVariableDeclaration> args = ((ASTFunctionDeclaration)declaration.getValue()).args;
+		ArrayList<ASTVariableDeclaration> args = astFunctionDeclaration.args;
 		for (ASTVariableDeclaration arg : args)
 		{
 			symOutput.println("Arg: " +
 					arg.getName() + " " +
 					arg.getExpressionType().getTypeName());
 		}
-		CherryType returnType = ((ASTFunctionDeclaration) declaration.getValue()).returnType;
+		CherryType returnType = astFunctionDeclaration.returnType;
 		symOutput.println("Fun: " +
-				declaration.getName() + " " +
+				astFunctionDeclaration.getParent().getName() + " " +
 				returnType.getTypeName());
 	}
 

@@ -14,6 +14,8 @@ public abstract class ASTParent extends ASTBase
 {
 	public ArrayList<ASTBase> childAsts = new ArrayList<>();
 
+	public abstract boolean compileChild(ASTBase child);
+
 	public ASTParent(ASTParent parent, String name)
 	{
 		super(parent, name);
@@ -38,6 +40,11 @@ public abstract class ASTParent extends ASTBase
 			return getParent().findSymbol(symbolName);
 
 		return null;
+	}
+
+	public ASTBase lastChild()
+	{
+		return childAsts.get(childAsts.size() - 1);
 	}
 
 

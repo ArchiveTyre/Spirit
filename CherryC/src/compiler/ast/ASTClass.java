@@ -17,6 +17,12 @@ import java.util.Arrays;
 public class ASTClass extends ASTParent implements CherryType
 {
 
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return true;
+	}
+
 	public class ImportDeclaration
 	{
 		public String importPackage;
@@ -33,10 +39,13 @@ public class ASTClass extends ASTParent implements CherryType
 
 	public String extendsClass = null;
 
+	public boolean ignoreImports = false;
+
 	public void importClass(String importPackage, String[] importSymbols)
 	{
 		classImports.add(new ImportDeclaration(importPackage, importSymbols));
-		FileCompiler.importFile(importPackage + ".raven", (ASTClass)getParent());
+		if (!ignoreImports)
+			FileCompiler.importFile(importPackage + ".raven", (ASTClass)getParent());
 	}
 
 	public ASTClass(String name, ASTParent parent)
@@ -106,7 +115,11 @@ public class ASTClass extends ASTParent implements CherryType
 		{
 			ASTVariableDeclaration parentAsVar = (ASTVariableDeclaration)parent;
 			if (parentAsVar.getValue() instanceof ASTFunctionGroup)
-				return (ASTFunctionGroup)parentAsVar.getValue();
+			{
+				ASTFunctionGroup group = (ASTFunctionGroup)parentAsVar.getValue();
+				return (ASTParent)group.childAsts.get(0);
+			}
+
 		}
 		else if (parent instanceof ASTParent)
 		{

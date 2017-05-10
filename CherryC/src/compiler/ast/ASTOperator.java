@@ -69,4 +69,10 @@ public class ASTOperator extends ASTParent
 	{
 		compiler.compileOperator(this);
 	}
+
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return false;
+	}
 }

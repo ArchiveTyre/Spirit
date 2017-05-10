@@ -16,7 +16,7 @@ public abstract class LangCompiler
 	public abstract void compileVariableUsage(ASTVariableUsage astVariableUsage);
 	public abstract void compileVariableDeclaration(ASTVariableDeclaration astVariableDeclaration);
 	public abstract void compileOperator(ASTOperator astOperator);
-	public abstract void compileFunctionDeclaration(ASTVariableDeclaration declaration);
+	public abstract void compileFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration);
 	public abstract void compileNumber(ASTNumber astNumber);
 	public abstract void compileString(ASTString astString);
 	public abstract void compileReturnExpression(ASTReturnExpression astReturnExpression);

@@ -31,7 +31,7 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public CherryType getExpressionType()
 	{
-		return Builtins.getBuiltin("fun");
+		return Builtins.getBuiltin("function");
 	}
 
 	@Override
@@ -70,6 +70,12 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
-		compiler.compileFunctionDeclaration((ASTVariableDeclaration) this.getParent());
+		compiler.compileFunctionDeclaration(this);
+	}
+
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return true;
 	}
 }

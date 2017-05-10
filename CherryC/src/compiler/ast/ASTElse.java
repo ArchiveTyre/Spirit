@@ -61,4 +61,10 @@ public class ASTElse extends ASTParent
 	{
 		// Do nothing. //
 	}
+
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return true;
+	}
 }

@@ -70,4 +70,10 @@ public class ASTMemberAccess extends ASTParent
 	{
 		compiler.compileMemberAccess(this);
 	}
+
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return false;
+	}
 }

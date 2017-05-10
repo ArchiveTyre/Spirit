@@ -46,13 +46,19 @@ public class ASTVariableDeclaration extends ASTParent
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
-		if (childAsts.get(0) instanceof ASTFunctionDeclaration)
+		if (getValue() instanceof ASTFunctionGroup)
 		{
-			compiler.compileFunctionDeclaration(this);
+			compiler.compileFunctionGroup((ASTFunctionGroup) this.getValue());
 		}
 		else
 		{
 			compiler.compileVariableDeclaration(this);
 		}
+	}
+
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return false;
 	}
 }

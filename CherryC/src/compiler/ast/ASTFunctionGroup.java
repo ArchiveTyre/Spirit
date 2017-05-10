@@ -10,6 +10,12 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTFunctionGroup extends ASTParent
 {
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return true;
+	}
+
 	public ASTFunctionGroup(ASTParent parent, String name)
 	{
 		super(parent, name);

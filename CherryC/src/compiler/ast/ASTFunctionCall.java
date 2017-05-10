@@ -19,6 +19,11 @@ public class ASTFunctionCall extends ASTParent
 
 	private ASTBase declarationName;
 
+	public ASTBase getDeclarationName()
+	{
+		return declarationName;
+	}
+
 	public ASTFunctionCall(ASTParent parent, ASTBase name)
 	{
 		super(parent, "");
@@ -45,10 +50,13 @@ public class ASTFunctionCall extends ASTParent
 		destination.print("(" + space);
 		for (ASTBase arg : childAsts)
 		{
-			arg.debugSelf(destination);
-			if (arg != childAsts.get(childAsts.size() - 1))
+			if (compileChild(arg))
 			{
-				destination.print(", ");
+				arg.debugSelf(destination);
+				if (arg != childAsts.get(childAsts.size() - 1))
+				{
+					destination.print(", ");
+				}
 			}
 		}
 		destination.print(space + ")");
@@ -58,5 +66,11 @@ public class ASTFunctionCall extends ASTParent
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileFunctionCall(this);
+	}
+
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return !(child == declarationName);
 	}
 }
