@@ -79,7 +79,7 @@ class ParserTest
 		String tmpInt = "tmp : () int = 5\n";
 		String tmpParam = "tmp2 : (x) int = x * 2";
 
-		// Empty. //
+		/*// Empty. //
 		testClassCompile("Empty1", "");
 
 		// Test basic assignment. //
@@ -133,7 +133,7 @@ class ParserTest
 		testClassCompile("Loops2", tmpPrint + "loop 10\n\tprint 2");
 		testClassCompile("Loops3", tmpPrint + "loop 6 + 2\n\tprint 2");
 		//testClassCompile("Loops4", "loop 10 as i:\n\tprint! 2");
-
+		*/
 
 		// File type declarations. //
 		testClassCompile(false, "FileType1", "type enum", "");
@@ -174,5 +174,14 @@ class ParserTest
 		// String test. //
 		testClassCompile("Strings1", "a := \"Hello\"");
 		testClassCompile("Strings2", tmpStrPrint + "print \"Hii\"");
+
+
+
+		// Comments test. //
+		testClassCompile("Comments1", "% This is a test\na := 10");
+		testClassCompile("Comments2", "a := 10 % This is a test");
+		testClassCompile("Comments3", "b := 10 <% This\nIs\nA\nTest %>\na := 10");
+		testClassCompile("Comments3", "b := 10 <% This<%\n%>Is\nA\nTest %>\na := 10");
+		testClassCompile("Comments4", "name := \"Godzilla\"\nna<%te\nst%>me = \"Nano\"");
 	}
 }
