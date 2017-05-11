@@ -33,6 +33,16 @@ public abstract class ASTBase
 	 */
 	private ASTParent parent;
 
+	public ASTClass getContainingClass()
+	{
+		ASTParent parent = getParent();
+		while (parent != null && !(parent instanceof ASTClass))
+		{
+			parent = parent.getParent();
+		}
+		return (ASTClass)parent;
+	}
+
 	public String getName()
 	{
 		return name;
@@ -68,16 +78,16 @@ public abstract class ASTBase
 		this.name = name;
 	}
 
-	public abstract CherryType getExpressionType();
-
 	/**
 	 * Prints the AST onto a stream.
 	 *
 	 * When implementing, make sure that the print does not end with a newline.
 	 * @param destination The IndentPrinter on which to print to.
 	 */
-	abstract public void debugSelf(IndentPrinter destination);
+	public abstract void debugSelf(IndentPrinter destination);
 
 	public abstract void compileSelf(LangCompiler compiler);
+
+	public abstract CherryType getExpressionType();
 
 }

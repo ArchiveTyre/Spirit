@@ -17,7 +17,10 @@ public class ASTVariableUsage extends ASTBase
 	public ASTVariableUsage(ASTParent parent, String name)
 	{
 		super(parent, name);
-		declaration = parent.findSymbol(name);
+		if (name.equals("super"))
+			declaration = this.getContainingClass().extendsClassAST;
+		else
+			declaration = parent.findSymbol(name);
 	}
 
 	@Override

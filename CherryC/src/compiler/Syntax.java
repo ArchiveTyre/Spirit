@@ -9,6 +9,11 @@ package compiler;
  */
 public class Syntax
 {
+	public class ReservedFunctions
+	{
+		public static final String CONSTRUCTOR = "init";
+	}
+
 	public class Keyword
 	{
 

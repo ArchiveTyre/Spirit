@@ -1,7 +1,9 @@
 package compiler.backends;
 
+import compiler.CherryType;
 import compiler.LangCompiler;
 import compiler.Main;
+import compiler.Syntax;
 import compiler.ast.*;
 import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
@@ -40,13 +42,20 @@ public class CompilerCPP extends LangCompiler
 				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionGroup);
 	}
 
+	private String getRawName(CherryType targetType)
+	{
+		return "___Raw" + targetType.getTypeName();
+	}
+
 	@Override
 	public void compileClass(ASTClass astClass)
 	{
+
+		/// Include guard. ///
 		hppOutput.println("#pragma once");
 		cppOutput.println("#include \"" + hppLocation + "\"");
 
-		// Compile the imports. //
+		/// Compile the imports. ///
 		{
 			String path = System.getenv(Main.RAVEN_PKG_PATH);
 			if (path == null)
@@ -68,6 +77,19 @@ public class CompilerCPP extends LangCompiler
 			}
 		}
 
+		/// Set up the class declaration. ///
+		hppOutput.println("#define " + astClass.getName() + ' ' + getRawName(astClass) + '*');
+		hppOutput.println("class " + getRawName(astClass));
+
+		if (astClass.extendsClassAST != null)
+			hppOutput.print(" : public " + getRawName(astClass.extendsClassAST));
+		hppOutput.println("{");
+		hppOutput.println("public:");
+		hppOutput.indentation++;
+
+
+		/// Compile members of the class. ///
+
 		for (ASTBase child : astClass.childAsts)
 		{
 			child.compileSelf(this);
@@ -78,13 +100,6 @@ public class CompilerCPP extends LangCompiler
 				cppOutput.print(isSemicolonless(child) ? ' ' : ';');
 		}
 
-		hppOutput.println("#define " + astClass.getName() + " ___Raw" + astClass.getName() + "*");
-		hppOutput.println("class ___Raw" + astClass.getName());
-		if (astClass.extendsClass != null)
-			hppOutput.print(" : public " + astClass.extendsClass);
-		hppOutput.println("{");
-		hppOutput.println("public:");
-		hppOutput.indentation++;
 		for (ASTBase child : astClass.childAsts)
 		{
 			if (child instanceof ASTVariableDeclaration)
@@ -92,7 +107,7 @@ public class CompilerCPP extends LangCompiler
 				ASTVariableDeclaration varChild = (ASTVariableDeclaration)child;
 				if (varChild.getValue() instanceof ASTFunctionGroup)
 				{
-					ASTFunctionGroup group = (ASTFunctionGroup) varChild.getValue();
+				/*	ASTFunctionGroup group = (ASTFunctionGroup) varChild.getValue();
 					ASTFunctionDeclaration declaration = (ASTFunctionDeclaration) group.childAsts.get(0);
 
 					hppOutput.print(declaration.returnType.getTypeName() + " " + varChild.getName() + "(");
@@ -107,6 +122,7 @@ public class CompilerCPP extends LangCompiler
 						args = args.substring(0, args.length() - 2);
 
 					hppOutput.println(args + ");");
+				*/
 				}
 				else
 				{
@@ -118,7 +134,7 @@ public class CompilerCPP extends LangCompiler
 			}
 		}
 		hppOutput.indentation--;
-		hppOutput.println("}");
+		hppOutput.println("};");
 	}
 
 	@Override
@@ -226,7 +242,12 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileVariableUsage(ASTVariableUsage astVariableUsage)
 	{
-		cppOutput.print(astVariableUsage.getName());
+		if (astVariableUsage.getName().equals("super"))
+			cppOutput.print(getRawName(astVariableUsage.getContainingClass().extendsClassAST));
+		else if (astVariableUsage.getName().equals(Syntax.ReservedFunctions.CONSTRUCTOR))
+			cppOutput.print(getRawName(astVariableUsage.getContainingClass()));
+		else
+			cppOutput.print(astVariableUsage.getName());
 	}
 
 	@Override
@@ -252,25 +273,59 @@ public class CompilerCPP extends LangCompiler
 			astOperator.getRightExpression().compileSelf(this);
 	}
 
+	private String createFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration, boolean includeNameSpace)
+	{
+		ASTVariableDeclaration variableDeclaration = (ASTVariableDeclaration)astFunctionDeclaration.getParent().getParent();
+
+		// Get name and namespace. //
+		boolean topLevel = variableDeclaration.getParent() instanceof ASTClass;
+		boolean isConstructor = variableDeclaration.getName().equals(Syntax.ReservedFunctions.CONSTRUCTOR);
+
+		String name = topLevel && isConstructor
+				? getRawName((ASTClass)variableDeclaration.getParent())
+				: variableDeclaration.getName();
+		String funNamespace = topLevel && includeNameSpace
+				? getRawName((ASTClass)variableDeclaration.getParent()) + "::"
+				: "";
+
+		/// Create the declaration. ///
+		StringBuilder declaration = new StringBuilder();
+
+		// The return type
+		declaration.append(isConstructor ? "" : astFunctionDeclaration.returnType.getTypeName() + " ");
+
+		// The name and namespace. //
+		declaration.append(funNamespace + name);
+
+		// The arguments. //
+		declaration.append("(");
+		for (ASTVariableDeclaration child : astFunctionDeclaration.args)
+		{
+			declaration.append(child.getExpressionType().getTypeName() + " " + child.getName());
+			if (child != astFunctionDeclaration.args.get(astFunctionDeclaration.args.size() - 1))
+				declaration.append(", ");
+		}
+		declaration.append(")");
+
+		return declaration.toString();
+	}
+
 	@Override
 	public void compileFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration)
 	{
-		ASTVariableDeclaration variableDeclaration = (ASTVariableDeclaration)astFunctionDeclaration.getParent().getParent();
-		String funNamespace = variableDeclaration.getParent() instanceof ASTClass
-				? "___Raw" + variableDeclaration.getParent().getName() + "::"
-				: "";
-		cppOutput.print(astFunctionDeclaration.returnType.getTypeName() + " " + funNamespace + variableDeclaration.getName() + "(");
-		String args = "";
-		boolean shouldSubstr = false;
-		for (ASTVariableDeclaration child : astFunctionDeclaration.args)
-		{
-			args += child.getExpressionType().getTypeName() + " " + child.getName() + ", ";
-			shouldSubstr = true;
-		}
-		if (shouldSubstr)
-			args = args.substring(0, args.length() - 2);
+		ASTFunctionGroup group = (ASTFunctionGroup) astFunctionDeclaration.getParent();
+		String cppDeclaration = createFunctionDeclaration(astFunctionDeclaration, true);
+		String hppDeclaration = createFunctionDeclaration(astFunctionDeclaration, false);
 
-		cppOutput.println(args + ")");
+		hppOutput.print(hppDeclaration);
+		hppOutput.println(";");
+
+		cppOutput.println(cppDeclaration);
+
+		if (group.isConstructor())
+		{
+
+		}
 		cppOutput.println("{");
 		cppOutput.indentation++;
 		for (ASTBase child : astFunctionDeclaration.childAsts)
@@ -305,8 +360,16 @@ public class CompilerCPP extends LangCompiler
 	public void compileMemberAccess(ASTMemberAccess astMemberAccess)
 	{
 		astMemberAccess.ofObject.compileSelf(this);
-		cppOutput.print("->");
-		cppOutput.print(astMemberAccess.getMember().getName());
+
+		if (astMemberAccess.ofObject instanceof ASTVariableUsage
+		&& ((ASTVariableUsage)astMemberAccess.ofObject).declaration instanceof CherryType)
+			cppOutput.print("::");
+		else
+			cppOutput.print("->");
+		String memberName = astMemberAccess.getMember().getName();
+		if (memberName.equals(Syntax.ReservedFunctions.CONSTRUCTOR))
+			memberName = getRawName(astMemberAccess.ofObject.getExpressionType());
+		cppOutput.print(memberName);
 	}
 
 	@Override

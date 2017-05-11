@@ -38,8 +38,31 @@ public class ASTClass extends ASTParent implements CherryType
 	public ArrayList<ImportDeclaration> classImports = new ArrayList<>();
 
 	public String extendsClass = null;
+	public ASTClass extendsClassAST = null;
 
 	public boolean ignoreImports = false;
+
+	public void extendClass(String className)
+	{
+		extendsClass = className;
+		ASTBase search = this.findSymbol(className);
+		if (search instanceof ASTClass)
+			extendsClassAST = (ASTClass)search;
+	}
+
+	public boolean getConstructorDeclared()
+	{
+		for (ASTBase child : childAsts)
+		{
+			if (child instanceof ASTFunctionGroup)
+			{
+				ASTFunctionGroup group = (ASTFunctionGroup) child;
+				if (group.isConstructor())
+					return true;
+			}
+		}
+		return false;
+	}
 
 	public void importClass(String importPackage, String[] importSymbols)
 	{

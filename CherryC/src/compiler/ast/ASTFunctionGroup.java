@@ -2,6 +2,7 @@ package compiler.ast;
 
 import compiler.CherryType;
 import compiler.LangCompiler;
+import compiler.Syntax;
 import compiler.lib.IndentPrinter;
 
 /**
@@ -10,15 +11,20 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTFunctionGroup extends ASTParent
 {
+	public ASTFunctionGroup(ASTParent parent, String name)
+	{
+		super(parent, name);
+	}
+
+	public boolean isConstructor()
+	{
+		return name.equals(Syntax.ReservedFunctions.CONSTRUCTOR);
+	}
+
 	@Override
 	public boolean compileChild(ASTBase child)
 	{
 		return true;
-	}
-
-	public ASTFunctionGroup(ASTParent parent, String name)
-	{
-		super(parent, name);
 	}
 
 	@Override

@@ -516,7 +516,7 @@ public class Parser
 		{
 			if (match(TokenType.SYMBOL))
 			{
-				astClass.extendsClass = previous.value;
+				astClass.extendClass(previous.value);
 				return true;
 			}
 			else

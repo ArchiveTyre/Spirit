@@ -40,6 +40,8 @@ public class FileCompiler
 		try
 		{
 			ASTClass loadedClass = loadClassAST(fileName, parent);
+			new Polisher().polishClass(loadedClass);
+
 			loadedClass.debugSelf(printer);
 			printer.println();
 
