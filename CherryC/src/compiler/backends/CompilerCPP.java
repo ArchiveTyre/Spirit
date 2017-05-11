@@ -79,10 +79,11 @@ public class CompilerCPP extends LangCompiler
 
 		/// Set up the class declaration. ///
 		hppOutput.println("#define " + astClass.getName() + ' ' + getRawName(astClass) + '*');
-		hppOutput.println("class " + getRawName(astClass));
+		hppOutput.print("class " + getRawName(astClass));
 
 		if (astClass.extendsClassAST != null)
 			hppOutput.print(" : public " + getRawName(astClass.extendsClassAST));
+		hppOutput.println();
 		hppOutput.println("{");
 		hppOutput.println("public:");
 		hppOutput.indentation++;
@@ -322,16 +323,34 @@ public class CompilerCPP extends LangCompiler
 
 		cppOutput.println(cppDeclaration);
 
+		ASTFunctionCall listInit = null;
 		if (group.isConstructor())
 		{
-
+			cppOutput.print(":");
+			cppOutput.print(getRawName(astFunctionDeclaration.getContainingClass().extendsClassAST));
+			cppOutput.print("(");
+			listInit = (ASTFunctionCall) astFunctionDeclaration.childAsts.get(0);
+			for (ASTBase child : listInit.childAsts)
+			{
+				if (listInit.compileChild(child))
+				{
+					child.compileSelf(this);
+					if (child != listInit.lastChild())
+						cppOutput.print(", ");
+				}
+			}
+			cppOutput.println(")");
 		}
+
 		cppOutput.println("{");
 		cppOutput.indentation++;
 		for (ASTBase child : astFunctionDeclaration.childAsts)
 		{
-			child.compileSelf(this);
-			cppOutput.println(isSemicolonless(child) ? ' ' : ';');
+			if (child != listInit)
+			{
+				child.compileSelf(this);
+				cppOutput.println(isSemicolonless(child) ? ' ' : ';');
+			}
 		}
 		cppOutput.indentation--;
 		cppOutput.println("}");
