@@ -76,12 +76,14 @@ public class Syntax
 			public static final String DEC	= "--"	;
 		}
 
-		public static final String 	ACCESS	=	"."	;
-		public static final String 	TYPEDEF	= 	":"	;
-		public static final String 	FUNCVAL	= 	"=" ;
-		public static final String 	MAP		= 	"=>";
-		public static final String 	ARG_SEP	=	","	;
-		public static final char 	MACRO =	'#'	;
+		public static final String 	ACCESS				=	"."		;
+		public static final String 	TYPEDEF				= 	":"		;
+		public static final String 	FUNCVAL 			= 	"=" 	;
+		public static final String 	MAP					= 	"=>"	;
+		public static final String 	ARG_SEP				=	","		;
+		public static final String 	BLOCK_COMMENT_START	=	"<%"	;
+		public static final String	BLOCK_COMMENT_END	=	"%>"	;
+		public static final char	INLINE_COMMENT		=	'%'		;
 
 
 	}
@@ -109,11 +111,6 @@ public class Syntax
 
 	}
 
-	public class Macro
-	{
-		public static final String BACKEND	=	"backend";
-
-	}
 
 
 	public static boolean isKeyword(String string)

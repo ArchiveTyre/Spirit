@@ -79,6 +79,16 @@ public class Lexer
 		while (c == ' ' || c == '\t' || c == '\n')
 			c = readChar();
 
+
+// Check a bunch of single char tokens. //
+		if (c == '\n' && parenthesesCount == 0)
+		{
+			return new Token("\n", Token.TokenType.NEWLINE, columnNumber, lineNumber);
+		}
+
+		while (c == ' ' || c == '\t' || c == '\n')
+			c = readChar();
+
 		if (c == '(')
 		{
 			++parenthesesCount;
@@ -139,6 +149,23 @@ public class Lexer
 			return new Token(string.toString(), Token.TokenType.STRING, columnNumber, lineNumber);
 		}
 
+		// Check if we are reading an inline comment. //
+		else if (c == Syntax.Op.INLINE_COMMENT)
+		{
+			// Ignore the rest of the line. //
+			do
+			{
+				c = readChar();
+			} while (c != '\n' && c != -1);
+
+			// Since we just read one char (too much), we unget it. //
+			unReadChar(c);
+
+
+			return getToken();
+		}
+
+
 		// Otherwise it's an operator. //
 		else
 		{
@@ -156,13 +183,13 @@ public class Lexer
 
 	private int readChar()
 	{
-		int character;
+		int c;
 
 		try
 		{
-			character =  input.read();
+			c =  input.read();
 
-			if (character == '\n')
+			if (c == '\n')
 			{
 				lineNumber++;
 				columnNumber = 0;
@@ -171,12 +198,73 @@ public class Lexer
 		}
 		catch (IOException e)
 		{
-			character = -1;
+			c = -1;
 			e.printStackTrace();
 		}
 
 
-		return character;
+		// Check if we are reading a block comment. //
+		if (c == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[0])
+		{
+			int lastChar = c;
+			c = readChar();
+
+
+			// Check if we have read a block comment (this assumes that the block comment is 2 chars in length. //
+			if (c == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[1])
+			{
+				int nestedLevel = 1;
+				while (nestedLevel != 0)
+				{
+					c = readChar();
+
+					if (c == -1)
+					{
+						return -1;
+					}
+
+					if (c == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[0])
+					{
+						int lastSChar = c;
+						c = readChar();
+						if (c == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[1])
+						{
+							nestedLevel++;
+						}
+						else
+						{
+							unReadChar(lastSChar);
+							unReadChar(c);
+						}
+
+					}
+
+					if (c == Syntax.Op.BLOCK_COMMENT_END.toCharArray()[0])
+					{
+						c = readChar();
+						int lastEndChar = c;
+						if (c == Syntax.Op.BLOCK_COMMENT_END.toCharArray()[1])
+						{
+							nestedLevel--;
+						}
+						else
+						{
+							unReadChar(lastEndChar);
+							unReadChar(c);
+						}
+					}
+				}
+				c = readChar();
+			}
+			else
+			{
+				unReadChar(c);
+				c = readChar();
+			}
+		}
+
+
+		return c;
 
 
 	}

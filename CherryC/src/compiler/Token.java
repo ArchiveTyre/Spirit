@@ -20,6 +20,8 @@ public class Token
 		RPAR,
 		EOF,
 		INLINE,
+		COMMENT_INLINE,
+		COMMENT_BLOCK,
 	}
 
 	public String value;
