@@ -136,6 +136,20 @@ public class CompilerCPP extends LangCompiler
 		}
 		hppOutput.indentation--;
 		hppOutput.println("};");
+
+		// If this is the main class. //
+		if (astClass.getName().equals("Main"))
+		{
+			cppOutput.println();
+			cppOutput.println("int main () ");
+			cppOutput.println("{");
+			cppOutput.indentation++;
+			cppOutput.println("Main main = new ___RawMain();");
+			cppOutput.println("main->main();");
+			cppOutput.println("return 0;");
+			cppOutput.indentation--;
+			cppOutput.println("}");
+		}
 	}
 
 	@Override

@@ -50,7 +50,11 @@ public class Main
 
 		ASTClass root = new ASTClass("root", null);
 		ASTClass objectClass = new ASTClass("object", root);
-		new Polisher().polishClassCreateConstructor(objectClass);
+
+		Polisher polishObject = new Polisher(objectClass);
+		polishObject.polishClassCreateConstructor();
+		polishObject.forceConstructorsCallSuper();
+
 		for (String file : fileNames)
 		{
 			FileCompiler.importFile(file, root);

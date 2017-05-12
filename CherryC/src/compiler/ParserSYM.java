@@ -98,7 +98,8 @@ public class ParserSYM
 				String name = grab();
 				CherryType cherryType = parseType(dest);
 				ASTVariableDeclaration varDecl = new ASTVariableDeclaration(dest, name, Builtins.getBuiltin("function"), null);
-				ASTFunctionDeclaration fun = new ASTFunctionDeclaration(varDecl, cherryType);
+				ASTFunctionGroup group = new ASTFunctionGroup(varDecl, name);
+				ASTFunctionDeclaration fun = new ASTFunctionDeclaration(group, cherryType);
 				fun.args = freeArgs;
 				freeArgs = new ArrayList<>();
 				//for (ASTVariableDeclaration var : fun.args)

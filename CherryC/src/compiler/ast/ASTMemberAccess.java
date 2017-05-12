@@ -20,6 +20,7 @@ public class ASTMemberAccess extends ASTParent
 	{
 		return member;
 	}
+	public String getMemberName() { return memberName;}
 
 	public ASTMemberAccess(ASTParent parent, ASTBase ofObject, String memberName)
 	{

@@ -54,9 +54,10 @@ public class ASTClass extends ASTParent implements CherryType
 	{
 		for (ASTBase child : childAsts)
 		{
-			if (child instanceof ASTFunctionGroup)
+			if (child instanceof ASTVariableDeclaration
+					&&((ASTVariableDeclaration) child).isFunctionDeclaration())
 			{
-				ASTFunctionGroup group = (ASTFunctionGroup) child;
+				ASTFunctionGroup group = (ASTFunctionGroup) ((ASTVariableDeclaration) child).getValue();
 				if (group.isConstructor())
 					return true;
 			}
