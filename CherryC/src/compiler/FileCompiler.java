@@ -1,11 +1,6 @@
 package compiler;
 
-import compiler.LangCompiler;
-import compiler.Lexer;
-import compiler.Parser;
-import compiler.ParserSYM;
 import compiler.ast.ASTClass;
-import compiler.ast.ASTParent;
 import compiler.backends.CompilerCPP;
 import compiler.backends.CompilerSYM;
 import compiler.lib.IndentPrinter;
@@ -13,9 +8,14 @@ import compiler.lib.IndentPrinter;
 import java.io.*;
 
 /**
- * @author david
+ * This class compiles files written in our language.
+ * It loads the file into AST and then creates a LangCompiler to compile it.
+ * It also creates .sym files to cache the result.
+ *
+ * @author david, Tyrereuxs
  * @date 4/12/17.
  */
+@SuppressWarnings("UnusedReturnValue")
 public class FileCompiler
 {
 	private static String getSymFileName(String fileName)
@@ -24,22 +24,23 @@ public class FileCompiler
 	}
 
 	/**
-	 *
-	 * @param fileName
-	 * @return
+	 * Imports/compiles/loads the file into parent.
+	 * @param fileName The file to import/compile/load
+	 * @return The loaded class.
 	 */
 	public static ASTClass importFile(String fileName, ASTClass parent)
 	{
-		/*
-		String[] splitFileName = fileName.split("\\.");
-		String className = splitFileName[0];
-		*/
-
 		IndentPrinter printer = new IndentPrinter(System.out);
 
 		try
 		{
 			ASTClass loadedClass = loadClassAST(fileName, parent);
+			if (loadedClass == null)
+			{
+				System.err.println("ERROR: Could no load AST of " + fileName);
+				return null;
+			}
+
 			new Polisher(loadedClass).polishClass();
 
 			loadedClass.debugSelf(printer);
@@ -100,7 +101,9 @@ public class FileCompiler
 		{
 			Lexer lexer = new Lexer(new PushbackInputStream(new FileInputStream(getSymFileName(fileName))), fileName);
 			ParserSYM parserSYM = new ParserSYM(lexer);
-			parserSYM.parseFile(dest);
+			if (!parserSYM.parseFile(dest))
+				return null;
+
 		}
 
 		return dest;
@@ -132,13 +135,4 @@ public class FileCompiler
 		// If we changed the source file since the last compile, then we need to recompile. //
 		return (sourceFile.lastModified() > symFile.lastModified());
 	}
-
-	/*
-	new Cow
-		[Name: "Hello"
-		Health: ""]
-
-	a := Cow.new "Daisy" ""
-	cow := new Cow 25 10
-	*/
 }

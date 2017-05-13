@@ -7,16 +7,14 @@ import compiler.backends.CompilerSYM;
 import compiler.lib.IndentPrinter;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * @author Tyrerexus
  * @date 5/4/17.
  */
 class CompilerSYMTest
 {
-
-	void test(String fileName, String source)
+	@SuppressWarnings("SameParameterValue")
+	private void test(String fileName, String source)
 	{
 		Lexer lexer = new Lexer(source, fileName);
 		Parser parser = new Parser(lexer);

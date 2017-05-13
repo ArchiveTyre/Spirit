@@ -11,7 +11,7 @@ import compiler.lib.IndentPrinter;
 public class ASTInline extends ASTBase
 {
 
-	String code;
+	public String code;
 	public ASTInline(ASTParent parent, String code)
 	{
 		super(parent);

@@ -5,24 +5,38 @@ import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 /**
+ * Defines a simple conditional statement, "if".
+ * Can also have an attached "elseStatement".
+ *
  * @author Tyrerexus
  * @date 4/13/17.
  */
 public class ASTIf extends ASTParent
 {
+	/**
+	 * The condition to check against.
+	 */
 	private ASTBase condition;
+
+	/**
+	 * Optionally attached "else" statement.
+	 */
 	public ASTElse elseStatement = null;
+
+	/**
+	 * Getter for condition to check against.
+	 * @return The condition to check against.
+	 */
+	public ASTBase getCondition()
+	{
+		return condition;
+	}
 
 	public ASTIf(ASTParent parent, ASTBase condition)
 	{
 		super(parent, "");
 		this.condition = condition;
 		condition.setParent(this);
-	}
-
-	public ASTBase getCondition()
-	{
-		return condition;
 	}
 
 	@Override

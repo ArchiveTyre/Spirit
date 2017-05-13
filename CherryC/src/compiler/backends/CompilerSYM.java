@@ -11,6 +11,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 
 /**
+ * Compiles an AST into a .sym file.
+ *
  * @author Tyrerexus
  * @date 5/4/17.
  */

@@ -33,21 +33,28 @@ public abstract class ASTBase
 	 */
 	private ASTParent parent;
 
-	public ASTClass getContainingClass()
-	{
-		ASTParent parent = getParent();
-		while (parent != null && !(parent instanceof ASTClass))
-		{
-			parent = parent.getParent();
-		}
-		return (ASTClass)parent;
-	}
-
+	/**
+	 * Getter for name.
+	 * @return The current name of this AST node.
+	 */
 	public String getName()
 	{
 		return name;
 	}
 
+	/**
+	 * Getter for parent.
+	 * @return The current parent of this AST node.
+	 */
+	public ASTParent getParent()
+	{
+		return parent;
+	}
+
+	/**
+	 * Setter for parent.
+	 * @param newParent The new parent.
+	 */
 	public void setParent(ASTParent newParent)
 	{
 		if (this.parent != null)
@@ -58,9 +65,18 @@ public abstract class ASTBase
 
 	}
 
-	public ASTParent getParent()
+	/**
+	 * Returns the first class it finds by traversing through the parents.
+	 * @return The found class that contains this AST node.
+	 */
+	public ASTClass getContainingClass()
 	{
-		return parent;
+		ASTParent parent = getParent();
+		while (parent != null && !(parent instanceof ASTClass))
+		{
+			parent = parent.getParent();
+		}
+		return (ASTClass)parent;
 	}
 
 	public ASTBase(ASTParent parent)
@@ -86,8 +102,16 @@ public abstract class ASTBase
 	 */
 	public abstract void debugSelf(IndentPrinter destination);
 
+	/**
+	 * Calls appropriate function in the compiler for compiling this AST node.
+	 * @param compiler The compiler to call.
+	 */
 	public abstract void compileSelf(LangCompiler compiler);
 
+	/**
+	 * Returns the expression type of this AST node.
+	 * @return The CherrType that represents this AST node.
+	 */
 	public abstract CherryType getExpressionType();
 
 }

@@ -10,9 +10,10 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTVariableUsage extends ASTBase
 {
-
+	/**
+	 * The path to the declaration.
+	 */
 	public ASTBase declaration;
-
 
 	public ASTVariableUsage(ASTParent parent, String name)
 	{

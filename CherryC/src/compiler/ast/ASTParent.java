@@ -12,9 +12,10 @@ import java.util.ArrayList;
  */
 public abstract class ASTParent extends ASTBase
 {
+	/**
+	 * A list of all the ast nodes in this ast node.
+	 */
 	public ArrayList<ASTBase> childAsts = new ArrayList<>();
-
-	public abstract boolean compileChild(ASTBase child);
 
 	public ASTParent(ASTParent parent, String name)
 	{
@@ -42,11 +43,19 @@ public abstract class ASTParent extends ASTBase
 		return null;
 	}
 
+	/**
+	 * Returns the last child of this parent.
+	 * @return The last child of this parent.
+	 */
 	public ASTBase lastChild()
 	{
 		return childAsts.get(childAsts.size() - 1);
 	}
 
-
-
+	/**
+	 * Returns true if we should compile this child.
+	 * @param child The child to test against.
+	 * @return Returns true if child should be compiled.
+	 */
+	public abstract boolean compileChild(ASTBase child);
 }

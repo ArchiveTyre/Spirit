@@ -8,12 +8,17 @@ import compiler.lib.IndentPrinter;
 /**
  * Puts a number into an AST.
  *
+ * TODO: Support more than just integers in size.
+ *
  * @author Tyrerexus
  * @date 4/12/17.
  */
 public class ASTNumber extends ASTBase
 {
 
+	/**
+	 * The value of this number.
+	 */
 	public int value;
 
 	public ASTNumber(ASTParent parent, int value)

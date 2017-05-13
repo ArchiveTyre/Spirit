@@ -1,8 +1,5 @@
 package compiler;
 
-import compiler.CherryType;
-import compiler.Lexer;
-import compiler.Token;
 import compiler.ast.*;
 import compiler.builtins.Builtins;
 
@@ -16,10 +13,12 @@ import static compiler.Token.TokenType;
  * @author Tyrerexus
  * @date 5/4/17.
  */
+@SuppressWarnings({"StatementWithEmptyBody", "SameParameterValue"})
 public class ParserSYM
 {
-	Lexer lexer;
+	private Lexer lexer;
 	private Token[] lookAheads = new Token[3];
+	private ArrayList<ASTVariableDeclaration> freeArgs = new ArrayList<>();
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -49,9 +48,7 @@ public class ParserSYM
 		throw new RuntimeException("Malformed .sym file. Please delete or fix it!");
 	}
 
-	ArrayList<ASTVariableDeclaration> freeArgs = new ArrayList<>();
-
-	public boolean parseLine(ASTClass dest)
+	private boolean parseLine(ASTClass dest)
 	{
 		// Skip any empty lines.
 		if (match(Token.TokenType.NEWLINE))

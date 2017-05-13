@@ -8,15 +8,13 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * @author david
  * @date 4/12/17.
  */
 class LexerTest
 {
-	void testForTokens(String testString, String[] tokens)
+	private void testForTokens(String testString, String[] tokens)
 	{
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 class ASTClassTest
 {
 
+	@SuppressWarnings("SameParameterValue")
 	private ASTNumber createChild(ASTClass parent, int indentation_level)
 	{
 		ASTNumber child = new ASTNumber(parent.getParentForNewCode(indentation_level), 42);

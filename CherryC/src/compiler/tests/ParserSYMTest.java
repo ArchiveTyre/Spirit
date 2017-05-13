@@ -6,15 +6,13 @@ import compiler.ast.ASTClass;
 import compiler.lib.IndentPrinter;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * @author Tyrerexus
  * @date 5/4/17.
  */
 class ParserSYMTest
 {
-	void test(String source)
+	private void test(String source)
 	{
 		Lexer lexer = new Lexer(source, "Test");
 		ParserSYM parseSYM = new ParserSYM(lexer);

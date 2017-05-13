@@ -13,8 +13,6 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * @author Tyrerexus
  * @date 28/04/17.
@@ -22,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CompilerCPPTest
 {
 
-	void testCompiler(String testName, String testString)
+	private void testCompiler(String testName, String testString)
 	{
 		System.out.println("=== " + testName + " ===");
 

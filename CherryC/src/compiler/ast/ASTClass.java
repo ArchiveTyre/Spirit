@@ -16,32 +16,53 @@ import java.util.Arrays;
  */
 public class ASTClass extends ASTParent implements CherryType
 {
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return true;
-	}
-
+	/**
+	 * A class representing an import.
+	 */
 	public class ImportDeclaration
 	{
+		/** The package name. */
 		public String importPackage;
+
+		/** The symbols that we wish to import from the package. */
 		public String[] importSymbols;
 
-		public ImportDeclaration(String importPackage, String[] importSymbols)
+		private ImportDeclaration(String importPackage, String[] importSymbols)
 		{
 			this.importPackage = importPackage;
 			this.importSymbols = importSymbols;
 		}
 	}
 
+	/**
+	 * A list of packages to import.
+	 */
 	public ArrayList<ImportDeclaration> classImports = new ArrayList<>();
 
+	/**
+	 * The name of the class we are extending.
+	 */
 	public String extendsClass = null;
+
+	/**
+	 * The result of <code>this.findSymbol(extendsClass)</code>.
+	 */
 	public ASTClass extendsClassAST = null;
 
+	/**
+	 * When importing should we compile the thing that we are importing?
+	 */
 	public boolean ignoreImports = false;
 
+	public ASTClass(String name, ASTParent parent)
+	{
+		super(parent, name);
+	}
+
+	/**
+	 * Makes the class extend another class by name.
+	 * @param className The name of the class to extend.
+	 */
 	public void extendClass(String className)
 	{
 		extendsClass = className;
@@ -50,6 +71,10 @@ public class ASTClass extends ASTParent implements CherryType
 			extendsClassAST = (ASTClass)search;
 	}
 
+	/**
+	 * Checks whether there is a constructor in the class.
+	 * @return True if there is a constructor.
+	 */
 	public boolean getConstructorDeclared()
 	{
 		for (ASTBase child : childAsts)
@@ -65,41 +90,17 @@ public class ASTClass extends ASTParent implements CherryType
 		return false;
 	}
 
+	/**
+	 * Adds a package to the import list.
+	 * Then it imports it if ignoreImports is set to false.
+	 * @param importPackage The package name.
+	 * @param importSymbols A list of stuff to  be imported from it.
+	 */
 	public void importClass(String importPackage, String[] importSymbols)
 	{
 		classImports.add(new ImportDeclaration(importPackage, importSymbols));
 		if (!ignoreImports)
 			FileCompiler.importFile(importPackage + ".raven", (ASTClass)getParent());
-	}
-
-	public ASTClass(String name, ASTParent parent)
-	{
-		super(parent, name);
-	}
-
-	@Override
-	public CherryType getExpressionType()
-	{
-		return this;
-	}
-
-	@Override
-	public void debugSelf(IndentPrinter to)
-	{
-		for (ImportDeclaration declaration : classImports)
-		{
-			to.println("from " + declaration.importPackage + " import " + Arrays.toString(declaration.importSymbols));
-		}
-		to.println(name);
-		to.println("{");
-		to.indentation++;
-		for (ASTBase child : childAsts)
-		{
-			child.debugSelf(to);
-			to.println("");
-		}
-		to.indentation--;
-		to.print("}");
 	}
 
 	/**
@@ -171,5 +172,36 @@ public class ASTClass extends ASTParent implements CherryType
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileClass(this);
+	}
+
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return true;
+	}
+
+	@Override
+	public CherryType getExpressionType()
+	{
+		return this;
+	}
+
+	@Override
+	public void debugSelf(IndentPrinter to)
+	{
+		for (ImportDeclaration declaration : classImports)
+		{
+			to.println("from " + declaration.importPackage + " import " + Arrays.toString(declaration.importSymbols));
+		}
+		to.println(name);
+		to.println("{");
+		to.indentation++;
+		for (ASTBase child : childAsts)
+		{
+			child.debugSelf(to);
+			to.println("");
+		}
+		to.indentation--;
+		to.print("}");
 	}
 }

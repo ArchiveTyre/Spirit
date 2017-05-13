@@ -5,21 +5,38 @@ import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 /**
+ * Defines a operator usage in the ast. <br>
+ * Example: 32 * 42
+ *
  * @author Tyrerexus
  * @date 4/21/17.
  */
 public class ASTOperator extends ASTParent
 {
 
+	/**
+	 * Right hand side of the operator
+	 */
+	private ASTBase rightExpression;
 
-	ASTBase rightExpression;
-	ASTBase leftExpression;
+	/**
+	 * Left hand side of the operator.
+	 */
+	private ASTBase leftExpression;
 
+	/**
+	 * Getter for rightExpression.
+	 * @return Returns the right hand side of the operator.
+	 */
 	public ASTBase getRightExpression()
 	{
 		return rightExpression;
 	}
 
+	/**
+	 * Getter for leftExpression.
+	 * @return Returns the left hand side of the operator.
+	 */
 	public ASTBase getLeftExpression()
 	{
 		return leftExpression;

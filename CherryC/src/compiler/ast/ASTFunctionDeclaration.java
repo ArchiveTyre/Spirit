@@ -8,15 +8,30 @@ import compiler.lib.IndentPrinter;
 import java.util.ArrayList;
 
 /**
+ * A function declaration.
+ * Contained in a ASTFunctionGroup that is contained in a ASTVariableDeclaration.
+ *
  * @author Tyrerexus
  * @date 4/12/17.
  */
 public class ASTFunctionDeclaration extends ASTParent
 {
 
+	/**
+	 * The arguments that are needed to call this function.
+	 */
 	public ArrayList<ASTVariableDeclaration> args = new ArrayList<>();
+
+	/**
+	 * The return type of this function.
+	 */
 	public CherryType returnType;
 
+	/**
+	 * If the function is nested.
+	 *
+	 * Set in the constructor.
+	 */
 	private boolean isNestedFunction;
 
 	public ASTFunctionDeclaration(ASTParent parent, CherryType returnType)
@@ -42,7 +57,7 @@ public class ASTFunctionDeclaration extends ASTParent
 		destination.print("(");
 		for (ASTVariableDeclaration arg : args)
 		{
-			destination.print(arg.name + " : " + arg.type.getTypeName());
+			destination.print(arg.name + " : " + arg.getExpressionType().getTypeName());
 			if (arg != args.get(args.size() - 1))
 				destination.print(", ");
 		}

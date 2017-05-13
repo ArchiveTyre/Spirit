@@ -7,6 +7,7 @@ package compiler;
  * @author david
  * @date 4/11/17.
  */
+@SuppressWarnings("ALL") // TODO: This is dangerous...
 public class Syntax
 {
 	public class ReservedFunctions

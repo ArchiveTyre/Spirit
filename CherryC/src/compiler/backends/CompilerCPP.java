@@ -11,6 +11,8 @@ import compiler.lib.PathFind;
 import java.io.*;
 
 /**
+ * Compiles an AST into C++ code.
+ *
  * @author Tyrerexus
  * @date 28/04/17.
  */
@@ -106,26 +108,7 @@ public class CompilerCPP extends LangCompiler
 			if (child instanceof ASTVariableDeclaration)
 			{
 				ASTVariableDeclaration varChild = (ASTVariableDeclaration)child;
-				if (varChild.getValue() instanceof ASTFunctionGroup)
-				{
-				/*	ASTFunctionGroup group = (ASTFunctionGroup) varChild.getValue();
-					ASTFunctionDeclaration declaration = (ASTFunctionDeclaration) group.childAsts.get(0);
-
-					hppOutput.print(declaration.returnType.getTypeName() + " " + varChild.getName() + "(");
-					String args = "";
-					boolean shouldSubstr = false;
-					for (ASTVariableDeclaration childArg : declaration.args)
-					{
-						args += childArg.getExpressionType().getTypeName() + " " + childArg.getName() + ", ";
-						shouldSubstr = true;
-					}
-					if (shouldSubstr)
-						args = args.substring(0, args.length() - 2);
-
-					hppOutput.println(args + ");");
-				*/
-				}
-				else
+				if (!(varChild.getValue() instanceof ASTFunctionGroup))
 				{
 					hppOutput.print(varChild.getExpressionType().getTypeName());
 					hppOutput.print(" ");
@@ -257,12 +240,18 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileVariableUsage(ASTVariableUsage astVariableUsage)
 	{
-		if (astVariableUsage.getName().equals("super"))
-			cppOutput.print(getRawName(astVariableUsage.getContainingClass().extendsClassAST));
-		else if (astVariableUsage.getName().equals(Syntax.ReservedFunctions.CONSTRUCTOR))
-			cppOutput.print(getRawName(astVariableUsage.getContainingClass()));
-		else
-			cppOutput.print(astVariableUsage.getName());
+		switch (astVariableUsage.getName())
+		{
+			case "super":
+				cppOutput.print(getRawName(astVariableUsage.getContainingClass().extendsClassAST));
+				break;
+			case Syntax.ReservedFunctions.CONSTRUCTOR:
+				cppOutput.print(getRawName(astVariableUsage.getContainingClass()));
+				break;
+			default:
+				cppOutput.print(astVariableUsage.getName());
+				break;
+		}
 	}
 
 	@Override
@@ -307,16 +296,23 @@ public class CompilerCPP extends LangCompiler
 		StringBuilder declaration = new StringBuilder();
 
 		// The return type
-		declaration.append(isConstructor ? "" : astFunctionDeclaration.returnType.getTypeName() + " ");
+		if (!isConstructor)
+		{
+			declaration.append(astFunctionDeclaration.returnType.getTypeName());
+			declaration.append(' ');
+		}
 
 		// The name and namespace. //
-		declaration.append(funNamespace + name);
+		declaration.append(funNamespace);
+		declaration.append(name);
 
 		// The arguments. //
 		declaration.append("(");
 		for (ASTVariableDeclaration child : astFunctionDeclaration.args)
 		{
-			declaration.append(child.getExpressionType().getTypeName() + " " + child.getName());
+			declaration.append(child.getExpressionType().getTypeName());
+			declaration.append(' ');
+			declaration.append(child.getName());
 			if (child != astFunctionDeclaration.args.get(astFunctionDeclaration.args.size() - 1))
 				declaration.append(", ");
 		}
@@ -405,6 +401,7 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.print(memberName);
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Override
 	public void createFileStreams(String fileName)
 	{

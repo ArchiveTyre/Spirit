@@ -1,5 +1,6 @@
 package compiler;
 
+import com.sun.istack.internal.Nullable;
 import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
@@ -12,20 +13,37 @@ import static compiler.Token.TokenType;
 /**
  * This class uses a Lexer to build an AST.
  *
- * @author Tyrerexus
+ * @author Tyrerexus, david
  * @date 4/11/17.
  */
 @SuppressWarnings("StatementWithEmptyBody")
 public class Parser
 {
-
-	/** The lexer to read from. */
+	/**
+	 * The lexer to read from.
+	 */
 	public Lexer lexer;
-	private Token[] lookAheads = new Token[3];
-	public Token previous = null;
 
+	/**
+	 * Set to true if the file type gets declared.
+	 */
 	public boolean fileTypeDeclared = false;
+
+	/**
+	 * if we should ignoreImports.
+	 */
 	public boolean ignoreImport = false;
+
+	/**
+	 * Look ahead for the next few tokens.
+	 */
+	private Token[] lookAheads = new Token[3];
+
+	/**
+	 * The previous token.
+	 * Set after something calls {@link #step()}
+	 */
+	private Token previous = null;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -40,6 +58,9 @@ public class Parser
 		}
 	}
 
+	/**
+	 * A list of the precedence values for each operator.
+	 */
 	private static final HashMap<String, Integer> operatorPrecedenceMap = new HashMap<String, Integer>(){{
 		// FIXME: Complete the map!
 
@@ -59,16 +80,32 @@ public class Parser
 		put("/",  4);
 	}};
 
+	/**
+	 * Returns true if the token is a fundamental type.
+	 * @param tokenType The token to check against.
+	 * @return True if the token is a fundamental type.
+	 */
 	private boolean isFundamental(TokenType tokenType)
 	{
 		return tokenType == TokenType.SYMBOL || tokenType == TokenType.NUMBER || tokenType == TokenType.STRING;
 	}
 
+	/**
+	 * Returns true if token is a primary type.
+	 * A primary type is either a fundamental type or a parentheses.
+	 * @param tokenType The token's type to check against.
+	 * @return True if the token is a primary type.
+	 */
 	private boolean isPrimary(TokenType tokenType)
 	{
 		return isFundamental(tokenType) || tokenType == TokenType.LPAR;
 	}
 
+	/**
+	 * Parses a primary type.
+	 * @param parent The parent for this parent type.
+	 * @return The parsed primary token.
+	 */
 	private ASTBase parsePrimary(ASTParent parent)
 	{
 		if (match(TokenType.SYMBOL))
@@ -98,7 +135,13 @@ public class Parser
 		return null;
 	}
 
-	private ASTFunctionCall parseFunctionCall(ASTParent parent, ASTBase functionVariableUsage)
+	/**
+	 * Parses the arguments for a function call.
+	 * @param parent The parent for the new function call.
+	 * @param functionVariableUsage The location to the declaration of the function being called.
+	 * @return A function-call-ast-node.
+	 */
+	private ASTFunctionCall parseFunctionCallArguments(ASTParent parent, ASTBase functionVariableUsage)
 	{
 		ASTFunctionCall functionCall = new ASTFunctionCall(parent, functionVariableUsage);
 
@@ -113,6 +156,13 @@ public class Parser
 		return functionCall;
 	}
 
+	/**
+	 * Parses the operator and the right-hand side of an operator.
+	 * @param left The left-hand side.
+	 * @param minPrecedence The minimum precedence. Use 0 as default.
+	 * @param parent The parent for this expression.
+	 * @return The parsed expression.
+	 */
 	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent)
 	{
 		while (look(0,TokenType.OPERATOR) && !look(0, ","))
@@ -168,34 +218,46 @@ public class Parser
 		return left;
 	}
 
+	/**
+	 * Returns true if possible function call. If true the parse should call
+	 * {@link #parseFunctionCallArguments(ASTParent, ASTBase)}
+	 * @param check The ast to check against.
+	 * @return True if possible function call.
+	 */
 	private boolean isFunctionCall(ASTBase check)
 	{
-		//previous.tokenType == TokenType.SYMBOL && !Syntax.isKeyword(lookAheads[0].value)
 		return check instanceof ASTVariableUsage || check instanceof  ASTMemberAccess;
 	}
 
 	// FIXME: Add support for strings.
+	/**
+	 * Parse a full expression and return it.
+	 * @param parent The parent to place the expression in.
+	 * @return The parsed expression.
+	 */
 	private ASTBase parseExpression(ASTParent parent)
 	{
 		if (isPrimary(lookAheads[0].tokenType))
 		{
 			ASTBase left = parsePrimary(parent);
+			if (left == null)
+				return null;
 
 			if (look(0, TokenType.OPERATOR))
 			{
 				left = parseOpExpression(left, 0, parent);
+				if (left == null)
+					return null;
 			}
 
 			// TODO: Move this check.
 			if (isFunctionCall(left))
-				return parseFunctionCall(parent, left);
+				return parseFunctionCallArguments(parent, left);
 			else
 			{
 				left.setParent(parent);
 				return left;
 			}
-
-			//syntaxError("end of expression", "Got garbage!");
 		}
 
 		// Garbage is okay if it's just an EOF //
@@ -228,6 +290,11 @@ public class Parser
 		return null;
 	}
 
+	/**
+	 * Parse a function declaration. Automatically creates an ASTFunctionGroup and ASTVariableDeclaration.
+	 * @param parent The parent to place the function declaration into.
+	 * @return The parsed function declaration.
+	 */
 	private ASTVariableDeclaration parseFunctionDeclaration(ASTParent parent)
 	{
 
@@ -357,6 +424,11 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Used by {@link #parseFunctionDeclaration(ASTParent)} to parse the direct return value.
+	 * @param parent The parent to place this return expression in.
+	 * @return The parsed expression.
+	 */
 	private ASTReturnExpression parseReturnExpression(ASTParent parent)
 	{
 		if (match(Syntax.Op.FUNCVAL))
@@ -736,7 +808,8 @@ public class Parser
 			;
 
 		// Parse as many lines as possible. //
-		while (parseLine(dest));
+		while (parseLine(dest))
+			;
 
 		// Check for garbage. //
 		if (!match(TokenType.EOF))
@@ -746,6 +819,13 @@ public class Parser
 
 	}
 
+	/**
+	 * Helper function to find a specific type.
+	 * @param perspective From where to search.
+	 * @param name The name of the type we are searching for.
+	 * @return The found type. Null if not found.
+	 */
+	@Nullable
 	private CherryType findType(ASTParent perspective, String name)
 	{
 		// FIXME: Is this really the best place?
@@ -761,6 +841,11 @@ public class Parser
 		return null;
 	}
 
+	/**
+	 * Moves lookAheads[0] into previous.
+	 * Then shifts lookAheads.
+	 * Finally it gets a new token from the lexer.
+	 */
 	private void step()
 	{
 		previous = lookAheads[0];
@@ -777,6 +862,11 @@ public class Parser
 		return lookAheads[0].tokenType == TokenType.EOF || lookAheads[0].tokenType == TokenType.NEWLINE;
 	}
 
+	/**
+	 * Matches and steps the value with lookAheads[0].
+	 * @param value To check against.
+	 * @return True if we matched the values.
+	 */
 	private boolean match(String value)
 	{
 		if (value.equals(lookAheads[0].value))
@@ -787,6 +877,11 @@ public class Parser
 		return false;
 	}
 
+	/**
+	 * Matches and steps the value with lookAheads[0].
+	 * @param value To check against.
+	 * @return True if we matched the values.
+	 */
 	private boolean match(TokenType value)
 	{
 		if (value == lookAheads[0].tokenType)
@@ -797,46 +892,76 @@ public class Parser
 		return false;
 	}
 
+	/**
+	 * Returns true if the look ahead ( + index) matches.
+	 * Like {@link #match(String)} but without calling {@link #step()}.
+	 * We can also specify a index which allow us to look farther than just look ahead.
+	 * @param index The index is used when accessing the lookAheads array.
+	 * @param value The value to check against.
+	 * @return True if the values match.
+	 */
 	private boolean look(int index, String value)
 	{
 		return lookAheads[index].value.equals(value);
 	}
 
+	/**
+	 * Returns true if the look ahead ( + index) matches.
+	 * Like {@link #match(TokenType)} but without calling {@link #step()}.
+	 * We can also specify a index which allow us to look farther than just look ahead.
+	 * @param index The index is used when accessing the lookAheads array.
+	 * @param type The token type to check against.
+	 * @return True if the values match.
+	 */
 	private boolean look(int index, TokenType type)
 	{
 		return lookAheads[index].tokenType == type;
 	}
 
+	/**
+	 * Reports a syntax error like {@link #syntaxError(String, String, String)}, except the "actual" argument
+	 * is replaced by the current look ahead.
+	 * @param expected What we expected.
+	 * @param message What happened. As well as correct usage, how to fix, etc.
+	 */
 	private void syntaxError(String expected, String message)
 	{
 		syntaxError(expected, lookAheads[0].value, message);
 	}
 
+	/**
+	 * Reports a syntax error.
+	 * @param expected What we expected.
+	 * @param actual What we got.
+	 * @param message What happened. As well as correct usage, how to fix, etc.
+	 */
 	private void syntaxError(String expected, String actual, String message)
 	{
-		System.err.println("[Raven]: Syntax Error in file: " + lexer.fileName + "\tat line " + previous.lineNumber + ".");
+		System.err.println("[Raven]: Syntax Error in file: " + lexer.getFileName() + "\tat line " + previous.lineNumber + ".");
 		System.err.println("\tExpected:\t\t" + expected);
 		System.err.println("\tActual:\t\t\t" + actual);
 		System.err.println("\tMessage:\t\t" + (message.equals("") ? "[NONE]" : message));
 	}
 
-	/*
-	private void unexpectedExpressionError(String message)
-	{
-		unexpectedExpressionError(lookAheads[0].value, message);
-	}
-	*/
-
+	/**
+	 * Reports an unexpected expression error.
+	 * @param expression The expression that was unexpected.
+	 * @param message What to tell. For instance: correct usage, what was expected, how to fix, etc.
+	 */
 	private void unexpectedExpressionError(String expression, String message)
 	{
-		System.err.println("[Raven]: Unexpected Expression Error in file: " + lexer.fileName + "\tat line " + previous.lineNumber + ".");
+		System.err.println("[Raven]: Unexpected Expression Error in file: " + lexer.getFileName() + "\tat line " + previous.lineNumber + ".");
 		System.err.println("Expression:\t\t" + expression);
 		System.err.println("Message:\t\t" + (message.equals("") ? "[NONE]" : message));
 	}
 
+	/**
+	 * Reports an error.
+	 * @param message The error message.
+	 */
 	private void error(String message)
 	{
-		System.err.println("[Raven]: Error in file: " + lexer.fileName + "\tat line " + previous.lineNumber + ".");
+		System.err.println("[Raven]: Error in file: " + lexer.getFileName() + "\tat line " + previous.lineNumber + ".");
 		System.err.println("Message:\t\t" + (message.equals("") ? "[NONE]" : message));
 	}
 

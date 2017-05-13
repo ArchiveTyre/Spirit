@@ -14,9 +14,10 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTFunctionCall extends ASTParent
 {
-
-
-
+	/**
+	 * This is either a ASTMemberAccess or a ASTVariable.
+	 * It shows us what to call.
+	 */
 	private ASTBase declarationName;
 
 	public ASTBase getDeclarationName()
@@ -40,12 +41,9 @@ public class ASTFunctionCall extends ASTParent
 	@Override
 	public void debugSelf(IndentPrinter destination)
 	{
-
-		String space = (childAsts.isEmpty()) ? "" : " ";
-		if (getParent() instanceof ASTFunctionCall)
-		{
-			space = "";
-		}
+		String space = childAsts.isEmpty() || getParent() instanceof ASTFunctionCall
+				? ""
+				: " ";
 		declarationName.debugSelf(destination);
 		destination.print("(" + space);
 		for (ASTBase arg : childAsts)

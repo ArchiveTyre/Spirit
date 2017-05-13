@@ -5,12 +5,26 @@ import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 /**
+ * A declaration of a variable.
+ *
  * @author Tyrerexus
  * @date 4/12/17.
  */
 public class ASTVariableDeclaration extends ASTParent
 {
-	CherryType type;
+	/**
+	 * The type of this variable declaration.
+	 */
+	private CherryType type;
+
+	/**
+	 * Gets the initial value of this declaration.
+	 * @return The initial value of this declaration.
+	 */
+	public ASTBase getValue()
+	{
+		return childAsts.get(0);
+	}
 
 	public ASTVariableDeclaration(ASTParent parent, String name, CherryType type, ASTBase value)
 	{
@@ -20,11 +34,10 @@ public class ASTVariableDeclaration extends ASTParent
 			value.setParent(this);
 	}
 
-	public ASTBase getValue()
-	{
-		return childAsts.get(0);
-	}
-
+	/**
+	 * Checks if this variable declaration is actually a function declaration.
+	 * @return True if the value is a ASTFunctionGroup.
+	 */
 	public boolean isFunctionDeclaration()
 	{
 		return getValue() instanceof ASTFunctionGroup;

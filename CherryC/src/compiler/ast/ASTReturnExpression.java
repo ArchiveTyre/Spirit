@@ -5,6 +5,8 @@ import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
 /**
+ * Defines a return statement for a function.
+ *
  * @author david
  * @date 4/20/17
  */

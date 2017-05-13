@@ -4,12 +4,14 @@ package compiler;
  * @author Tyrerexus
  * @date 11/04/17.
  */
+@SuppressWarnings("WeakerAccess")
 public class Token
 {
+	@SuppressWarnings("SpellCheckingInspection")
 	public enum TokenType
 	{
 		UNKNOWN,
-		KEYWORD,
+		//KEYWORD,
 		OPERATOR,
 		SYMBOL,
 		STRING,
@@ -20,8 +22,6 @@ public class Token
 		RPAR,
 		EOF,
 		INLINE,
-		COMMENT_INLINE,
-		COMMENT_BLOCK,
 	}
 
 	public String value;

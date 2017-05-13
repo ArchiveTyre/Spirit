@@ -6,11 +6,16 @@ import compiler.builtins.Builtins;
 import compiler.lib.IndentPrinter;
 
 /**
+ * A string in the ast.
+ *
  * @author david
  * @date 4/12/17.
  */
 public class ASTString extends ASTBase
 {
+	/**
+	 * The value of this string in string form.
+	 */
 	public String value;
 
 	public ASTString(ASTParent parent, String value)

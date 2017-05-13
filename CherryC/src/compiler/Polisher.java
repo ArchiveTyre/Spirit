@@ -3,17 +3,16 @@ package compiler;
 import compiler.ast.*;
 import compiler.builtins.Builtins;
 
-import java.util.Iterator;
-
 /**
  * Polishes a class before compilation.
  *
  * @author Tyrerexus
  * @date 5/11/17.
  */
+@SuppressWarnings("WeakerAccess")
 public class Polisher
 {
-	ASTClass astClass;
+	private ASTClass astClass;
 
 	public Polisher (ASTClass astClass)
 	{
@@ -25,20 +24,7 @@ public class Polisher
 		ASTVariableDeclaration v = new ASTVariableDeclaration(astClass,
 				Syntax.ReservedFunctions.CONSTRUCTOR, Builtins.getBuiltin("function"), null);
 		ASTFunctionGroup group = new ASTFunctionGroup(v, Syntax.ReservedFunctions.CONSTRUCTOR);
-		ASTFunctionDeclaration fun = new ASTFunctionDeclaration(group, Builtins.getBuiltin("void"));
-
-
-		// There is no point in calling the super class constructor if there is no super class. //
-		/*if (astClass.extendsClassAST != null)
-		{
-			// Compiles roughly to: (super.constructor) //
-			new ASTFunctionCall(fun,
-				new ASTMemberAccess(astClass,
-						new ASTVariableUsage(fun, "super"),
-						Syntax.ReservedFunctions.CONSTRUCTOR));
-
-		}
-		*/
+		new ASTFunctionDeclaration(group, Builtins.getBuiltin("void"));
 	}
 
 	/**
@@ -73,7 +59,7 @@ public class Polisher
 		}
 
 		// If the first thing in the constructor isn't a call to the super constructor. //
-		if (callsSuper == false)
+		if (!callsSuper)
 		{
 			// Then insert a call to the super constructor. //
 

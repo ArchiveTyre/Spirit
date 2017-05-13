@@ -10,7 +10,7 @@ import compiler.lib.IndentPrinter;
  * @date 4/19/17.
  */
 
-// FIXME: Move to just class...
+// FIXME: Just move it to ASTClass...
 public class ASTFileTypeDeclaration extends ASTBase
 {
 

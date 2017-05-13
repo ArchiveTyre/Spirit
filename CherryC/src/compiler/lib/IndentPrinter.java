@@ -10,15 +10,30 @@ import java.io.PrintStream;
  */
 public class IndentPrinter
 {
+	/**
+	 * On what stream to print to.
+	 */
 	private PrintStream destination;
-	public int indentation;
+
+	/**
+	 * True if nothing has been written since new line.
+	 */
 	private boolean new_line_clean = true;
+
+	/**
+	 * The current indention of the IndentPrinter.
+	 */
+	public int indentation;
 
 	public IndentPrinter(PrintStream destination)
 	{
 		this.destination = destination;
 	}
 
+	/**
+	 * Prints the object and then prints a newline.
+	 * @param what The object to print.
+	 */
 	public void println(Object what)
 	{
 		if (new_line_clean)
@@ -32,11 +47,18 @@ public class IndentPrinter
 		new_line_clean = true;
 	}
 
+	/**
+	 * Just prints a newline.
+	 */
 	public void println()
 	{
 		println("");
 	}
 
+	/**
+	 * Prints out an object.
+	 * @param what The object to print.
+	 */
 	public void print(Object what)
 	{
 		if (new_line_clean)

@@ -10,6 +10,12 @@ import java.io.File;
  */
 public class PathFind
 {
+	/**
+	 * Finds a file in a path.
+	 * @param path The path to search through.
+	 * @param toFind The file to find.
+	 * @return The path to the result. Null if file not found.
+	 */
 	public static String findInPath(String path, String toFind)
 	{
 		// Parse the path. //

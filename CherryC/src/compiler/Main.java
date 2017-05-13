@@ -1,7 +1,6 @@
 package compiler;
 
 import compiler.ast.ASTClass;
-import compiler.ast.ASTParent;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import java.util.ArrayList;
  * @author david, Tyrerexus
  * @date 4/11/17.
  */
+@SuppressWarnings("WeakerAccess")
 public class Main
 {
 	public static final String VERSION = "0.0.1 ALPHA";
@@ -61,12 +61,12 @@ public class Main
 		}
 	}
 
-	public static void printVersion()
+	private static void printVersion()
 	{
 		System.out.println(COMPILER_NAME + " V" + VERSION + "\n" + COPYRIGHT);
 	}
 
-	public static void printHelp()
+	private static void printHelp()
 	{
 		System.out.println("Options:");
 		System.out.println("\t-o / --output:\t\tSpecify the output file");

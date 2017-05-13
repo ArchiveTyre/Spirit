@@ -3,7 +3,11 @@ package compiler;
 import compiler.ast.*;
 
 /**
- * @auhtor Tyrerexus
+ * The file defines everything a backend has to be able to compile.
+ * It also defines functions that are called before and after compilation.
+ * Such as: {@link #createFileStreams(String)} and {@link #closeStreams()}
+ *
+ * @author Tyrerexus
  * @date 28/04/17.
  */
 public abstract class LangCompiler
@@ -22,7 +26,15 @@ public abstract class LangCompiler
 	public abstract void compileReturnExpression(ASTReturnExpression astReturnExpression);
 	public abstract void compileMemberAccess(ASTMemberAccess astMemberAccess);
 
+	/**
+	 * Opens up the appropriate streams for a specified fileName.
+	 * @param fileName The filename of the file being compiled.
+	 */
 	public abstract void createFileStreams(String fileName);
+
+	/**
+	 * Flush and close streams.
+	 */
 	public abstract void closeStreams();
 
 	public LangCompiler()

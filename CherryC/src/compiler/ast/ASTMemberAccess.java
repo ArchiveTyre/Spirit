@@ -7,19 +7,42 @@ import compiler.lib.IndentPrinter;
 import java.util.ArrayList;
 
 /**
+ * Defines a member access for a variable.<br>
+ * Example: "world.hello"
+ *
  * @author Tyrerexus
  * @date 4/30/17.
  */
 public class ASTMemberAccess extends ASTParent
 {
+	/**
+	 * The object we are accessing.
+	 */
 	public ASTBase ofObject;
-	ASTBase member = null;
-	String memberName;
 
+	/**
+	 * The found member.
+	 */
+	private ASTBase member = null;
+
+	/**
+	 * The member name.
+	 */
+	private String memberName;
+
+	/**
+	 * The found member based on {@link #getMemberName()}
+	 * @return The member that was found.
+	 */
 	public ASTBase getMember()
 	{
 		return member;
 	}
+
+	/**
+	 * Getter for memberName.
+	 * @return Returns the name of the member we are trying to access.
+	 */
 	public String getMemberName() { return memberName;}
 
 	public ASTMemberAccess(ASTParent parent, ASTBase ofObject, String memberName)

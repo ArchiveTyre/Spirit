@@ -1,7 +1,6 @@
 package compiler.builtins;
 
 import compiler.CherryType;
-import compiler.Syntax;
 import compiler.ast.ASTBase;
 
 import java.util.ArrayList;

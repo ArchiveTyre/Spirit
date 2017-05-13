@@ -1,7 +1,5 @@
 package compiler;
 
-import compiler.lib.Utils;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PushbackInputStream;
@@ -13,19 +11,56 @@ import java.nio.charset.StandardCharsets;
  * @author david
  * @date 4/11/17.
  */
+@SuppressWarnings("WeakerAccess")
 public class Lexer
 {
+	/**
+	 * The filename we are reading from.
+	 */
+	private String fileName;
 
-	public String fileName;
-
+	/**
+	 * Current input stream.
+	 */
 	private PushbackInputStream input;
 
+	/**
+	 * The column that we are on right now.
+	 */
 	private int columnNumber = 0;
+
+	/**
+	 * The column that we were on when we were on the previous line.
+	 */
 	private int oldColumnNumber = 0;
+
+	/**
+	 * Current line number.
+	 */
 	private int lineNumber = 0;
+
+	/**
+	 * How many parentheses are we inside of?
+	 */
 	private int parenthesesCount = 0;
 
-	private boolean inMacro = false;
+	/**
+	 * Getter for fileName
+	 * @return The filename we are reading from.
+	 */
+	public String getFileName()
+	{
+		return fileName;
+	}
+
+	/**
+	 * Getter for lineNumber.
+	 * @return Returns the current line.
+	 */
+	public int getLineNumber()
+	{
+		return lineNumber;
+	}
 
 	public Lexer(PushbackInputStream input, String fileName)
 	{
@@ -41,11 +76,10 @@ public class Lexer
 				fileName);
 	}
 
-	public int getLineNumber()
-	{
-		return lineNumber;
-	}
-
+	/**
+	 * Extracts one token and moves on.
+	 * @return The extracted token.
+	 */
 	public Token getToken()
 	{
 		int c = readChar();
@@ -79,15 +113,14 @@ public class Lexer
 		while (c == ' ' || c == '\t' || c == '\n')
 			c = readChar();
 
+		// Check a bunch of single char tokens. //
+		//if (c == '\n' && parenthesesCount == 0)
+		//{
+		//	return new Token("\n", Token.TokenType.NEWLINE, columnNumber, lineNumber);
+		//}
 
-// Check a bunch of single char tokens. //
-		if (c == '\n' && parenthesesCount == 0)
-		{
-			return new Token("\n", Token.TokenType.NEWLINE, columnNumber, lineNumber);
-		}
-
-		while (c == ' ' || c == '\t' || c == '\n')
-			c = readChar();
+		//while (c == ' ' || c == '\t' || c == '\n')
+		//	c = readChar();
 
 		if (c == '(')
 		{
@@ -170,7 +203,7 @@ public class Lexer
 		else
 		{
 			StringBuilder operator = new StringBuilder();
-			while (!Utils.isAlphaNum((char) c) && c != ' ' && c != '\n' && c != '\t' && c!= '(' && c != ')' && c != -1)
+			while (!Character.isLetterOrDigit((char)c) && c != ' ' && c != '\n' && c != '\t' && c!= '(' && c != ')' && c != -1)
 			{
 				operator.append((char) c);
 				c = readChar();
@@ -181,6 +214,10 @@ public class Lexer
 		}
 	}
 
+	/**
+	 * Gets one character from stream.
+	 * @return The character that was read.
+	 */
 	private int readChar()
 	{
 		int c;
@@ -206,7 +243,7 @@ public class Lexer
 		// Check if we are reading a block comment. //
 		if (c == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[0])
 		{
-			int lastChar = c;
+			//int lastChar = c;
 			c = readChar();
 
 
@@ -263,12 +300,14 @@ public class Lexer
 			}
 		}
 
-
 		return c;
-
-
 	}
 
+	/**
+	 * Puts a char back onto the stream and reverts
+	 * lineNumber and columnNumber to old state.
+	 * @param c The character to revert.
+	 */
 	private void unReadChar(int c)
 	{
 		try
@@ -282,7 +321,6 @@ public class Lexer
 		}
 
 		columnNumber--;
-
 
 		if (c == '\n')
 		{

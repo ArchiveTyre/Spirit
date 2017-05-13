@@ -13,6 +13,9 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTElse extends ASTParent
 {
+	/**
+	 * This ASTIf that this ASTElse is connected with.
+	 */
 	private ASTIf ifStatement;
 
 	public ASTElse(ASTParent parent)
@@ -43,28 +46,30 @@ public class ASTElse extends ASTParent
 	}
 
 	@Override
-	public void debugSelf(IndentPrinter destination)
-	{
-		/*
-		 * This does nothing because it's printed out by the owning "if" statement.
-		 */
-	}
-
-	@Override
 	public ASTParent getParent()
 	{
 		return ifStatement;
 	}
 
 	@Override
-	public void compileSelf(LangCompiler compiler)
-	{
-		// Do nothing. //
-	}
-
-	@Override
 	public boolean compileChild(ASTBase child)
 	{
 		return true;
+	}
+
+	@Override
+	public void debugSelf(IndentPrinter destination)
+	{
+		/*
+		 * This does nothing because it's printed out by the owning ASTIf.
+		 */
+	}
+
+	@Override
+	public void compileSelf(LangCompiler compiler)
+	{
+		/*
+		 * This does nothing because it's compiled by the owning ASTIf
+		 */
 	}
 }
