@@ -206,7 +206,7 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
 	{
-		astFunctionCall.getDeclarationName().compileSelf(this);
+		astFunctionCall.getDeclarationPath().compileSelf(this);
 		cppOutput.print("(");
 
 		for (ASTBase child : astFunctionCall.childAsts)

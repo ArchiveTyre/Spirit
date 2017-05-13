@@ -13,12 +13,12 @@ import java.util.ArrayList;
  * @author Tyrerexus
  * @date 4/30/17.
  */
-public class ASTMemberAccess extends ASTParent
+public class ASTMemberAccess extends ASTParent implements ASTPath
 {
 	/**
 	 * The object we are accessing.
 	 */
-	public ASTBase ofObject;
+	public ASTPath ofObject;
 
 	/**
 	 * The found member.
@@ -45,7 +45,7 @@ public class ASTMemberAccess extends ASTParent
 	 */
 	public String getMemberName() { return memberName;}
 
-	public ASTMemberAccess(ASTParent parent, ASTBase ofObject, String memberName)
+	public ASTMemberAccess(ASTParent parent, ASTPath ofObject, String memberName)
 	{
 		super(parent, "");
 		this.ofObject = ofObject;

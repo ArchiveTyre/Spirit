@@ -8,7 +8,7 @@ import compiler.lib.IndentPrinter;
  * @author david
  * @date 4/12/17.
  */
-public class ASTVariableUsage extends ASTBase
+public class ASTVariableUsage extends ASTBase implements ASTPath
 {
 	/**
 	 * The path to the declaration.

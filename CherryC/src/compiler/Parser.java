@@ -141,9 +141,10 @@ public class Parser
 	 * @param functionVariableUsage The location to the declaration of the function being called.
 	 * @return A function-call-ast-node.
 	 */
-	private ASTFunctionCall parseFunctionCallArguments(ASTParent parent, ASTBase functionVariableUsage)
+	private ASTFunctionCall parseFunctionCallArguments(ASTParent parent, ASTPath functionVariableUsage)
 	{
-		ASTFunctionCall functionCall = new ASTFunctionCall(parent, functionVariableUsage);
+		ASTFunctionCall functionCall = new ASTFunctionCall(parent);
+		functionCall.setDeclarationPath(functionVariableUsage);
 
 		// Parse arguments until we find something un-parsable. //
 		while(isPrimary(lookAheads[0].tokenType))
@@ -181,11 +182,11 @@ public class Parser
 			int opPrecedence = operatorPrecedenceMap.get(opName);
 			step();
 
-			if (opName.equals("."))
+			if (opName.equals(".") && left instanceof ASTPath)
 			{
 				String memberName = lookAheads[0].value;
 				step();
-				left = new ASTMemberAccess(parent, left, memberName);
+				left = new ASTMemberAccess(parent, (ASTPath)left, memberName);
 				continue;
 			}
 
@@ -220,7 +221,7 @@ public class Parser
 
 	/**
 	 * Returns true if possible function call. If true the parse should call
-	 * {@link #parseFunctionCallArguments(ASTParent, ASTBase)}
+	 * {@link #parseFunctionCallArguments(ASTParent, ASTPath)}
 	 * @param check The ast to check against.
 	 * @return True if possible function call.
 	 */
@@ -252,7 +253,7 @@ public class Parser
 
 			// TODO: Move this check.
 			if (isFunctionCall(left))
-				return parseFunctionCallArguments(parent, left);
+				return parseFunctionCallArguments(parent, (ASTPath)left);
 			else
 			{
 				left.setParent(parent);

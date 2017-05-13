@@ -18,24 +18,28 @@ public class ASTFunctionCall extends ASTParent
 	 * This is either a ASTMemberAccess or a ASTVariable.
 	 * It shows us what to call.
 	 */
-	private ASTBase declarationName;
+	private ASTPath declarationPath;
 
-	public ASTBase getDeclarationName()
+	public ASTPath getDeclarationPath()
 	{
-		return declarationName;
+		return declarationPath;
 	}
 
-	public ASTFunctionCall(ASTParent parent, ASTBase name)
+	public void setDeclarationPath(ASTPath newDeclarationPath)
+	{
+		declarationPath = newDeclarationPath;
+		newDeclarationPath.setParent(this);
+	}
+
+	public ASTFunctionCall(ASTParent parent)
 	{
 		super(parent, "");
-		declarationName = name;
-		declarationName.setParent(this);
 	}
 
 	@Override
 	public CherryType getExpressionType()
 	{
-			return declarationName.getExpressionType();
+			return declarationPath.getExpressionType();
 	}
 
 	@Override
@@ -44,7 +48,7 @@ public class ASTFunctionCall extends ASTParent
 		String space = childAsts.isEmpty() || getParent() instanceof ASTFunctionCall
 				? ""
 				: " ";
-		declarationName.debugSelf(destination);
+		declarationPath.debugSelf(destination);
 		destination.print("(" + space);
 		for (ASTBase arg : childAsts)
 		{
@@ -69,6 +73,6 @@ public class ASTFunctionCall extends ASTParent
 	@Override
 	public boolean compileChild(ASTBase child)
 	{
-		return !(child == declarationName);
+		return !(child == declarationPath);
 	}
 }
