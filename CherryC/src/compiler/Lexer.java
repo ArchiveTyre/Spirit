@@ -182,6 +182,52 @@ public class Lexer
 			return new Token(string.toString(), Token.TokenType.STRING, columnNumber, lineNumber);
 		}
 
+		// Check if we are reading a macro statement. //
+		else if (c == Syntax.Macro.IDENTIFIER)
+		{
+			String macro = getToken().value;
+			System.out.println("FOUND #");
+			// Check if we have found an inline statement. //
+			if (macro.equals(Syntax.Macro.INLINE))
+			{
+
+				StringBuilder inlineCode = new StringBuilder();
+				// We have found an inline statement. //
+				boolean inline = true;
+				while (inline)
+				{
+					c = readChar();
+					if (c == Syntax.Macro.IDENTIFIER)
+					{
+						 StringBuilder inlineMacro = new StringBuilder();
+						 while (Character.isAlphabetic((c = readChar())))
+						 {
+							inlineMacro.append((char) c);
+						 }
+
+						 if (inlineMacro.toString().equals(Syntax.Macro.END))
+						 {
+						 	inline = false;
+						 }
+						 else
+						 {
+						 	unReadChar(c);
+						 	inlineCode.append(inlineMacro.toString());
+						 }
+					}
+
+					System.out.println("appending: \"" + ((char) c) + "\", " + c);
+					inlineCode.append((char) c);
+
+				}
+				return new Token(inlineCode.toString(), Token.TokenType.INLINE, columnNumber, lineNumber);
+			}
+			else
+			{
+				return null;
+			}
+		}
+
 		// Check if we are reading an inline comment. //
 		else if (c == Syntax.Op.INLINE_COMMENT)
 		{
@@ -243,13 +289,14 @@ public class Lexer
 		// Check if we are reading a block comment. //
 		if (c == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[0])
 		{
-			//int lastChar = c;
-			c = readChar();
+
+			int temp = readChar();
 
 
 			// Check if we have read a block comment (this assumes that the block comment is 2 chars in length. //
-			if (c == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[1])
+			if (temp == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[1])
 			{
+				c = temp;
 				int nestedLevel = 1;
 				while (nestedLevel != 0)
 				{
@@ -295,8 +342,7 @@ public class Lexer
 			}
 			else
 			{
-				unReadChar(c);
-				c = readChar();
+				unReadChar(temp);
 			}
 		}
 

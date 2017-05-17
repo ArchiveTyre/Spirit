@@ -112,6 +112,13 @@ public class Syntax
 
 	}
 
+	public class Macro
+	{
+		public static final char IDENTIFIER	=	'#'		;
+		public static final String INLINE	=	"inline";
+		public static final String END		=	"end"	;
+	}
+
 
 
 	public static boolean isKeyword(String string)

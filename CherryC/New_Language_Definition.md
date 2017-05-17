@@ -34,45 +34,43 @@ This is very useful, if you for example want to leave
 a note of what you are doing, explain further or
 temporarily disable pieces of code.
 
-A single line comment in raven starts with a `-]`.
+A single line comment in raven starts with a `%`.
 Everything after this is ignored, and you may put
 whatever you want there.
 
 ```raven
--] Check if the user is logged in.
+% Check if the user is logged in.
 if logged_in
-    -] Display the admin panel
+    % Display the admin panel
     display_admin_panel user.name
 ```
 
 The other type of comment is a multiline comments. These comments
 are not restricted to a single line, but starts with a 
-`[=`, and ends with a `=]`. Everything between these characters
+`<% `, and ends with a `%>`. Everything between these characters
 is ignored and will not be compiled.
 
 **User.raven**
 ```raven
-[=
- = The purpose of this class is to allow the
- = user to interact with the admin panel.
- =]
+<%
+ % The purpose of this class is to allow the
+ % user to interact with the admin panel.
+ %>
 ```
 
-Note that the equal signs between `[=` and `=]`
+Note that the percent signs between `<%` and `%>`
 are not necessary. They are only there because in Raven it is
 a convention to put an equal sign at the start of each line in a
 mulitline comment. This is also valid:
 ```raven
-[=This
+<%This
 is a perfectly
-		find and valid
+		fine and valid
 multiline
 comment.
-			=]
+			%>
 ```
 
-
-`[==]`
 
 ## 4.0 Strings
 

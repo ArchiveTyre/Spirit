@@ -17,7 +17,7 @@ class LexerTest
 	private void testForTokens(String testString, String[] tokens)
 	{
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
-		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
+		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream, 3);
 
 		Lexer lexer = new Lexer(pushbackInputStream, "Test.cherry");
 

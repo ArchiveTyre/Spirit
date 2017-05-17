@@ -773,10 +773,14 @@ public class Parser
 			return parseImportExpression(dest);
 		}
 
+		// Check if we have an inline expression. //
 		else if (look(0, TokenType.INLINE))
 		{
-			new ASTInline(parent, lexer.getToken().value);
-			match(TokenType.INLINE);
+			// Get the code. //
+			String code = lookAheads[0].value;
+			step();
+			new ASTInline(parent, code);
+			System.out.println("CODE: " + code);
 			return true;
 		}
 

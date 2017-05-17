@@ -36,5 +36,6 @@ public class ASTInline extends ASTBase
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
+		compiler.
 	}
 }

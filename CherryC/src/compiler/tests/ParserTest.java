@@ -28,7 +28,7 @@ class ParserTest
 		IndentPrinter printer = new IndentPrinter(System.out);
 
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
-		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
+		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream, 3);
 		Lexer lexer = new Lexer(pushbackInputStream, name + ".raven");
 		ASTClass astClass = new ASTClass(name, null);
 
@@ -183,5 +183,11 @@ class ParserTest
 		testClassCompile("Comments3", "b := 10 <% This\nIs\nA\nTest %>\na := 10");
 		testClassCompile("Comments3", "b := 10 <% This<%\n%>Is\nA\nTest %>\na := 10");
 		testClassCompile("Comments4", "name := \"Godzilla\"\nna<%te\nst%>me = \"Nano\"");
+
+		// Inline. //
+		testClassCompile("Inline1", "a := 5\n#inline\na = 15;\ncout << a;\n#end\na = 10");
+
+		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
+
 	}
 }

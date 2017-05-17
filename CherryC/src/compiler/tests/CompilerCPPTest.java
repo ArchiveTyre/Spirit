@@ -25,7 +25,7 @@ class CompilerCPPTest
 		System.out.println("=== " + testName + " ===");
 
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
-		PushbackInputStream i = new PushbackInputStream(inputStream);
+		PushbackInputStream i = new PushbackInputStream(inputStream, 3);
 
 		LangCompiler c = new CompilerCPP(new IndentPrinter(System.out), new IndentPrinter(System.err));
 
