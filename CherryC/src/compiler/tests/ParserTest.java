@@ -188,6 +188,7 @@ class ParserTest
 		testClassCompile("Inline1", "a := 5\n#inline\na = 15;\ncout << a;\n#end\na = 10");
 
 		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
+		testClassCompile("Test2", tmpStrPrint + "print\n\tif 10 == 10\n\t\ta := 20");
 
 	}
 }

@@ -34,13 +34,22 @@ public class ASTFunctionDeclaration extends ASTParent
 	 */
 	private boolean isNestedFunction;
 
+	private boolean anonymous = false;
+
 	public ASTFunctionDeclaration(ASTParent parent, CherryType returnType)
+	{
+		this(parent, returnType, false);
+	}
+
+	public ASTFunctionDeclaration(ASTParent parent, CherryType returnType, boolean anonymous)
 	{
 		super(parent, "");
 		this.returnType = returnType;
 		isNestedFunction = !(parent.getParent().getParent() instanceof ASTClass);
 		if (isNestedFunction)
 			System.out.println("Defining a nested function.");
+
+		this.anonymous = anonymous;
 	}
 
 	@Override

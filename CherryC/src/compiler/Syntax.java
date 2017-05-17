@@ -79,12 +79,14 @@ public class Syntax
 
 		public static final String 	ACCESS				=	"."		;
 		public static final String 	TYPEDEF				= 	":"		;
-		public static final String 	FUNCVAL 			= 	"=" 	;
+		public static final String 	RETURN 				= 	"=" 	;
 		public static final String 	MAP					= 	"=>"	;
 		public static final String 	ARG_SEP				=	","		;
 		public static final String 	BLOCK_COMMENT_START	=	"<%"	;
 		public static final String	BLOCK_COMMENT_END	=	"%>"	;
 		public static final char	INLINE_COMMENT		=	'%'		;
+		public static final char	ANON_FUNC_START		=	'{'		;
+		public static final char	ANON_FUNC_END		=	'}'		;
 
 
 	}

@@ -45,6 +45,8 @@ public class Parser
 	 */
 	private Token previous = null;
 
+	private boolean inAnonymousFunction = false;
+
 	/**
 	 * Creates a Parser that will read from a lexer.
 	 * @param lexer The lexer to read from.
@@ -396,7 +398,7 @@ public class Parser
 					{
 						function.returnType = Builtins.getBuiltin("void");
 					}
-					if (look(0, Syntax.Op.FUNCVAL))
+					if (look(0, Syntax.Op.RETURN))
 					{
 						ASTReturnExpression call = parseReturnExpression(parent);
 						if (call != null)
@@ -432,7 +434,7 @@ public class Parser
 	 */
 	private ASTReturnExpression parseReturnExpression(ASTParent parent)
 	{
-		if (match(Syntax.Op.FUNCVAL))
+		if (match(Syntax.Op.RETURN))
 		{
 			ASTReturnExpression returnExpression = new ASTReturnExpression(parent);
 
@@ -447,7 +449,7 @@ public class Parser
 		}
 		else
 		{
-			syntaxError(Syntax.Op.FUNCVAL, "COMPILER ERROR!!!");
+			syntaxError(Syntax.Op.RETURN, "COMPILER ERROR!!!");
 			return null;
 		}
 	}
@@ -679,6 +681,7 @@ public class Parser
 		return true;
 	}
 
+
 	private boolean parseLine(ASTClass dest)
 	{
 		// Extract indents to get a parent. //
@@ -869,6 +872,8 @@ public class Parser
 
 	/**
 	 * Matches and steps the value with lookAheads[0].
+	 * Only steps if the match returns true.
+	 *
 	 * @param value To check against.
 	 * @return True if we matched the values.
 	 */
@@ -880,6 +885,16 @@ public class Parser
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Overload of {@link #match(String)} but with characters
+	 * @param value	To check against.
+	 * @return True if we matched results.
+	 */
+	private boolean match(char value)
+	{
+		return match("" + value);
 	}
 
 	/**
@@ -909,6 +924,20 @@ public class Parser
 	{
 		return lookAheads[index].value.equals(value);
 	}
+
+	/**
+	 * Returns true if the look ahead ( + index) matches. (alternative to work with chars)
+	 * Like {@link #match(String)} but without calling {@link #step()}.
+	 * We can also specify a index which allow us to look farther than just look ahead.
+	 * @param index The index is used when accessing the lookAheads array.
+	 * @param value The value to check against.
+	 * @return True if the values match.
+	 */
+	private boolean look(int index, char value)
+	{
+		return look(index, "" + value);
+	}
+
 
 	/**
 	 * Returns true if the look ahead ( + index) matches.
