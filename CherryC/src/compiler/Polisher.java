@@ -85,12 +85,8 @@ public class Polisher
 		if (astClass.extendsClassAST == null)
 			return;
 
-		//Iterator<ASTBase> iterator = astClass.childAsts.iterator();
-		//while (iterator.hasNext())
 		for (ASTBase child : astClass.childAsts)
 		{
-			//iterator.
-			//ASTBase child = iterator.next();
 			if (child instanceof ASTVariableDeclaration
 					&& ((ASTVariableDeclaration)child).isFunctionDeclaration())
 			{

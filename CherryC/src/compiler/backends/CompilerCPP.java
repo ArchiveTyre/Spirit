@@ -391,7 +391,7 @@ public class CompilerCPP extends LangCompiler
 		astMemberAccess.ofObject.compileSelf(this);
 
 		if (astMemberAccess.ofObject instanceof ASTVariableUsage
-		&& ((ASTVariableUsage)astMemberAccess.ofObject).declaration instanceof CherryType)
+		&& ((ASTVariableUsage)astMemberAccess.ofObject).getDeclaration() instanceof CherryType)
 			cppOutput.print("::");
 		else
 			cppOutput.print("->");

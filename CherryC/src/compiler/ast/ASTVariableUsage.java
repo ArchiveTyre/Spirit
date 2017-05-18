@@ -13,21 +13,25 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 	/**
 	 * The path to the declaration.
 	 */
-	public ASTBase declaration;
+	//public ASTBase declaration;
+
+	public ASTBase getDeclaration()
+	{
+		if (name.equals("super"))
+			return this.getContainingClass().extendsClassAST;
+		else
+			return getParent().findSymbol(name);
+	}
 
 	public ASTVariableUsage(ASTParent parent, String name)
 	{
 		super(parent, name);
-		if (name.equals("super"))
-			declaration = this.getContainingClass().extendsClassAST;
-		else
-			declaration = parent.findSymbol(name);
 	}
 
 	@Override
 	public CherryType getExpressionType()
 	{
-		return declaration.getExpressionType();
+		return getDeclaration().getExpressionType();
 	}
 
 	@Override
