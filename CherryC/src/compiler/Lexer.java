@@ -186,7 +186,6 @@ public class Lexer
 		else if (c == Syntax.Macro.IDENTIFIER)
 		{
 			String macro = getToken().value;
-			System.out.println("FOUND #");
 			// Check if we have found an inline statement. //
 			if (macro.equals(Syntax.Macro.INLINE))
 			{
@@ -216,7 +215,6 @@ public class Lexer
 						 }
 					}
 
-					System.out.println("appending: \"" + ((char) c) + "\", " + c);
 					inlineCode.append((char) c);
 
 				}

@@ -36,6 +36,6 @@ public class ASTInline extends ASTBase
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
-		// What should we put here? //
+		compiler.compileInline(this);
 	}
 }

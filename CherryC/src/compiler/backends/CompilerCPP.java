@@ -41,7 +41,7 @@ public class CompilerCPP extends LangCompiler
 	private boolean isSemicolonless(ASTBase ast)
 	{
 		return ast instanceof ASTIf || ast instanceof ASTLoop || ast instanceof ASTElse
-				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionGroup);
+				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionGroup) || ast instanceof ASTInline;
 	}
 
 	private String getRawName(CherryType targetType)
@@ -56,6 +56,7 @@ public class CompilerCPP extends LangCompiler
 		/// Include guard. ///
 		hppOutput.println("#pragma once");
 		cppOutput.println("#include \"" + hppLocation + "\"");
+		cppOutput.println("#include <string>");
 
 		/// Compile the imports. ///
 		{
@@ -401,6 +402,12 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.print(memberName);
 	}
 
+	@Override
+	public void compileInline(ASTInline inline)
+	{
+		cppOutput.println(inline.code);
+	}
+
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Override
 	public void createFileStreams(String fileName)
@@ -435,8 +442,18 @@ public class CompilerCPP extends LangCompiler
 	public void closeStreams()
 	{
 		cppStream.flush();
-		hppStream.flush();
 		cppStream.close();
+
+		try
+		{
+			Thread.sleep(100);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+
+		hppStream.flush();
 		hppStream.close();
 	}
 }

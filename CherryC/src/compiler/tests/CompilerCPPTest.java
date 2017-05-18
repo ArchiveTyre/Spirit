@@ -20,6 +20,9 @@ import java.nio.charset.StandardCharsets;
 class CompilerCPPTest
 {
 
+	private String print = 	"prints : (what : string)\n\t#inline\n\tcout << what << endl;\n\t#end\n" +
+							"printi : (what : int)\n\t#inline\n\tcout << what << endl;\n\t#end\n";
+
 	private void testCompiler(String testName, String testString)
 	{
 		System.out.println("=== " + testName + " ===");
@@ -42,12 +45,14 @@ class CompilerCPPTest
 		c.compileClass(cl);
 
 		System.out.println('\n');
+
+
 	}
 
 	@Test
 	void testAll()
 	{
-		testCompiler("Assignment", "helloWorld := 42");
+		/*testCompiler("Assignment", "helloWorld := 42");
 		testCompiler("Expressions", "B:=2\nA:= B + 2");
 		testCompiler("IfAndElse", "B:=2\nif B == 1\n\tB = 42\nelse\n\tB=32");
 		testCompiler("Loops", "B := 0\nloop A:=1, A < 10, A = A + 1\n\tB = B + 1");
@@ -56,7 +61,15 @@ class CompilerCPPTest
 		testCompiler("ReturnVal", "a : () = 42");
 		testCompiler("Call", "a : (x, y : int)\nb : ()\n\ta 1 2");
 
-		testCompiler("Imports", "import Hello.World");
+		//testCompiler("Imports", "import Hello.World");
+		testCompiler("Inline", "a := 10\n#inline\ncout << a;\n#end\na := 15");*/
 
+	}
+
+
+	@Test
+	void singleTest()
+	{
+		testCompiler("Inline", print + "main : () int\n\ta := \"Hello\"\n\tprints a\n\t= 0");
 	}
 }

@@ -25,6 +25,7 @@ public abstract class LangCompiler
 	public abstract void compileString(ASTString astString);
 	public abstract void compileReturnExpression(ASTReturnExpression astReturnExpression);
 	public abstract void compileMemberAccess(ASTMemberAccess astMemberAccess);
+	public abstract void compileInline(ASTInline inline);
 
 	/**
 	 * Opens up the appropriate streams for a specified fileName.

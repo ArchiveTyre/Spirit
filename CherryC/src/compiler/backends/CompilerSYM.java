@@ -16,6 +16,7 @@ import java.util.ArrayList;
  * @author Tyrerexus
  * @date 5/4/17.
  */
+
 public class CompilerSYM extends LangCompiler
 {
 	public IndentPrinter symOutput = null;
@@ -120,6 +121,12 @@ public class CompilerSYM extends LangCompiler
 	public void compileMemberAccess(ASTMemberAccess astMemberAccess)
 	{
 
+	}
+
+	@Override
+	public void compileInline(ASTInline inline)
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
