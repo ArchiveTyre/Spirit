@@ -171,13 +171,15 @@ public class Lexer
 		// Check if we are reading a string. //
 		else if (c == '"')
 		{
-			StringBuilder string = new StringBuilder();
+			StringBuilder string = new StringBuilder("\"");
+
 			c = readChar();
 			while (c != '"')
 			{
 				if (c != '\t' && c != '\n') string.append((char) c);
 				c = readChar();
 			}
+			string.append('"');
 
 			return new Token(string.toString(), Token.TokenType.STRING, columnNumber, lineNumber);
 		}
