@@ -62,6 +62,7 @@ public class Syntax
 			public static final String AND			= "&&"	;
 			public static final String OR			= "||"	;
 			public static final String XOR			= "^^"	;
+
 		}
 
 		public class Assign
@@ -142,6 +143,43 @@ public class Syntax
 			case Type.INTERFACE			:
 			case Type.ENUM				:
 			case Keyword.FROM			:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public static String getOperator(String token)
+	{
+		switch (token)
+		{
+			case Op.Cond.Txt.EQU:
+				return Op.Cond.EQU;
+			case Op.Cond.Txt.NOT_EQU:
+				return Op.Cond.NOT_EQU;
+			case Op.Cond.Txt.AND:
+				return Op.Cond.AND;
+			case Op.Cond.Txt.OR:
+				return Op.Cond.OR;
+			case Op.Cond.Txt.XOR:
+				return Op.Cond.XOR;
+			case Op.Cond.Txt.NOT:
+				return Op.Cond.Txt.NOT;
+			default:
+				return token;
+		}
+	}
+
+	public static boolean isOperator(String t)
+	{
+		switch (t)
+		{
+			case Op.Cond.Txt.EQU:
+			case Op.Cond.Txt.NOT_EQU:
+			case Op.Cond.Txt.AND:
+			case Op.Cond.Txt.OR:
+			case Op.Cond.Txt.XOR:
+			case Op.Cond.Txt.NOT:
 				return true;
 			default:
 				return false;
