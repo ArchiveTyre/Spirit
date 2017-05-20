@@ -685,10 +685,10 @@ public class Parser
 	private boolean parseLine(ASTClass dest)
 	{
 		// Extract indents to get a parent. //
-		int line_indent = 0;
+		int lineIndent = 0;
 		if (match(TokenType.INDENT))
 		{
-			line_indent = previous.indent;
+			lineIndent = previous.indent;
 		}
 
 		// Skip any empty lines.
@@ -698,11 +698,11 @@ public class Parser
 		}
 
 		// Use the indent to find a new parent for the contents of this line. //
-		ASTParent parent = dest.getParentForNewCode(line_indent);
+		ASTParent parent = dest.getParentForNewCode(lineIndent);
 
 		if (parent == null)
 		{
-			error("Incorrect line indentation at: " + lexer.getLineNumber() + "\n Tabbing: " + line_indent);
+			error("Incorrect line indentation at: " + lexer.getLineNumber() + "\n Tabbing: " + lineIndent);
 			return false;
 		}
 
@@ -719,7 +719,7 @@ public class Parser
 			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
 			if (function != null)
 			{
-				function.columnNumber = line_indent;
+				function.columnNumber = lineIndent;
 				return true;
 			}
 			return false;
@@ -742,7 +742,7 @@ public class Parser
 			ASTLoop loop = parseLoop(parent);
 			if (loop != null)
 			{
-				loop.columnNumber = line_indent;
+				loop.columnNumber = lineIndent;
 				return true;
 			}
 			return false;
@@ -756,7 +756,7 @@ public class Parser
 			ASTVariableDeclaration declaration = parseVariableDeclaration(parent);
 			if (declaration != null)
 			{
-				declaration.columnNumber = line_indent;
+				declaration.columnNumber = lineIndent;
 				return true;
 			}
 			return false;
@@ -776,6 +776,19 @@ public class Parser
 			return parseImportExpression(dest);
 		}
 
+		// Check if we have a return expression. //
+		else if (look (0, Syntax.Op.RETURN))
+		{
+			ASTReturnExpression ret = parseReturnExpression(parent);
+			if (ret != null)
+			{
+				ret.columnNumber = lineIndent;
+				return true;
+			}
+			return false;
+
+		}
+
 		// Check if we have an inline expression. //
 		else if (look(0, TokenType.INLINE))
 		{
@@ -783,7 +796,6 @@ public class Parser
 			String code = lookAheads[0].value;
 			step();
 			new ASTInline(parent, code);
-			System.out.println("CODE: " + code);
 			return true;
 		}
 
@@ -793,7 +805,7 @@ public class Parser
 			ASTBase expression = parseExpression(parent);
 			if (expression != null)
 			{
-				expression.columnNumber = line_indent;
+				expression.columnNumber = lineIndent;
 				return true;
 			}
 			return false;

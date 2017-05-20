@@ -59,6 +59,7 @@ public class CompilerCPP extends LangCompiler
 		/// Include guard. ///
 		hppOutput.println("#pragma once");
 		cppOutput.println("#include \"" + hppLocation + "\"");
+		cppOutput.println("#include <string>");
 
 		/// Compile the imports. ///
 		{
@@ -445,8 +446,18 @@ public class CompilerCPP extends LangCompiler
 	public void closeStreams()
 	{
 		cppStream.flush();
-		hppStream.flush();
 		cppStream.close();
+
+		try
+		{
+			Thread.sleep(100);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+
+		hppStream.flush();
 		hppStream.close();
 	}
 }

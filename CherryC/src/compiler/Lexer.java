@@ -186,7 +186,6 @@ public class Lexer
 		else if (c == Syntax.Macro.IDENTIFIER)
 		{
 			String macro = getToken().value;
-			System.out.println("FOUND #");
 			// Check if we have found an inline statement. //
 			if (macro.equals(Syntax.Macro.INLINE))
 			{
@@ -217,7 +216,6 @@ public class Lexer
 						}
 					}
 
-					System.out.println("appending: \"" + ((char) c) + "\", " + c);
 					inlineCode.append((char) c);
 
 				}
@@ -293,7 +291,7 @@ public class Lexer
 
 			int temp = readChar();
 
-
+			System.out.println("Possible comment: line: " + (lineNumber + 1) + ", file: " + fileName);
 			// Check if we have read a block comment (this assumes that the block comment is 2 chars in length. //
 			if (temp == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[1])
 			{
