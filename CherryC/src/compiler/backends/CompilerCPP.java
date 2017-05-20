@@ -25,6 +25,7 @@ public class CompilerCPP extends LangCompiler
 
 	private IndentPrinter cppOutput;
 	private IndentPrinter hppOutput;
+	private ASTMemberAccess astMemberAccess;
 
 	public CompilerCPP()
 	{
@@ -210,7 +211,15 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
 	{
-		astFunctionCall.getDeclarationPath().compileSelf(this);
+		if (astFunctionCall.isConstructorCall())
+		{
+			cppOutput.print("new ");
+			((ASTMemberAccess)astFunctionCall.getDeclarationPath()).ofObject.compileSelf(this);
+		}
+		else
+		{
+			astFunctionCall.getDeclarationPath().compileSelf(this);
+		}
 		cppOutput.print("(");
 
 		for (ASTBase child : astFunctionCall.childAsts)
@@ -253,7 +262,10 @@ public class CompilerCPP extends LangCompiler
 				cppOutput.print(getRawName(astVariableUsage.getContainingClass()));
 				break;
 			default:
-				cppOutput.print(astVariableUsage.getName());
+				if (astVariableUsage.getDeclaration() instanceof CherryType)
+					cppOutput.print(getRawName((CherryType)astVariableUsage.getDeclaration()));
+				else
+					cppOutput.print(astVariableUsage.getName());
 				break;
 		}
 	}
@@ -399,9 +411,15 @@ public class CompilerCPP extends LangCompiler
 			cppOutput.print("::");
 		else
 			cppOutput.print("->");
-		String memberName = astMemberAccess.getMember().getName();
-		if (memberName.equals(Syntax.ReservedFunctions.CONSTRUCTOR))
+		ASTBase member = astMemberAccess.getMember();
+		String memberName;
+		if (member instanceof CherryType)
+			memberName = getRawName((CherryType) member);
+		else if (member.getName().equals(Syntax.ReservedFunctions.CONSTRUCTOR))
 			memberName = getRawName(astMemberAccess.ofObject.getExpressionType());
+		else
+			memberName = member.getName();
+
 		cppOutput.print(memberName);
 	}
 

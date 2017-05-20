@@ -79,6 +79,12 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	}
 
 	@Override
+	public String getEnd()
+	{
+		return memberName;
+	}
+
+	@Override
 	public void debugSelf(IndentPrinter destination)
 	{
 		ofObject.debugSelf(destination);

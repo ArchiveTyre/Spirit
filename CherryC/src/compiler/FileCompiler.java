@@ -93,7 +93,7 @@ public class FileCompiler
 
 		if (shouldCompile(fileName))
 		{
-			Lexer lexer = new Lexer(new PushbackInputStream(new FileInputStream(fileName)), fileName);
+			Lexer lexer = new Lexer(new PushbackInputStream(new FileInputStream(fileName), 3), fileName);
 			Parser parser = new Parser(lexer);
 			parser.parseFile(dest);
 		}

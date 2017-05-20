@@ -44,4 +44,10 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 	{
 		compiler.compileVariableUsage(this);
 	}
+
+	@Override
+	public String getEnd()
+	{
+		return getName();
+	}
 }
