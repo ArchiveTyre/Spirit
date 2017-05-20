@@ -152,7 +152,7 @@ class ParserTest
 		// Precedence. //
 		testClassCompile("Precedence1", "2 + 2 * 2 + 2");
 		testClassCompile("Precedence2", "2 + 2 == 2 + 2");
-		testClassCompile("Precedence3", "2 > 2 == 2 < 2");
+		testClassCompile("Precedence3", "2 > 2 is 2 < 2");
 		testClassCompile("Precedence2", "2 + 2 + 4 * 4 + 2 + 2");
 		testClassCompile("Precedence2", "2 * 2 + 2 * 2");
 
@@ -186,7 +186,7 @@ class ParserTest
 		testClassCompile("Comments4", "name := \"Godzilla\"\nna<%te\nst%>me = \"Nano\"");
 
 		// Inline. //
-		testClassCompile("Inline1", "a := 5\n#inline\na = 15;\ncout << a;\n#end\na = 10");
+		testClassCompile("Inline1", "a := 5\n#inline\n// Lol, inline c...\nstd::cout << a;\n#end\na = 10");
 
 
 

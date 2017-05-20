@@ -1,5 +1,7 @@
 package compiler;
 
+import java.util.HashMap;
+
 /**
  * @author Tyrerexus
  * @date 11/04/17.
@@ -24,6 +26,7 @@ public class Token
 		INLINE,
 	}
 
+
 	public String value;
 	public TokenType tokenType;
 	public int indent = 0;
@@ -38,6 +41,17 @@ public class Token
 		this.tokenType = tokenType;
 		this.columnNumber = columnNumber;
 		this.lineNumber = lineNumber;
+
+
+		if (tokenType == TokenType.SYMBOL)
+		{
+			if (Syntax.isOperator(value))
+			{
+				this.tokenType = TokenType.OPERATOR;
+				this.value = Syntax.getOperator(value);
+			}
+		}
+
 	}
 
 	public Token(int indent, int lineNumber)
