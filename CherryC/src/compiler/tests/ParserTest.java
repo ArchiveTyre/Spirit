@@ -6,10 +6,11 @@ import compiler.ast.ASTClass;
 import compiler.lib.IndentPrinter;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  *
@@ -186,6 +187,11 @@ class ParserTest
 
 		// Inline. //
 		testClassCompile("Inline1", "a := 5\n#inline\na = 15;\ncout << a;\n#end\na = 10");
+
+
+
+
+
 
 		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
 		testClassCompile("Test2", tmpStrPrint + "print\n\tif 10 == 10\n\t\ta := 20");
