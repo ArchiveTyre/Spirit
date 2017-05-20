@@ -12,7 +12,7 @@ public class Syntax
 {
 	public class ReservedFunctions
 	{
-		public static final String CONSTRUCTOR = "init";
+		public static final String CONSTRUCTOR = "new";
 	}
 
 	public class Keyword
