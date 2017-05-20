@@ -79,7 +79,7 @@ class ParserTest
 		String tmpInt = "tmp : () int = 5\n";
 		String tmpParam = "tmp2 : (x) int = x * 2";
 
-		/*// Empty. //
+		// Empty. //
 		testClassCompile("Empty1", "");
 
 		// Test basic assignment. //
@@ -133,7 +133,7 @@ class ParserTest
 		testClassCompile("Loops2", tmpPrint + "loop 10\n\tprint 2");
 		testClassCompile("Loops3", tmpPrint + "loop 6 + 2\n\tprint 2");
 		//testClassCompile("Loops4", "loop 10 as i:\n\tprint! 2");
-		*/
+
 
 		// File type declarations. //
 		testClassCompile(false, "FileType1", "type enum", "");

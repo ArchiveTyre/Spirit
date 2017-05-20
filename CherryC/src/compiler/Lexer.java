@@ -199,21 +199,22 @@ public class Lexer
 					c = readChar();
 					if (c == Syntax.Macro.IDENTIFIER)
 					{
-						 StringBuilder inlineMacro = new StringBuilder();
-						 while (Character.isAlphabetic((c = readChar())))
-						 {
+						StringBuilder inlineMacro = new StringBuilder();
+						while (Character.isAlphabetic((c = readChar())))
+						{
 							inlineMacro.append((char) c);
-						 }
+						}
 
-						 if (inlineMacro.toString().equals(Syntax.Macro.END))
-						 {
-						 	inline = false;
-						 }
-						 else
-						 {
-						 	unReadChar(c);
-						 	inlineCode.append(inlineMacro.toString());
-						 }
+						unReadChar(c);
+
+						if (inlineMacro.toString().equals(Syntax.Macro.END))
+						{
+							inline = false;
+						}
+						else
+						{
+							inlineCode.append(inlineMacro.toString());
+						}
 					}
 
 					System.out.println("appending: \"" + ((char) c) + "\", " + c);

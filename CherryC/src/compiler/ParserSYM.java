@@ -68,6 +68,8 @@ public class ParserSYM
 			case "CompilerVersion":
 			case "ClassName":
 			{
+				// Skip these values. They are not important right now. ^w^ //
+
 				while (true)
 				{
 					step();
@@ -79,11 +81,15 @@ public class ParserSYM
 			}
 			case "ExtendsClass":
 			{
+				// Make sure to extend this class... //
+
 				dest.extendsClass = grab();
 				break;
 			}
 			case "Arg":
 			{
+				// Appends an argument to the argument pool. Later used by a function declaration. //
+
 				String name = grab();
 				CherryType cherryType = parseType(dest);
 				// FIXME:  Should args really have no parent?
@@ -109,6 +115,16 @@ public class ParserSYM
 				String name = grab();
 				CherryType cherryType = parseType(dest);
 				new ASTVariableDeclaration(dest, name, cherryType, null);
+				break;
+			}
+			case "Dependency":
+			{
+				StringBuilder dependencyName = new StringBuilder();
+				while(lookAheads[0].value.equals(".") || lookAheads[0].tokenType == TokenType.SYMBOL)
+				{
+					dependencyName.append(grab());
+				}
+				dest.importClass(dependencyName.toString(), new String[] {"*"});
 				break;
 			}
 			default:

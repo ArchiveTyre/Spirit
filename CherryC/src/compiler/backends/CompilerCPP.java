@@ -40,7 +40,10 @@ public class CompilerCPP extends LangCompiler
 
 	private boolean isSemicolonless(ASTBase ast)
 	{
-		return ast instanceof ASTIf || ast instanceof ASTLoop || ast instanceof ASTElse
+		return ast instanceof ASTIf
+				|| ast instanceof ASTLoop
+				|| ast instanceof ASTElse
+				|| ast instanceof  ASTInline
 				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionGroup);
 	}
 
@@ -399,6 +402,13 @@ public class CompilerCPP extends LangCompiler
 		if (memberName.equals(Syntax.ReservedFunctions.CONSTRUCTOR))
 			memberName = getRawName(astMemberAccess.ofObject.getExpressionType());
 		cppOutput.print(memberName);
+	}
+
+	@Override
+	public void compileInline(ASTInline astInline)
+	{
+		for (String line : astInline.code.split("\n"))
+			cppOutput.println(line);
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")

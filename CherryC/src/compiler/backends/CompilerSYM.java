@@ -28,6 +28,15 @@ public class CompilerSYM extends LangCompiler
 		symOutput.println("CompilerVersion: " + Main.VERSION);
 		symOutput.println("ExtendsClass: " + astClass.extendsClass);
 		symOutput.println();
+
+		if (astClass.classImports.size() > 0)
+		{
+			for (ASTClass.ImportDeclaration importDeclaration : astClass.classImports)
+			{
+				symOutput.println("Dependency: " + importDeclaration.importPackage);
+			}
+			symOutput.println();
+		}
 		for (ASTBase node : astClass.childAsts)
 		{
 			node.compileSelf(this);
@@ -60,6 +69,37 @@ public class CompilerSYM extends LangCompiler
 	}
 
 	@Override
+	public void compileFunctionGroup(ASTFunctionGroup astFunctionGroup)
+	{
+		for (ASTBase node : astFunctionGroup.childAsts)
+		{
+			node.compileSelf(this);
+		}
+	}
+
+	@Override
+	public void createFileStreams(String fileName)
+	{
+		try
+		{
+			symStream = new PrintStream("out/" + fileName + ".sym");
+			symOutput = new IndentPrinter(symStream);
+		}
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void closeStreams()
+	{
+		symStream.flush();
+		symStream.close();
+	}
+
+	@Override
 	public void compileIf(ASTIf astIf)
 	{
 
@@ -75,15 +115,6 @@ public class CompilerSYM extends LangCompiler
 	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
 	{
 
-	}
-
-	@Override
-	public void compileFunctionGroup(ASTFunctionGroup astFunctionGroup)
-	{
-		for (ASTBase node : astFunctionGroup.childAsts)
-		{
-			node.compileSelf(this);
-		}
 	}
 
 	@Override
@@ -123,24 +154,8 @@ public class CompilerSYM extends LangCompiler
 	}
 
 	@Override
-	public void createFileStreams(String fileName)
+	public void compileInline(ASTInline astInline)
 	{
-		try
-		{
-			symStream = new PrintStream("out/" + fileName + ".sym");
-			symOutput = new IndentPrinter(symStream);
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
 
-	}
-
-	@Override
-	public void closeStreams()
-	{
-		symStream.flush();
-		symStream.close();
 	}
 }

@@ -133,6 +133,6 @@ public class FileCompiler
 		}
 
 		// If we changed the source file since the last compile, then we need to recompile. //
-		return (sourceFile.lastModified() > symFile.lastModified());
+		return (sourceFile.lastModified() >= symFile.lastModified());
 	}
 }

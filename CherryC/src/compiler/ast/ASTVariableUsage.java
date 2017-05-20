@@ -12,9 +12,8 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 {
 	/**
 	 * The path to the declaration.
+	 * @return Returns the declaration.
 	 */
-	//public ASTBase declaration;
-
 	public ASTBase getDeclaration()
 	{
 		if (name.equals("super"))
