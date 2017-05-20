@@ -9,9 +9,12 @@ import compiler.lib.IndentPrinter;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * @author Tyrerexus
@@ -63,6 +66,17 @@ class CompilerCPPTest
 
 		//testCompiler("Imports", "import Hello.World");
 		testCompiler("Inline", "a := 10\n#inline\ncout << a;\n#end\na := 15");*/
+
+		try
+		{
+			String fileContents = new String(Files.readAllBytes(Paths.get("/home/alex/TestArea/Print.raven")));
+			System.out.println(fileContents);
+			testCompiler("Inline2", fileContents);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 
 	}
 

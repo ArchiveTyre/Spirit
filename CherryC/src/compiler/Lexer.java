@@ -212,6 +212,7 @@ public class Lexer
 						}
 						else
 						{
+							inlineCode.append(Syntax.Macro.IDENTIFIER);
 							inlineCode.append(inlineMacro.toString());
 						}
 					}
@@ -291,7 +292,6 @@ public class Lexer
 
 			int temp = readChar();
 
-			System.out.println("Possible comment: line: " + (lineNumber + 1) + ", file: " + fileName);
 			// Check if we have read a block comment (this assumes that the block comment is 2 chars in length. //
 			if (temp == Syntax.Op.BLOCK_COMMENT_START.toCharArray()[1])
 			{

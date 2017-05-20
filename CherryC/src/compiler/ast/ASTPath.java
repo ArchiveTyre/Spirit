@@ -16,5 +16,6 @@ public interface ASTPath
 	void setParent(ASTParent newParent);
 	void compileSelf(LangCompiler compiler);
 	String getName();
+	String getEnd();
 	CherryType getExpressionType();
 }

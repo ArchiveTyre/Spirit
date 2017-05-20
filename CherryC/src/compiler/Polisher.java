@@ -3,6 +3,8 @@ package compiler;
 import compiler.ast.*;
 import compiler.builtins.Builtins;
 
+import java.util.ArrayList;
+
 /**
  * Polishes a class before compilation.
  *
@@ -85,7 +87,7 @@ public class Polisher
 		if (astClass.extendsClassAST == null)
 			return;
 
-		for (ASTBase child : astClass.childAsts)
+		for (ASTBase child : new ArrayList<>(astClass.childAsts))
 		{
 			if (child instanceof ASTVariableDeclaration
 					&& ((ASTVariableDeclaration)child).isFunctionDeclaration())

@@ -2,6 +2,7 @@ package compiler.ast;
 
 import compiler.CherryType;
 import compiler.LangCompiler;
+import compiler.Syntax;
 import compiler.lib.IndentPrinter;
 
 /**
@@ -29,6 +30,16 @@ public class ASTFunctionCall extends ASTParent
 	{
 		declarationPath = newDeclarationPath;
 		newDeclarationPath.setParent(this);
+	}
+
+	/**
+	 * Checks if this is a call to a constructor.
+	 * @return True if this is a call to a constructor.
+	 */
+	public boolean isConstructorCall()
+	{
+		// TODO: Put in Syntax class.
+		return (declarationPath.getEnd().equals(Syntax.ReservedFunctions.CONSTRUCTOR));
 	}
 
 	public ASTFunctionCall(ASTParent parent)
