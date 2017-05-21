@@ -5,6 +5,7 @@ import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -37,13 +38,18 @@ public class Parser
 	/**
 	 * Look ahead for the next few tokens.
 	 */
-	private Token[] lookAheads = new Token[3];
+	public Token[] lookAheads = new Token[3];
 
 	/**
 	 * The previous token.
 	 * Set after something calls {@link #step()}
 	 */
-	private Token previous = null;
+	public Token previous = null;
+
+	/**
+	 * Printer for printing errors.
+	 */
+	private ErrorPrint error;
 
 	/**
 	 * Creates a Parser that will read from a lexer.
@@ -51,12 +57,20 @@ public class Parser
 	 */
 	public Parser(Lexer lexer)
 	{
+		this(lexer, System.out);
+	}
+
+	public Parser(Lexer lexer, PrintStream out)
+	{
 		this.lexer = lexer;
 		for (int i = 0; i < lookAheads.length; i++)
 		{
 			lookAheads[i] = lexer.getToken();
 		}
+
+		this.error = new ErrorPrint(this, out);
 	}
+
 
 	/**
 	 * A list of the precedence values for each operator.
@@ -128,7 +142,7 @@ public class Parser
 			}
 			else
 			{
-				syntaxError(")", "Unmatched parenthesis.");
+				error.syntaxError(")", "Unmatched parenthesis.");
 				return null;
 			}
 		}
@@ -266,7 +280,7 @@ public class Parser
 		// Garbage is okay if it's just an EOF //
 		else if (!eOLF())
 		{
-			syntaxError("primary type", "Got garbage!");
+			error.syntaxError("primary type", "Got garbage!");
 		}
 		return null;
 	}
@@ -371,13 +385,13 @@ public class Parser
 								builderArgs.append(' ');
 							}
 							String args = builderArgs.substring(0, builderArgs.length() - 3);
-							syntaxError("Type specification", "Some arguments did not have a specified type. [" + args + "]");
+							error.syntaxError("Type specification", "Some arguments did not have a specified type. [" + args + "]");
 						}
 					}
 
 					if (!match(TokenType.RPAR))
 					{
-						syntaxError(")", "Unmatched parenthesis");
+						error.syntaxError(")", "Unmatched parenthesis");
 					}
 
 					if (look(0, TokenType.SYMBOL))
@@ -410,13 +424,13 @@ public class Parser
 				}
 				else
 				{
-					syntaxError("(", "All function type declarations need to start with a parenthesis");
+					error.syntaxError("(", "All function type declarations need to start with a parenthesis");
 					return null;
 				}
 			}
 			else
 			{
-				syntaxError(":", "You need to specify a type for the function, void functions use () as their type ");
+				error.syntaxError(":", "You need to specify a type for the function, void functions use () as their type ");
 				return null;
 			}
 		}
@@ -449,7 +463,7 @@ public class Parser
 		}
 		else
 		{
-			syntaxError(Syntax.Op.RETURN, "COMPILER ERROR!!!");
+			error.syntaxError(Syntax.Op.RETURN, "COMPILER ERROR!!!");
 			return null;
 		}
 	}
@@ -488,7 +502,7 @@ public class Parser
 		}
 		else
 		{
-			syntaxError("name", "Names are required for variable declaration.");
+			error.syntaxError("name", "Names are required for variable declaration.");
 			return null;
 		}
 	}
@@ -516,12 +530,12 @@ public class Parser
 				}
 				else
 				{
-					syntaxError("filetype", previous.value, "The file type provided is not recognized");
+					error.syntaxError("filetype", previous.value, "The file type provided is not recognized");
 				}
 			}
 			else
 			{
-				syntaxError("file type", "A file type is required for file type declaration.");
+				error.syntaxError("file type", "A file type is required for file type declaration.");
 			}
 		}
 
@@ -559,7 +573,7 @@ public class Parser
 				ASTBase until = loop.initialStatement;
 				if (until.getExpressionType() != Builtins.getBuiltin("int"))
 				{
-					syntaxError("int", "Can only loop without index with type \"int\".");
+					error.syntaxError("int", "Can only loop without index with type \"int\".");
 					return null;
 				}
 				final String counterName = "__c_counter";
@@ -596,7 +610,7 @@ public class Parser
 			}
 			else
 			{
-				unexpectedExpressionError(lookAheads[0].value, "Invalid name for class/object.");
+				error.unexpectedExpressionError("Class name", "Invalid name for class/object.");
 			}
 		}
 		else
@@ -634,7 +648,7 @@ public class Parser
 			}
 			else
 			{
-				syntaxError("Package ID", "Need a package ID to import, but I didn't get one. :(");
+				error.syntaxError("Package ID", "Need a package ID to import, but I didn't get one. :(");
 				return false;
 			}
 		}
@@ -657,7 +671,7 @@ public class Parser
 
 				if (files.isEmpty())
 				{
-					syntaxError("filename or wildcard", "Need files to import.");
+					error.syntaxError("filename or wildcard", "Need files to import.");
 					return false;
 				}
 
@@ -666,7 +680,7 @@ public class Parser
 			}
 			else
 			{
-				syntaxError("Package ID", "Need a package ID to import, but I didn't get one. :(");
+				error.syntaxError("Package ID", "Need a package ID to import, but I didn't get one. :(");
 				return false;
 			}
 		}
@@ -766,7 +780,7 @@ public class Parser
 		else if (match(Syntax.Keyword.TYPE))
 		{
 			// Error. //
-			unexpectedExpressionError(previous.value, "File type has already been declared, was not expecting another declaration");
+			error.unexpectedExpressionError("", previous.value, "File type has already been declared, was not expecting another declaration");
 			return false;
 		}
 
@@ -834,7 +848,7 @@ public class Parser
 		// Check for garbage. //
 		if (!match(TokenType.EOF))
 		{
-			syntaxError("end of file", "There is un-parsed junk at the end of the file. ");
+			error.syntaxError("end of file", "There is un-parsed junk at the end of the file. ");
 		}
 
 	}
@@ -964,42 +978,6 @@ public class Parser
 		return lookAheads[index].tokenType == type;
 	}
 
-	/**
-	 * Reports a syntax error like {@link #syntaxError(String, String, String)}, except the "actual" argument
-	 * is replaced by the current look ahead.
-	 * @param expected What we expected.
-	 * @param message What happened. As well as correct usage, how to fix, etc.
-	 */
-	private void syntaxError(String expected, String message)
-	{
-		syntaxError(expected, lookAheads[0].value, message);
-	}
-
-	/**
-	 * Reports a syntax error.
-	 * @param expected What we expected.
-	 * @param actual What we got.
-	 * @param message What happened. As well as correct usage, how to fix, etc.
-	 */
-	private void syntaxError(String expected, String actual, String message)
-	{
-		System.err.println("[Raven]: Syntax Error in file: " + lexer.getFileName() + "\tat line " + previous.lineNumber + ".");
-		System.err.println("\tExpected:\t\t" + expected);
-		System.err.println("\tActual:\t\t\t" + actual);
-		System.err.println("\tMessage:\t\t" + (message.equals("") ? "[NONE]" : message));
-	}
-
-	/**
-	 * Reports an unexpected expression error.
-	 * @param expression The expression that was unexpected.
-	 * @param message What to tell. For instance: correct usage, what was expected, how to fix, etc.
-	 */
-	private void unexpectedExpressionError(String expression, String message)
-	{
-		System.err.println("[Raven]: Unexpected Expression Error in file: " + lexer.getFileName() + "\tat line " + previous.lineNumber + ".");
-		System.err.println("Expression:\t\t" + expression);
-		System.err.println("Message:\t\t" + (message.equals("") ? "[NONE]" : message));
-	}
 
 	/**
 	 * Reports an error.
