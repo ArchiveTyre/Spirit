@@ -84,13 +84,6 @@ public class Lexer
 	{
 		int c = readChar();
 
-
-		// Check if char is EOF. //
-		if (c == -1)
-		{
-			return new Token("", Token.TokenType.EOF, columnNumber, lineNumber);
-		}
-
 		// Try to create indent token. //
 		if (parenthesesCount == 0 && columnNumber == 0 && (c == ' ' || c == '\t'))
 		{
@@ -113,14 +106,11 @@ public class Lexer
 		while (c == ' ' || c == '\t' || c == '\n')
 			c = readChar();
 
-		// Check a bunch of single char tokens. //
-		//if (c == '\n' && parenthesesCount == 0)
-		//{
-		//	return new Token("\n", Token.TokenType.NEWLINE, columnNumber, lineNumber);
-		//}
-
-		//while (c == ' ' || c == '\t' || c == '\n')
-		//	c = readChar();
+		// Check if char is EOF. //
+		if (c == -1)
+		{
+			return new Token("", Token.TokenType.EOF, columnNumber, lineNumber);
+		}
 
 		if (c == '(')
 		{
@@ -171,7 +161,7 @@ public class Lexer
 		// Check if we are reading a string. //
 		else if (c == '"')
 		{
-			StringBuilder string = new StringBuilder("\"");
+			StringBuilder string = new StringBuilder();
 
 			c = readChar();
 			while (c != '"')
@@ -179,7 +169,6 @@ public class Lexer
 				if (c != '\t' && c != '\n') string.append((char) c);
 				c = readChar();
 			}
-			string.append('"');
 
 			return new Token(string.toString(), Token.TokenType.STRING, columnNumber, lineNumber);
 		}

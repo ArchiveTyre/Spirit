@@ -60,7 +60,8 @@ public class CompilerCPP extends LangCompiler
 		/// Include guard. ///
 		hppOutput.println("#pragma once");
 		cppOutput.println("#include \"" + hppLocation + "\"");
-		cppOutput.println("#include <string>");
+		hppOutput.println("#include <string>");
+		hppOutput.println("using std::string;");
 
 		/// Compile the imports. ///
 		{
@@ -133,7 +134,6 @@ public class CompilerCPP extends LangCompiler
 			cppOutput.println("{");
 			cppOutput.indentation++;
 			cppOutput.println("Main main = new ___RawMain();");
-			cppOutput.println("main->main();");
 			cppOutput.println("return 0;");
 			cppOutput.indentation--;
 			cppOutput.println("}");
@@ -391,7 +391,7 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileString(ASTString astString)
 	{
-		cppOutput.print(astString.value);
+		cppOutput.print('"' + astString.value + '"');
 	}
 
 	@Override

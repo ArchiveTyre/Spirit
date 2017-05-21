@@ -142,7 +142,7 @@ public class ASTClass extends ASTParent implements CherryType
 			if (parentAsVar.getValue() instanceof ASTFunctionGroup)
 			{
 				ASTFunctionGroup group = (ASTFunctionGroup)parentAsVar.getValue();
-				return (ASTParent)group.childAsts.get(0);
+				return (ASTParent)group.lastChild();
 			}
 
 		}

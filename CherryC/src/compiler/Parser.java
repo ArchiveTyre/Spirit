@@ -45,8 +45,6 @@ public class Parser
 	 */
 	private Token previous = null;
 
-	private boolean inAnonymousFunction = false;
-
 	/**
 	 * Creates a Parser that will read from a lexer.
 	 * @param lexer The lexer to read from.
@@ -89,7 +87,9 @@ public class Parser
 	 */
 	private boolean isFundamental(TokenType tokenType)
 	{
-		return tokenType == TokenType.SYMBOL || tokenType == TokenType.NUMBER || tokenType == TokenType.STRING;
+		return tokenType == TokenType.SYMBOL
+				|| tokenType == TokenType.NUMBER
+				|| tokenType == TokenType.STRING;
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class Parser
 	 */
 	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent)
 	{
-		while (look(0,TokenType.OPERATOR) && !look(0, ","))
+		while (look(0,TokenType.OPERATOR))
 		{
 
 			// Make sure that the operator exists in the precedence table. //
@@ -196,7 +196,7 @@ public class Parser
 			{
 
 				ASTBase right = parsePrimary(parent);
-				while (look(0, TokenType.OPERATOR) && !look(0, ","))
+				while (look(0, TokenType.OPERATOR))
 				{
 					int otherPrecedence = operatorPrecedenceMap.get(lookAheads[0].value);
 					if (otherPrecedence > opPrecedence)
