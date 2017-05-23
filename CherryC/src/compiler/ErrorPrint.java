@@ -10,11 +10,11 @@ import java.io.PrintStream;
 public class ErrorPrint
 {
 	public PrintStream out = System.out;
-	private Parser parser;
+	private String filename;
 
-	public ErrorPrint(Parser parser)
+	public ErrorPrint(String filename)
 	{
-
+		this.filename = filename;
 	}
 
 	public void syntaxError(String expected, String actual, String message, boolean fatal)
@@ -41,7 +41,7 @@ public class ErrorPrint
 	{
 		// If the error is fatal, prepend a sign that it is fatal. //
 		errorType = (fatal) ? "FATAL" + errorType : errorType;
-		System.err.println("[Raven] " + errorType + "error in file \"" + parser.lexer.getFileName() + "\"\tat line: ");
+		System.err.println("[Raven] " + errorType + "error in file \"" + filename + "\"\tat line: ");
 		System.err.println("\tExpected:\t\t" + expected);
 		System.err.println("\tActual:\t\t" + actual);
 		System.err.println("\tMessage:\t\t" + (message.equals("") ? "[NONE]" : message));

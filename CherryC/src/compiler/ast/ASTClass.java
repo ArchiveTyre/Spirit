@@ -54,9 +54,15 @@ public class ASTClass extends ASTParent implements CherryType
 	 */
 	public boolean ignoreImports = false;
 
+	public ASTBase newlyInsertedCode = null;
+
 	public ASTClass(String name, ASTParent parent)
 	{
 		super(parent, name);
+		if (parent == null)
+			this.columnNumber = -2;
+		else
+			this.columnNumber = -1;
 	}
 
 	/**
@@ -111,26 +117,25 @@ public class ASTClass extends ASTParent implements CherryType
 	 */
 	public ASTParent getParentForNewCode(int line_indent)
 	{
-		if (childAsts.size() == 0)
+		if (newlyInsertedCode == null)
+		{
 			return this;
-
-		// Get last child node. //
-		ASTBase newly_inserted_code = childAsts.get(childAsts.size() - 1);
+		}
 
 		ASTBase parent;
 
 		// Find parent. //
-		if (line_indent > newly_inserted_code.columnNumber)
+		if (line_indent > newlyInsertedCode.columnNumber)
 		{
-			parent = newly_inserted_code;
+			parent = newlyInsertedCode;
 		}
-		else if (line_indent == newly_inserted_code.columnNumber)
+		else if (line_indent == newlyInsertedCode.columnNumber)
 		{
-			parent = newly_inserted_code.getParent();
+			parent = newlyInsertedCode.getParent();
 		}
 		else
 		{
-			parent = newly_inserted_code.getParent();
+			parent = newlyInsertedCode.getParent();
 			while(parent.columnNumber >= line_indent && parent.getParent() != null)
 				parent = parent.getParent();
 		}

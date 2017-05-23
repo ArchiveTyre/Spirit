@@ -1,9 +1,6 @@
 package compiler.backends;
 
-import compiler.CherryType;
-import compiler.LangCompiler;
-import compiler.Main;
-import compiler.Syntax;
+import compiler.*;
 import compiler.ast.*;
 import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
@@ -349,30 +346,44 @@ public class CompilerCPP extends LangCompiler
 
 		cppOutput.println(cppDeclaration);
 
-		ASTFunctionCall listInit = null;
+		ASTFunctionCall listInitSuperConstructorCall = null;
 		if (group.isConstructor())
 		{
-			cppOutput.print(":");
-			cppOutput.print(getRawName(astFunctionDeclaration.getContainingClass().extendsClassAST));
-			cppOutput.print("(");
-			listInit = (ASTFunctionCall) astFunctionDeclaration.childAsts.get(0);
-			for (ASTBase child : listInit.childAsts)
+			listInitSuperConstructorCall = (ASTFunctionCall) astFunctionDeclaration.childAsts.get(0);
+
+			// Check if listInitSuperCall is actually valid... //
+			if (listInitSuperConstructorCall.getDeclarationPath() instanceof ASTMemberAccess
+					&& listInitSuperConstructorCall.getDeclarationPath().getEnd().equals("new"))
 			{
-				if (listInit.compileChild(child))
+
+
+				cppOutput.print(":");
+				cppOutput.print(getRawName(astFunctionDeclaration.getContainingClass().extendsClassAST));
+				cppOutput.print("(");
+
+				for (ASTBase child : listInitSuperConstructorCall.childAsts)
 				{
-					child.compileSelf(this);
-					if (child != listInit.lastChild())
-						cppOutput.print(", ");
+					if (listInitSuperConstructorCall.compileChild(child))
+					{
+						child.compileSelf(this);
+						if (child != listInitSuperConstructorCall.lastChild())
+							cppOutput.print(", ");
+					}
 				}
+				cppOutput.println(")");
+
 			}
-			cppOutput.println(")");
+			else
+			{
+				System.err.println("ERROR: Constructor doesn't start with call to super constructor!");
+			}
 		}
 
 		cppOutput.println("{");
 		cppOutput.indentation++;
 		for (ASTBase child : astFunctionDeclaration.childAsts)
 		{
-			if (child != listInit)
+			if (child != listInitSuperConstructorCall && astFunctionDeclaration.compileChild(child))
 			{
 				child.compileSelf(this);
 				cppOutput.println(isSemicolonless(child) ? ' ' : ';');

@@ -39,7 +39,7 @@ public class ASTFunctionCall extends ASTParent
 	public boolean isConstructorCall()
 	{
 		// TODO: Put in Syntax class.
-		return (declarationPath.getEnd().equals(Syntax.ReservedFunctions.CONSTRUCTOR));
+		return declarationPath.getEnd().equals(Syntax.ReservedFunctions.CONSTRUCTOR);
 	}
 
 	public ASTFunctionCall(ASTParent parent)

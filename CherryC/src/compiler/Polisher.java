@@ -45,16 +45,14 @@ public class Polisher
 			{
 				ASTFunctionCall firstCall = (ASTFunctionCall) firstThing;
 
-				// Check if the first call calls "super.init". //
+				// Check if the first call calls "super.new". //
 				if (firstCall.getDeclarationPath() instanceof ASTMemberAccess)
 				{
 					ASTMemberAccess access = (ASTMemberAccess) firstCall.getDeclarationPath();
-					if (access.getMemberName().equals(Syntax.ReservedFunctions.CONSTRUCTOR))
+					if (access.getEnd().equals(Syntax.ReservedFunctions.CONSTRUCTOR)
+							&& access.ofObject.getName().equals("super"))
 					{
-						if (access.ofObject.getName().equals("super"))
-						{
-							callsSuper = true;
-						}
+						callsSuper = true;
 					}
 				}
 			}
@@ -67,11 +65,13 @@ public class Polisher
 
 			// Compiles roughly to: (super.constructor) //
 			// Inserts as first thing that happens on call. //
-			ASTFunctionCall astFunctionCall = new ASTFunctionCall(null);
+			// Thus, parent is specified later. //
+			ASTFunctionCall astFunctionCall = new ASTFunctionCall(function);
 			astFunctionCall.setDeclarationPath(
 					new ASTMemberAccess(astClass,
 							new ASTVariableUsage(astFunctionCall, "super"),
 					Syntax.ReservedFunctions.CONSTRUCTOR));
+			function.childAsts.remove(astFunctionCall);
 			function.childAsts.add(0, astFunctionCall);
 		}
 	}

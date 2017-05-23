@@ -170,17 +170,16 @@ public class Parser
 	{
 		while (look(0,TokenType.OPERATOR))
 		{
+			// Find the operator in the table as well as name;
+			String opName = lookAheads[0].value;
 
 			// Make sure that the operator exists in the precedence table. //
-			if (!operatorPrecedenceMap.containsKey(lookAheads[0].value))
+			if (!operatorPrecedenceMap.containsKey(opName))
 			{
 				System.err.println("COMPILER ERROR! Table does not contain precedence value of operator "
 						+ lookAheads[0].value);
 				return null;
 			}
-
-			// Find the operator in the table as well as name;
-			String opName = lookAheads[0].value;
 			int opPrecedence = operatorPrecedenceMap.get(opName);
 			step();
 
@@ -339,8 +338,6 @@ public class Parser
 							if (look(0, Syntax.Op.TYPEDEF))
 							{
 								CherryType argType = parseType(parent);
-								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
-								specifiedAnyArguments = true;
 
 								if (!unspecifiedParams.isEmpty())
 								{
@@ -351,6 +348,9 @@ public class Parser
 									}
 									unspecifiedParams.clear();
 								}
+
+								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+								specifiedAnyArguments = true;
 							}
 							else if (look(0, Syntax.Op.ARG_SEP) || look(0, TokenType.RPAR))
 							{
@@ -684,12 +684,16 @@ public class Parser
 
 	private boolean parseLine(ASTClass dest)
 	{
+		ASTBase newAST = null;
+
 		// Extract indents to get a parent. //
 		int lineIndent = 0;
 		if (match(TokenType.INDENT))
 		{
 			lineIndent = previous.indent;
 		}
+
+		int lineNumber = lexer.getLineNumber();
 
 		// Skip any empty lines.
 		if (match(TokenType.NEWLINE))
@@ -716,36 +720,21 @@ public class Parser
 				&& look(1, Syntax.Op.TYPEDEF)
 				&& look(2, TokenType.LPAR))
 		{
-			ASTVariableDeclaration function = parseFunctionDeclaration(parent);
-			if (function != null)
-			{
-				function.columnNumber = lineIndent;
-				return true;
-			}
-			return false;
+			newAST = parseFunctionDeclaration(parent);
 		}
 		else if (match(Syntax.Keyword.IF))
 		{
 			ASTBase condition = parseExpression(parent);
-
-			new ASTIf(parent, condition);
-			return true;
+			newAST = new ASTIf(parent, condition);
 		}
 		else if (match(Syntax.Keyword.ELSE))
 		{
-			new ASTElse(parent);
-			return true;
+			newAST = new ASTElse(parent);
 		}
 
 		else if (look(0, Syntax.Keyword.LOOP))
 		{
-			ASTLoop loop = parseLoop(parent);
-			if (loop != null)
-			{
-				loop.columnNumber = lineIndent;
-				return true;
-			}
-			return false;
+			newAST = parseLoop(parent);
 		}
 
 		// Try to parse as a variable declaration. //
@@ -753,13 +742,7 @@ public class Parser
 		else if (look(0, TokenType.SYMBOL)
 				&& look(1, Syntax.Op.TYPEDEF))
 		{
-			ASTVariableDeclaration declaration = parseVariableDeclaration(parent);
-			if (declaration != null)
-			{
-				declaration.columnNumber = lineIndent;
-				return true;
-			}
-			return false;
+			newAST = parseVariableDeclaration(parent);
 		}
 
 		// Check if it contains the keyword "type" to see if we can see what type it is. //
@@ -779,14 +762,7 @@ public class Parser
 		// Check if we have a return expression. //
 		else if (look (0, Syntax.Op.RETURN))
 		{
-			ASTReturnExpression ret = parseReturnExpression(parent);
-			if (ret != null)
-			{
-				ret.columnNumber = lineIndent;
-				return true;
-			}
-			return false;
-
+			newAST = parseReturnExpression(parent);
 		}
 
 		// Check if we have an inline expression. //
@@ -795,19 +771,25 @@ public class Parser
 			// Get the code. //
 			String code = lookAheads[0].value;
 			step();
-			new ASTInline(parent, code);
+			newAST = new ASTInline(parent, code);
 			return true;
 		}
 
 		// Otherwise it's just an expression. //
 		else
 		{
-			ASTBase expression = parseExpression(parent);
-			if (expression != null)
-			{
-				expression.columnNumber = lineIndent;
-				return true;
-			}
+			newAST = parseExpression(parent);
+		}
+
+		if (newAST != null)
+		{
+			newAST.columnNumber = lineIndent;
+			newAST.lineNumber = lineNumber;
+			dest.newlyInsertedCode = newAST;
+			return true;
+		}
+		else
+		{
 			return false;
 		}
 	}
