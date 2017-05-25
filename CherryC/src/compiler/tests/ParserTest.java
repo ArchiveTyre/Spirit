@@ -1,6 +1,7 @@
 package compiler.tests;
 
 import compiler.Lexer;
+import compiler.Main;
 import compiler.Parser;
 import compiler.ast.ASTClass;
 import compiler.lib.IndentPrinter;
@@ -30,7 +31,7 @@ class ParserTest
 
 		InputStream inputStream = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 		PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream, 3);
-		Lexer lexer = new Lexer(pushbackInputStream, name + ".raven");
+		Lexer lexer = new Lexer(pushbackInputStream, name + Main.FILE_EXTENSION);
 		ASTClass astClass = new ASTClass(name, null);
 
 		Parser parser = new Parser(lexer);
@@ -41,7 +42,7 @@ class ParserTest
 		{
 			InputStream inputStream2 = new ByteArrayInputStream(importedString.getBytes(StandardCharsets.UTF_8));
 			PushbackInputStream pushbackInputStream2 = new PushbackInputStream(inputStream2);
-			Lexer lexer2 = new Lexer(pushbackInputStream2, name + "Sub.raven");
+			Lexer lexer2 = new Lexer(pushbackInputStream2, name + "Sub" + Main.FILE_EXTENSION);
 			ASTClass importedClass = new ASTClass("Other", astClass);
 
 			Parser parser2 = new Parser(lexer2);

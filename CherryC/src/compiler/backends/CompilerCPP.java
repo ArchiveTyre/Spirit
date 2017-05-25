@@ -69,7 +69,7 @@ public class CompilerCPP extends LangCompiler
 			for (ASTClass.ImportDeclaration declaration : astClass.classImports)
 			{
 				String pkgPath = PathFind.findInPath(path, "out/" +
-						declaration.importPackage.replace('.', '/') + ".raven.hpp");
+						declaration.importPackage.replace('.', '/') + Main.FILE_EXTENSION +".hpp");
 				if (pkgPath == null)
 				{
 					System.err.println("ERROR: Could not find package: " + declaration.importPackage);
@@ -253,15 +253,25 @@ public class CompilerCPP extends LangCompiler
 		switch (astVariableUsage.getName())
 		{
 			case "super":
+				// In this language there can only be one super class.          //
+				// Thus there is no need for using the real name of that class. //
+
 				cppOutput.print(getRawName(astVariableUsage.getContainingClass().extendsClassAST));
 				break;
-			case Syntax.ReservedFunctions.CONSTRUCTOR:
+			case Syntax.ReservedNames.CONSTRUCTOR:
+				// If we're calling the constructor, then replace that with the name //
+				// of the class in question.                                         //
+
 				cppOutput.print(getRawName(astVariableUsage.getContainingClass()));
 				break;
 			default:
+
+				// Check if we're referring to a type. //
 				if (astVariableUsage.getDeclaration() instanceof CherryType)
+					// If so, print out the raw name. //
 					cppOutput.print(getRawName((CherryType)astVariableUsage.getDeclaration()));
 				else
+					// Use normal name.
 					cppOutput.print(astVariableUsage.getName());
 				break;
 		}
@@ -296,7 +306,7 @@ public class CompilerCPP extends LangCompiler
 
 		// Get name and namespace. //
 		boolean topLevel = variableDeclaration.getParent() instanceof ASTClass;
-		boolean isConstructor = variableDeclaration.getName().equals(Syntax.ReservedFunctions.CONSTRUCTOR);
+		boolean isConstructor = variableDeclaration.getName().equals(Syntax.ReservedNames.CONSTRUCTOR);
 
 		String name = topLevel && isConstructor
 				? getRawName((ASTClass)variableDeclaration.getParent())
@@ -347,7 +357,7 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.println(cppDeclaration);
 
 		ASTFunctionCall listInitSuperConstructorCall = null;
-		if (group.isConstructor())
+		if (group.isConstructor() && astFunctionDeclaration.childAsts.size() > 0)
 		{
 			listInitSuperConstructorCall = (ASTFunctionCall) astFunctionDeclaration.childAsts.get(0);
 
@@ -355,8 +365,6 @@ public class CompilerCPP extends LangCompiler
 			if (listInitSuperConstructorCall.getDeclarationPath() instanceof ASTMemberAccess
 					&& listInitSuperConstructorCall.getDeclarationPath().getEnd().equals("new"))
 			{
-
-
 				cppOutput.print(":");
 				cppOutput.print(getRawName(astFunctionDeclaration.getContainingClass().extendsClassAST));
 				cppOutput.print("(");
@@ -371,7 +379,6 @@ public class CompilerCPP extends LangCompiler
 					}
 				}
 				cppOutput.println(")");
-
 			}
 			else
 			{
@@ -426,7 +433,7 @@ public class CompilerCPP extends LangCompiler
 		String memberName;
 		if (member instanceof CherryType)
 			memberName = getRawName((CherryType) member);
-		else if (member.getName().equals(Syntax.ReservedFunctions.CONSTRUCTOR))
+		else if (member.getName().equals(Syntax.ReservedNames.CONSTRUCTOR))
 			memberName = getRawName(astMemberAccess.ofObject.getExpressionType());
 		else
 			memberName = member.getName();

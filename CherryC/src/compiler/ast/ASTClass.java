@@ -3,6 +3,7 @@ package compiler.ast;
 import compiler.CherryType;
 import compiler.FileCompiler;
 import compiler.LangCompiler;
+import compiler.Main;
 import compiler.lib.IndentPrinter;
 
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class ASTClass extends ASTParent implements CherryType
 	{
 		classImports.add(new ImportDeclaration(importPackage, importSymbols));
 		if (!ignoreImports)
-			FileCompiler.importFile(importPackage + ".raven", (ASTClass)getParent());
+			FileCompiler.importFile(importPackage + Main.FILE_EXTENSION, (ASTClass)getParent());
 	}
 
 	/**
