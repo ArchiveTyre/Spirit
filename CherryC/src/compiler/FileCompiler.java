@@ -1,11 +1,13 @@
 package compiler;
 
+import compiler.ast.ASTBase;
 import compiler.ast.ASTClass;
 import compiler.backends.CompilerCPP;
 import compiler.backends.CompilerSYM;
 import compiler.lib.IndentPrinter;
 
 import java.io.*;
+import java.util.ArrayList;
 
 /**
  * This class compiles files written in our language.
@@ -43,8 +45,8 @@ public class FileCompiler
 
 			new Polisher(loadedClass).polishClass();
 
-			loadedClass.debugSelf(printer);
-			printer.println();
+			//loadedClass.debugSelf(printer);
+			//printer.println();
 
 			if (shouldCompile(fileName))
 			{
@@ -58,11 +60,22 @@ public class FileCompiler
 				symbolCompiler.compileClass(loadedClass);
 				symbolCompiler.closeStreams();
 			}
+
+			// Remove duplicates. //
+			for (ASTBase b : new ArrayList<>(parent.childAsts))
+			{
+				if (b instanceof ASTClass && b.getName().equals(loadedClass.getName()) && b != loadedClass)
+				{
+					// Found a duplicate. Remove it! //
+					b.setParent(null);
+				}
+			}
+
 			return loadedClass;
 		}
 		catch (FileNotFoundException e)
 		{
-			System.err.println("ERROR: Unknown file.");
+			System.err.println("ERROR: Unknown file");
 			e.printStackTrace();
 			return null;
 		}
@@ -87,6 +100,11 @@ public class FileCompiler
 	 */
 	private static ASTClass loadClassAST(String fileName, ASTClass root) throws FileNotFoundException
 	{
+		if (!new File(fileName).exists())
+		{
+			throw new FileNotFoundException(fileName);
+		}
+
 		String[] splitFileName = fileName.split("\\.");
 		String className = splitFileName[0];
 		ASTClass dest = new ASTClass(className, root);

@@ -21,21 +21,35 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	public ASTPath ofObject;
 
 	/**
-	 * The found member.
-	 */
-	private ASTBase member = null;
-
-	/**
 	 * The member name.
 	 */
 	private String memberName;
 
 	/**
-	 * The found member based on {@link #getMemberName()}
+	 * The find member based on {@link #getMemberName()}
 	 * @return The member that was found.
 	 */
 	public ASTBase getMember()
 	{
+		ASTBase member = null;
+
+		ArrayList<ASTBase> members = ofObject.getExpressionType().getChildNodes();
+		if (members != null)
+		{
+			for (ASTBase possibleMember : members)
+			{
+				if (possibleMember.getName().equals(memberName))
+				{
+					member = possibleMember;
+					break;
+				}
+			}
+		}
+
+		if (member == null)
+		{
+			System.err.println("Could not find member: " + memberName + " in " + ofObject.getName());
+		}
 		return member;
 	}
 
@@ -51,31 +65,12 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 		this.ofObject = ofObject;
 		ofObject.setParent(this);
 		this.memberName = memberName;
-
-		ArrayList<ASTBase> members =  ofObject.getExpressionType().getChildNodes();
-		if (members != null)
-		{
-			for (ASTBase member : members)
-			{
-				if (member.getName().equals(memberName))
-				{
-					this.member = member;
-					break;
-				}
-			}
-		}
-
-		if (member == null)
-		{
-			System.err.println("Could not find member: " + memberName + " in " + ofObject.getName());
-		}
-
 	}
 
 	@Override
 	public CherryType getExpressionType()
 	{
-		return member.getExpressionType();
+		return getMember().getExpressionType();
 	}
 
 	@Override
@@ -89,8 +84,8 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	{
 		ofObject.debugSelf(destination);
 		destination.print(".");
-		if (member != null)
-			destination.print(member.getName());
+		if (getMember() != null)
+			destination.print(getMember().getName());
 		else
 			destination.print("<<NOT FOUND>>");
 	}

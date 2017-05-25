@@ -1,6 +1,7 @@
 package compiler;
 
 import compiler.ast.ASTClass;
+import compiler.lib.IndentPrinter;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,10 +15,11 @@ import java.util.ArrayList;
 @SuppressWarnings("WeakerAccess")
 public class Main
 {
-	public static final String VERSION = "0.0.1 ALPHA";
-	public static final String COMPILER_NAME = "Cherry";
-	public static final String COPYRIGHT = "© 2017 TYREREXUS AND DAVID ALL RIGHTS RESERVED";
+	public static final String VERSION        = "0.0.1 ALPHA";
+	public static final String COMPILER_NAME  = "Cherry";
+	public static final String COPYRIGHT      = "© 2017 TYREREXUS AND DAVID ALL RIGHTS RESERVED";
 	public static final String RAVEN_PKG_PATH = "RAVEN_PKG_PATH";
+	public static final String FILE_EXTENSION = ".raven";
 	public static File outDir = new File("out/");
 
 	public static void main(String[] args)
@@ -49,16 +51,20 @@ public class Main
 		}
 
 		ASTClass root = new ASTClass("root", null);
-		ASTClass objectClass = new ASTClass("object", root);
+		FileCompiler.importFile(Syntax.ReservedNames.OBJECT_CLASS + FILE_EXTENSION, root);
+		//ASTClass objectClass = new ASTClass(Syntax.ReservedNames.OBJECT_CLASS, root);
 
-		Polisher polishObject = new Polisher(objectClass);
-		polishObject.polishClassCreateConstructor();
-		polishObject.forceConstructorsCallSuper();
+		//Polisher polishObject = new Polisher(objectClass);
+		//polishObject.polishClassCreateConstructor();
+		//polishObject.forceConstructorsCallSuper();
 
 		for (String file : fileNames)
 		{
 			FileCompiler.importFile(file, root);
 		}
+
+		IndentPrinter printer = new IndentPrinter(System.out);
+		root.debugSelf(printer);
 	}
 
 	private static void printVersion()
