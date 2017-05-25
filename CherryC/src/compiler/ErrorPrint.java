@@ -11,23 +11,38 @@ public class ErrorPrint
 {
 	public PrintStream out = System.out;
 	private String filename;
+	private Parser parser;
 
-	public ErrorPrint(String filename)
+	public ErrorPrint(Parser parser, PrintStream out)
 	{
-		this.filename = filename;
+		this.parser = parser;
+		this.out = out;
 	}
-
-	public void syntaxError(String expected, String actual, String message, boolean fatal)
-	{
-		error("Syntax", expected, actual, message, fatal);
-	}
-
 
 	public void syntaxError(String expected, String actual, String message)
 	{
-		error("Syntax", expected, actual, message, true);
+		error("Syntax", expected, actual, message);
 	}
 
+	public void syntaxError(String expected, String message)
+	{
+		error("Syntax", expected, message);
+	}
+
+	public void unexpectedExpressionError(String expected, String actual, String message)
+	{
+		error("Unexpected Expression", expected, actual, message);
+	}
+
+	public void unexpectedExpressionError(String expected, String message)
+	{
+		error("Unexpected Expression", expected, message);
+	}
+
+	public void compilerError(String message)
+	{
+		error("Compiler", message);
+	}
 
 	/**
 	 * Display an error.
@@ -37,30 +52,25 @@ public class ErrorPrint
 	 * @param message	Additional message providing more information.
 	 */
 	@SuppressWarnings("WeakerAccess")
-	public void error(String errorType, String expected, String actual, String message, boolean fatal)
+	public void error(String errorType, String expected, String actual, String message)
 	{
-		// If the error is fatal, prepend a sign that it is fatal. //
-		errorType = (fatal) ? "FATAL" + errorType : errorType;
-		System.err.println("[Raven] " + errorType + "error in file \"" + filename + "\"\tat line: ");
-		System.err.println("\tExpected:\t\t" + expected);
-		System.err.println("\tActual:\t\t" + actual);
-		System.err.println("\tMessage:\t\t" + (message.equals("") ? "[NONE]" : message));
+		System.err.println("[Raven] " + errorType + " error in file \"" + parser.lexer.getFileName() + "\"\tat line: ");
+		if (!expected.isEmpty()) System.out.println("\tExpected:\t\t" + message);
+		if (!actual.isEmpty()) System.out.println("\tActual:\t\t" + message);
+		if (!message.isEmpty()) System.out.println("\tMessage:\t\t" + message);
 
-		if (fatal) System.exit(0);
+		System.exit(0);
 	}
 
-	public void error(String errorType, String expected, String actual, String messager)
+	public void error(String errorType, String expected, String message)
 	{
-		error(errorType, expected, actual, messager, true);
+		error(errorType, expected, parser.lookAheads[0].value, message);
 	}
 
-
-
-
-
-
-
-
+	public void error(String errorType, String message)
+	{
+		error(errorType, "", "", "");
+	}
 }
 
 

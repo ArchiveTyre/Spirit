@@ -253,15 +253,25 @@ public class CompilerCPP extends LangCompiler
 		switch (astVariableUsage.getName())
 		{
 			case "super":
+				// In this language there can only be one super class.          //
+				// Thus there is no need for using the real name of that class. //
+
 				cppOutput.print(getRawName(astVariableUsage.getContainingClass().extendsClassAST));
 				break;
 			case Syntax.ReservedFunctions.CONSTRUCTOR:
+				// If we're calling the constructor, then replace that with the name //
+				// of the class in question.                                         //
+
 				cppOutput.print(getRawName(astVariableUsage.getContainingClass()));
 				break;
 			default:
+
+				// Check if we're referring to a type. //
 				if (astVariableUsage.getDeclaration() instanceof CherryType)
+					// If so, print out the raw name. //
 					cppOutput.print(getRawName((CherryType)astVariableUsage.getDeclaration()));
 				else
+					// Use normal name.
 					cppOutput.print(astVariableUsage.getName());
 				break;
 		}
@@ -355,8 +365,6 @@ public class CompilerCPP extends LangCompiler
 			if (listInitSuperConstructorCall.getDeclarationPath() instanceof ASTMemberAccess
 					&& listInitSuperConstructorCall.getDeclarationPath().getEnd().equals("new"))
 			{
-
-
 				cppOutput.print(":");
 				cppOutput.print(getRawName(astFunctionDeclaration.getContainingClass().extendsClassAST));
 				cppOutput.print("(");
@@ -371,7 +379,6 @@ public class CompilerCPP extends LangCompiler
 					}
 				}
 				cppOutput.println(")");
-
 			}
 			else
 			{
