@@ -7,6 +7,7 @@ import compiler.Syntax;
 import compiler.ast.*;
 import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
@@ -41,10 +42,7 @@ public class CompilerCPP extends LangCompiler
 
 	private boolean isSemicolonless(ASTBase ast)
 	{
-		return ast instanceof ASTIf
-				|| ast instanceof ASTLoop
-				|| ast instanceof ASTElse
-				|| ast instanceof  ASTInline
+		return  	ast instanceof ASTSemicolonLess
 				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionGroup);
 	}
 
@@ -428,6 +426,28 @@ public class CompilerCPP extends LangCompiler
 	{
 		for (String line : astInline.code.split("\n"))
 			cppOutput.println(line);
+	}
+
+	@Override
+	public void compileCase(ASTMatchCase astMatchCase)
+	{
+		if (astMatchCase.isDefaultCase())
+		{
+			cppOutput.println("default:");
+		}
+		else
+		{
+			cppOutput.print("case ");
+			astMatchCase.childAsts.get(0).compileSelf(this);
+			cppOutput.println(":");
+			cppOutput.incIndent();
+			for (int i = 1; i < astMatchCase.childAsts.size(); i++)
+			{
+				ASTBase child = astMatchCase.childAsts.get(i);
+				child.compileSelf(this);
+			}
+			cppOutput.decIndent();
+		}
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")

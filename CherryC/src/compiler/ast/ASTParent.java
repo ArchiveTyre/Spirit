@@ -1,6 +1,7 @@
 package compiler.ast;
 
 import compiler.CherryType;
+import compiler.lib.IndentPrinter;
 
 import java.util.ArrayList;
 
@@ -58,4 +59,12 @@ public abstract class ASTParent extends ASTBase
 	 * @return Returns true if child should be compiled.
 	 */
 	public abstract boolean compileChild(ASTBase child);
+
+	public void debugChildren(IndentPrinter dest)
+	{
+		for (ASTBase child : childAsts)
+		{
+			child.debugSelf(dest);
+		}
+	}
 }

@@ -68,8 +68,8 @@ class ParserTest
 	@Test
 	void singleTest()
 	{
-		String tmpStrPrint = "print : (what : string)\n";
-		testClassCompile("Strings2", tmpStrPrint + "print  \"Hii\" ");
+		// Match. //
+		testClassCompile("Match1", "match hello\n\t0 =>\n\t\ta := 10");
 	}
 
 	@Test
@@ -184,5 +184,6 @@ class ParserTest
 
 		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
 		testClassCompile("Test2", tmpStrPrint + "print\n\tif 10 == 10\n\t\ta := 20");
+
 	}
 }

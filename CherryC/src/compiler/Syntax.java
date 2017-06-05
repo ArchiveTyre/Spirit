@@ -17,7 +17,6 @@ public class Syntax
 
 	public class Keyword
 	{
-
 		public static final String IF		= "if"			;
 		public static final String ELSE		= "else"		;
 		public static final String ELSEIF	= "elseif"		;

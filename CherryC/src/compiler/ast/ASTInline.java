@@ -8,7 +8,7 @@ import compiler.lib.IndentPrinter;
  * @author david
  * @date 5/5/17
  */
-public class ASTInline extends ASTBase
+public class ASTInline extends ASTBase implements ASTSemicolonLess
 {
 
 	public String code;

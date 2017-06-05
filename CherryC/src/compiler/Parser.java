@@ -725,6 +725,25 @@ public class Parser
 		{
 			return parseExtendDeclaration(dest);
 		}
+
+		// Check if we have a case condition. //
+		else if ((TokenType.isFundamental(lookAheads[0].tokenType) || look(0, TokenType.SYMBOL))
+				&& 	look(1, Syntax.Op.MAP))
+		{
+			// Get rid of the fundamental type. //
+			ASTMatchCase matchCase = new ASTMatchCase(parent, false);
+			ASTBase condAST = parsePrimary(matchCase);
+			step();
+			step();
+
+			if (condAST != null)
+			{
+				matchCase.columnNumber = lineIndent;
+				return true;
+			}
+			return false;
+		}
+
 		// Check if we are defining a function. //
 		else if (  look(0, TokenType.SYMBOL)
 				&& look(1, Syntax.Op.TYPEDEF)
@@ -812,6 +831,20 @@ public class Parser
 			new ASTInline(parent, code);
 			return true;
 		}
+
+		// Check if we have a match expression. //
+		else if (match(Syntax.Keyword.MATCH))
+		{
+			if (match(TokenType.SYMBOL))
+			{
+				new ASTMatch(parent, previous.value);
+				return true;
+			}
+			return false;
+		}
+
+
+
 
 		// Otherwise it's just an expression. //
 		else

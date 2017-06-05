@@ -10,7 +10,7 @@ import compiler.lib.IndentPrinter;
  * @author Tyrerexus
  * @date 4/13/17.
  */
-public class ASTLoop extends ASTParent
+public class ASTLoop extends ASTParent implements ASTSemicolonLess
 {
 
 	public ASTBase preparationalStatement = null;

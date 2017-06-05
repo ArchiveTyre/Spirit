@@ -23,7 +23,19 @@ public class Token
 		LPAR,
 		RPAR,
 		EOF,
-		INLINE,
+		INLINE;
+
+
+		public static boolean isFundamental(TokenType type)
+		{
+			switch (type)
+			{
+				case STRING:
+				case NUMBER:
+					return true;
+			}
+			return false;
+		}
 	}
 
 

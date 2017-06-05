@@ -57,10 +57,10 @@ public class ErrorPrint
 	@SuppressWarnings("WeakerAccess")
 	public void error(String errorType, String expected, String actual, String message)
 	{
-		System.err.println("[Raven] " + errorType + " error in file \"" + parser.lexer.getFileName() + "\"\tat line: ");
-		if (!expected.isEmpty()) System.out.println("\tExpected:\t\t" + message);
-		if (!actual.isEmpty()) System.out.println("\tActual:\t\t" + message);
-		if (!message.isEmpty()) System.out.println("\tMessage:\t\t" + message);
+		System.err.println("[Raven] " + errorType + " error in file \"" + parser.lexer.getFileName() + "\"\tat line: " + parser.lexer.getLineNumber());
+		if (!expected.isEmpty()) System.err.println("\tExpected:\t\t" + expected);
+		if (!actual.isEmpty()) System.err.println("\tActual:\t\t" + actual);
+		if (!message.isEmpty()) System.err.println("\tMessage:\t\t" + message);
 
 		System.exit(0);
 	}

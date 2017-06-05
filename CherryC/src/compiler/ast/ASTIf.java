@@ -11,7 +11,7 @@ import compiler.lib.IndentPrinter;
  * @author Tyrerexus
  * @date 4/13/17.
  */
-public class ASTIf extends ASTParent
+public class ASTIf extends ASTParent implements ASTSemicolonLess
 {
 	/**
 	 * The condition to check against.

@@ -159,4 +159,10 @@ public class CompilerSYM extends LangCompiler
 	{
 
 	}
+
+	@Override
+	public void compileCase(ASTMatchCase astMatchCase)
+	{
+
+	}
 }

@@ -72,5 +72,20 @@ public class IndentPrinter
 		new_line_clean = false;
 	}
 
+	public void incIndent()
+	{
+		indentation++;
+	}
+
+	public void decIndent()
+	{
+		indentation--;
+	}
+
+	public void setIndent(int indentation)
+	{
+		this.indentation = indentation;
+	}
+
 
 }

@@ -11,7 +11,7 @@ import compiler.lib.IndentPrinter;
  * @author Tyrerexus
  * @date 4/13/17.
  */
-public class ASTElse extends ASTParent
+public class ASTElse extends ASTParent implements ASTSemicolonLess
 {
 	/**
 	 * This ASTIf that this ASTElse is connected with.
