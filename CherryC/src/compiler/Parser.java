@@ -737,12 +737,14 @@ public class Parser
 			// Get rid of the fundamental type. //
 			ASTMatchCase matchCase = new ASTMatchCase(parent, false);
 			ASTBase condAST = parsePrimary(matchCase);
+
 			step();
 			step();
 
 			matchCase.columnNumber = lineIndent;
 			newAST = matchCase;
 		}
+
 
 		// Check if we are defining a function. //
 		else if (  look(0, TokenType.SYMBOL)
