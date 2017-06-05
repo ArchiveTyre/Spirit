@@ -21,11 +21,17 @@ public class Polisher
 		this.astClass = astClass;
 	}
 
+	public void forceExtendSomething()
+	{
+		if (astClass.extendsClassAST == null)
+			astClass.extendClass(Syntax.ReservedNames.OBJECT_CLASS);
+	}
+
 	public void polishClassCreateConstructor()
 	{
 		ASTVariableDeclaration v = new ASTVariableDeclaration(astClass,
-				Syntax.ReservedFunctions.CONSTRUCTOR, Builtins.getBuiltin("function"), null);
-		ASTFunctionGroup group = new ASTFunctionGroup(v, Syntax.ReservedFunctions.CONSTRUCTOR);
+				Syntax.ReservedNames.CONSTRUCTOR, Builtins.getBuiltin("function"), null);
+		ASTFunctionGroup group = new ASTFunctionGroup(v, Syntax.ReservedNames.CONSTRUCTOR);
 		new ASTFunctionDeclaration(group, Builtins.getBuiltin("void"));
 	}
 
@@ -45,16 +51,14 @@ public class Polisher
 			{
 				ASTFunctionCall firstCall = (ASTFunctionCall) firstThing;
 
-				// Check if the first call calls "super.init". //
+				// Check if the first call calls "super.new". //
 				if (firstCall.getDeclarationPath() instanceof ASTMemberAccess)
 				{
 					ASTMemberAccess access = (ASTMemberAccess) firstCall.getDeclarationPath();
-					if (access.getMemberName().equals(Syntax.ReservedFunctions.CONSTRUCTOR))
+					if (access.getEnd().equals(Syntax.ReservedNames.CONSTRUCTOR)
+							&& access.ofObject.getName().equals("super"))
 					{
-						if (access.ofObject.getName().equals("super"))
-						{
-							callsSuper = true;
-						}
+						callsSuper = true;
 					}
 				}
 			}
@@ -67,11 +71,13 @@ public class Polisher
 
 			// Compiles roughly to: (super.constructor) //
 			// Inserts as first thing that happens on call. //
-			ASTFunctionCall astFunctionCall = new ASTFunctionCall(null);
+			// Thus, parent is specified later. //
+			ASTFunctionCall astFunctionCall = new ASTFunctionCall(function);
 			astFunctionCall.setDeclarationPath(
 					new ASTMemberAccess(astClass,
 							new ASTVariableUsage(astFunctionCall, "super"),
-					Syntax.ReservedFunctions.CONSTRUCTOR));
+					Syntax.ReservedNames.CONSTRUCTOR));
+			function.childAsts.remove(astFunctionCall);
 			function.childAsts.add(0, astFunctionCall);
 		}
 	}
@@ -108,14 +114,11 @@ public class Polisher
 	{
 
 		// There is no need to polish the finest object... (#^.^#)//
-		if (astClass.getName().equals("object"))
+		if (astClass.getName().equals(Syntax.ReservedNames.OBJECT_CLASS))
 			return;
 
 		// Make sure that the class extends something. //
-		if (astClass.extendsClassAST == null)
-		{
-			astClass.extendClass("object");
-		}
+		forceExtendSomething();
 
 
 		// Make sure that there is at least one constructor! //

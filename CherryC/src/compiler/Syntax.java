@@ -10,9 +10,10 @@ package compiler;
 @SuppressWarnings("ALL") // TODO: This is dangerous...
 public class Syntax
 {
-	public class ReservedFunctions
+	public class ReservedNames
 	{
 		public static final String CONSTRUCTOR = "new";
+		public static final String OBJECT_CLASS = "Object";
 	}
 
 	public class Keyword

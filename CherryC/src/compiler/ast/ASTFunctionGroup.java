@@ -18,7 +18,7 @@ public class ASTFunctionGroup extends ASTParent
 
 	public boolean isConstructor()
 	{
-		return name.equals(Syntax.ReservedFunctions.CONSTRUCTOR);
+		return name.equals(Syntax.ReservedNames.CONSTRUCTOR);
 	}
 
 	@Override

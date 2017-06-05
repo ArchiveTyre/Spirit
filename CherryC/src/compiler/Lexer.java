@@ -266,8 +266,8 @@ public class Lexer
 			if (c == '\n')
 			{
 				lineNumber++;
-				columnNumber = 0;
 				oldColumnNumber = columnNumber;
+				columnNumber = 0;
 			}
 		}
 		catch (IOException e)

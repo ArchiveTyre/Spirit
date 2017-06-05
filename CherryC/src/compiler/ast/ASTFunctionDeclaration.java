@@ -100,6 +100,12 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public boolean compileChild(ASTBase child)
 	{
+		// This is quite slow... //
+		for (ASTBase arg : args)
+		{
+			if (arg == child)
+				return false;
+		}
 		return true;
 	}
 }

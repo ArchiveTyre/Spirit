@@ -10,6 +10,7 @@ import java.io.PrintStream;
 public class ErrorPrint
 {
 	public PrintStream out = System.out;
+	private String filename;
 	private Parser parser;
 
 	public ErrorPrint(Parser parser, PrintStream out)
@@ -43,10 +44,6 @@ public class ErrorPrint
 		error("Compiler", message);
 	}
 
-
-
-
-
 	/**
 	 * Display an error.
 	 * @param errorType	The type of the error.
@@ -65,24 +62,15 @@ public class ErrorPrint
 		System.exit(0);
 	}
 
-
 	public void error(String errorType, String expected, String message)
 	{
 		error(errorType, expected, parser.lookAheads[0].value, message);
 	}
 
-
-
 	public void error(String errorType, String message)
 	{
 		error(errorType, "", "", "");
 	}
-
-
-
-
-
-
 }
 
 
