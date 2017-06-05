@@ -18,6 +18,7 @@ class ASTClassTest
 	{
 		ASTNumber child = new ASTNumber(parent.getParentForNewCode(indentation_level), 42);
 		child.columnNumber = indentation_level;
+		parent.newlyInsertedCode = child;
 		return child;
 	}
 
@@ -30,6 +31,7 @@ class ASTClassTest
 			ASTParent p1 = class1.getParentForNewCode(1);
 			ASTClass class2 = new ASTClass("Sub-class", p1);
 			class2.columnNumber = 1;
+			class1.newlyInsertedCode = class2;
 
 			ASTParent p2 = class1.getParentForNewCode(2);
 			ASTClass class3 = new ASTClass("Other sub-class", p2);

@@ -49,7 +49,7 @@ public class ASTMatchCase extends ASTParent
 		destination.incIndent();
 		for (int i = 1; i < childAsts.size(); i++)
 		{
-			ASTBase child = childAsts.get(i);
+			childAsts.get(i).debugSelf(destination);
 		}
 		destination.decIndent();
 	}

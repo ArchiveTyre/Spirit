@@ -740,12 +740,8 @@ public class Parser
 			step();
 			step();
 
-			if (condAST != null)
-			{
-				matchCase.columnNumber = lineIndent;
-				return true;
-			}
-			return false;
+			matchCase.columnNumber = lineIndent;
+			newAST = matchCase;
 		}
 
 		// Check if we are defining a function. //
@@ -805,7 +801,6 @@ public class Parser
 			String code = lookAheads[0].value;
 			step();
 			newAST = new ASTInline(parent, code);
-			return true;
 		}
 
 		// Check if we have a match expression. //
@@ -813,14 +808,9 @@ public class Parser
 		{
 			if (match(TokenType.SYMBOL))
 			{
-				new ASTMatch(parent, previous.value);
-				return true;
+				newAST = new ASTMatch(parent, previous.value);
 			}
-			return false;
 		}
-
-
-
 
 		// Otherwise it's just an expression. //
 		else
