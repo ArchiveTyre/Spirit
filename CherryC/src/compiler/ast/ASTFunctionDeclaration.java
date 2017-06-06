@@ -108,4 +108,15 @@ public class ASTFunctionDeclaration extends ASTParent
 		}
 		return true;
 	}
+
+	@Override
+	public ASTBase findSymbol(String symbolName)
+	{
+		for (ASTBase arg : args)
+		{
+			if (arg.name.equals(symbolName) && (arg instanceof ASTFunctionGroup || arg instanceof ASTVariableDeclaration || arg instanceof CherryType))
+				return arg;
+		}
+		return super.findSymbol(symbolName);
+	}
 }

@@ -14,6 +14,7 @@ public class Syntax
 	{
 		public static final String CONSTRUCTOR = "new";
 		public static final String OBJECT_CLASS = "Object";
+		public static final String SELF = "self";
 	}
 
 	public class Keyword

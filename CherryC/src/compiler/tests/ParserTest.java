@@ -183,6 +183,10 @@ class ParserTest
 		// Inline. //
 		testClassCompile("Inline1", "a := 5\n#inline\n// Lol, inline c...\nstd::cout << a;\n#end\na = 10");
 
+		// Operator overloading. //
+		testClassCompile("Overload1", "+ : () int = 32");
+		testClassCompile("Overload2", "self : () int = 32");
+
 		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
 		testClassCompile("Test2", tmpStrPrint + "print\n\tif 10 == 10\n\t\ta := 20");
 	}

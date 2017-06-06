@@ -53,20 +53,29 @@ class CompilerCPPTest
 	}
 
 	@Test
+	void singleTest()
+	{
+		//testCompiler("Loops", "B := 0\nloop A:=1, A < 10, A = A + 1\n\tB = B + 1");
+	}
+
+	@Test
 	void testAll()
 	{
-		/*testCompiler("Assignment", "helloWorld := 42");
+		testCompiler("Assignment", "helloWorld := 42");
 		testCompiler("Expressions", "B:=2\nA:= B + 2");
 		testCompiler("IfAndElse", "B:=2\nif B == 1\n\tB = 42\nelse\n\tB=32");
-		testCompiler("Loops", "B := 0\nloop A:=1, A < 10, A = A + 1\n\tB = B + 1");
+		//testCompiler("Loops", "B := 0\nloop A:=1, A < 10, A = A + 1\n\tB = B + 1");
 		testCompiler("Function_Declaration0", "a : () int = 5");
 		testCompiler("Function_Declaration1", "a : (x, y : int)\n\tb := 5\na 5 10\na 10 10");
 		testCompiler("ReturnVal", "a : () = 42");
 		testCompiler("Call", "a : (x, y : int)\nb : ()\n\ta 1 2");
 
 		//testCompiler("Imports", "import Hello.World");
-		testCompiler("Inline", "a := 10\n#inline\ncout << a;\n#end\na := 15");*/
+		testCompiler("Inline", "a := 10\n#inline\ncout << a;\n#end\na := 15");
 
+		testCompiler("Overloading", "+ : () int = 3");
+
+		/*
 		try
 		{
 			String fileContents = new String(Files.readAllBytes(Paths.get("/home/alex/TestArea/Print.raven")));
@@ -77,13 +86,6 @@ class CompilerCPPTest
 		{
 			e.printStackTrace();
 		}
-
-	}
-
-
-	@Test
-	void singleTest()
-	{
-		testCompiler("Inline", print + "main : () int\n\ta := \"Hello\"\n\tprints a\n\t= 0");
+		*/
 	}
 }

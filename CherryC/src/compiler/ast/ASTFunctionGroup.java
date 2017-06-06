@@ -11,6 +11,8 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTFunctionGroup extends ASTParent
 {
+	public boolean operatorOverload = false;
+
 	public ASTFunctionGroup(ASTParent parent, String name)
 	{
 		super(parent, name);
@@ -36,7 +38,7 @@ public class ASTFunctionGroup extends ASTParent
 	@Override
 	public void debugSelf(IndentPrinter destination)
 	{
-		destination.println("FunctionGroup");
+		destination.println("FunctionGroup" + (operatorOverload ? " operator overload" : ""));
 		destination.println("{");
 		destination.indentation++;
 		for(ASTBase node : childAsts)

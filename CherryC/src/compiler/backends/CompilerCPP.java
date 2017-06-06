@@ -6,6 +6,7 @@ import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
 
 import java.io.*;
+import java.util.HashMap;
 
 /**
  * Compiles an AST into C++ code.
@@ -23,6 +24,22 @@ public class CompilerCPP extends LangCompiler
 	private IndentPrinter cppOutput;
 	private IndentPrinter hppOutput;
 	private ASTMemberAccess astMemberAccess;
+
+
+	private static final HashMap<String, String> overloadOperatorToOperatorName = new HashMap<String, String>(){{
+		// FIXME: Complete the map!
+
+		put("+",  "___add");
+		put("-",  "___minus");
+
+		put("*",  "___mul");
+		put("/",  "___div");
+	}};
+
+	private boolean possibleOverload(ASTBase node)
+	{
+		return overloadOperatorToOperatorName.containsKey(node.getName());
+	}
 
 	public CompilerCPP()
 	{
@@ -295,22 +312,45 @@ public class CompilerCPP extends LangCompiler
 	{
 		if (astOperator.getLeftExpression() != null)
 			astOperator.getLeftExpression().compileSelf(this);
-		cppOutput.print(" " + astOperator.getName() + " ");
+		boolean callsFunction = astOperator.getLeftExpression().getExpressionType() instanceof ASTClass
+				&& possibleOverload(astOperator);
+		if (callsFunction)
+		{
+			cppOutput.print("->");
+			cppOutput.print(overloadOperatorToOperatorName.get(astOperator.getName()));
+			cppOutput.print("(");
+		}
+		else
+		{
+			cppOutput.print(" " + astOperator.getName() + " ");
+		}
 		if (astOperator.getRightExpression() != null)
+		{
 			astOperator.getRightExpression().compileSelf(this);
+		}
+		if (callsFunction)
+		{
+			cppOutput.print(")");
+		}
 	}
 
 	private String createFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration, boolean includeNameSpace)
 	{
-		ASTVariableDeclaration variableDeclaration = (ASTVariableDeclaration)astFunctionDeclaration.getParent().getParent();
+		ASTFunctionGroup group = (ASTFunctionGroup) astFunctionDeclaration.getParent();
+		ASTVariableDeclaration variableDeclaration = (ASTVariableDeclaration)group.getParent();
 
 		// Get name and namespace. //
 		boolean topLevel = variableDeclaration.getParent() instanceof ASTClass;
-		boolean isConstructor = variableDeclaration.getName().equals(Syntax.ReservedNames.CONSTRUCTOR);
+		boolean isConstructor = group.isConstructor();
+		boolean isOverload = group.operatorOverload;
 
-		String name = topLevel && isConstructor
-				? getRawName((ASTClass)variableDeclaration.getParent())
-				: variableDeclaration.getName();
+		String name;
+		if (topLevel && isConstructor)
+			name = getRawName((ASTClass)variableDeclaration.getParent());
+		else if (isOverload && possibleOverload(variableDeclaration))
+			name = overloadOperatorToOperatorName.get(variableDeclaration.getName());
+		else
+			name = variableDeclaration.getName();
 		String funNamespace = topLevel && includeNameSpace
 				? getRawName((ASTClass)variableDeclaration.getParent()) + "::"
 				: "";

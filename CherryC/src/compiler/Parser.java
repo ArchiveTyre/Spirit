@@ -315,7 +315,7 @@ public class Parser
 	{
 
 		// Functions always start with a name as their identifier. //
-		if (match(TokenType.SYMBOL))
+		if (match(TokenType.SYMBOL) || match(TokenType.OPERATOR))
 		{
 			String name = previous.value;
 			ASTFunctionGroup group;
@@ -329,6 +329,8 @@ public class Parser
 				ASTVariableDeclaration variableDeclaration =
 						new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("function"), null);
 				group = new ASTFunctionGroup(variableDeclaration, name);
+				if (previous.tokenType == TokenType.OPERATOR || name.equals(Syntax.ReservedNames.SELF))
+					group.operatorOverload = true;
 			}
 
 			ASTFunctionDeclaration function =
@@ -391,7 +393,7 @@ public class Parser
 
 					if (!match(TokenType.RPAR))
 					{
-						error.syntaxError(")", "Unmatched parenthesis");
+						error.syntaxError(")", "Expected parenthesis");
 					}
 
 					if (look(0, TokenType.SYMBOL))
@@ -730,7 +732,8 @@ public class Parser
 			return parseExtendDeclaration(dest);
 		}
 		// Check if we are defining a function. //
-		else if (  look(0, TokenType.SYMBOL)
+		else if (  (look(0, TokenType.SYMBOL)
+					|| look(0, TokenType.OPERATOR))
 				&& look(1, Syntax.Op.TYPEDEF)
 				&& look(2, TokenType.LPAR))
 		{
