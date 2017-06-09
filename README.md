@@ -1,5 +1,5 @@
 # Spirit
-The languagge of discipline.
+The language of discipline.
 ```
 add : (x, y) int = x + y
 
