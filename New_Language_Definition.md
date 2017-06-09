@@ -1,13 +1,13 @@
-# Raven Programming Language
+# Spirit Programming Language
 
 
 ## Introduction
 
-## 0.0 Basic types in RAVEN
+## 0.0 Basic types in Spirit
 
-Raven has 11 basic types. They are as follows
+Spirit has 11 basic types. They are as follows
 
-| Raven name | Memory  |      Descriptor name      |                         Description                         |                          Range                          |
+| Spirit name | Memory  |      Descriptor name      |                         Description                         |                          Range                          |
 | ---------- | ------- | ------------------------- | ----------------------------------------------------------- | ------------------------------------------------------- |
 | char       | 8 bits  | Character                 | An 8 bit number representing a literal character.           | - 128 to 127                                            |
 | uchar      | 8 bits  | Unsigned Character        | An 8 bit unsigned  number representing a literal character. | 0 to 255                                                |
@@ -22,23 +22,23 @@ Raven has 11 basic types. They are as follows
 | string     | --      | string                    | A sequence of characters                                    | --                                                      |
 
 
-## 1.0 Raven reserved words
+## 1.0 Spirit reserved words
 
-## 2.0 Raven Variables
+## 2.0 Spirit Variables
 
 ## 3.0 Comments
 
-A comment in raven is simply telling the compiler to ignore whatever
+A comment in Spirit is simply telling the compiler to ignore whatever
 you put after the comment.
 This is very useful, if you for example want to leave
 a note of what you are doing, explain further or
 temporarily disable pieces of code.
 
-A single line comment in raven starts with a `%`.
+A single line comment in Spirit starts with a `%`.
 Everything after this is ignored, and you may put
 whatever you want there.
 
-```raven
+```Spirit
 % Check if the user is logged in.
 if logged_in
     % Display the admin panel
@@ -50,8 +50,8 @@ are not restricted to a single line, but starts with a
 `<% `, and ends with a `%>`. Everything between these characters
 is ignored and will not be compiled.
 
-**User.raven**
-```raven
+**User.Spirit**
+```Spirit
 <%
  % The purpose of this class is to allow the
  % user to interact with the admin panel.
@@ -59,10 +59,10 @@ is ignored and will not be compiled.
 ```
 
 Note that the percent signs between `<%` and `%>`
-are not necessary. They are only there because in Raven it is
+are not necessary. They are only there because in Spirit it is
 a convention to put an equal sign at the start of each line in a
 mulitline comment. This is also valid:
-```raven
+```Spirit
 <%This
 is a perfectly
 		fine and valid
@@ -74,10 +74,10 @@ comment.
 
 ## 4.0 Strings
 
-There are three types ways to use text as data in raven.
+There are three types ways to use text as data in Spirit.
 
 The first one is through a normal string like this:
-```raven
+```Spirit
 my_string := "This is a string"
 
 ```
