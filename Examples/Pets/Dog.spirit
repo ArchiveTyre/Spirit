@@ -1,0 +1,8 @@
+extends Pet
+
+new : (name : string)
+	(super name)
+	print "A dog was spawned"
+
+bark : ()
+	print "Bark bark!"

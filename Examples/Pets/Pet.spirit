@@ -1,0 +1,7 @@
+name := "Unnamed"
+
+new : (newName : string)
+	name = newName
+
+meet : (other : Pet)
+	print "Hi, my name is {name} and your name is {other.name}"

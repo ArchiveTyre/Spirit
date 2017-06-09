@@ -1,0 +1,12 @@
+% A Cat is also a pet.
+extends Pet
+
+% Defines a constructor
+new : (name : string)
+	(super name)
+	print "A cat was created."
+
+meow : ()
+	print "Meow!"
+
+
