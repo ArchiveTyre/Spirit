@@ -1,9 +1,6 @@
 package compiler.ast;
 
-import compiler.SpiritType;
-import compiler.FileCompiler;
-import compiler.LangCompiler;
-import compiler.Main;
+import compiler.*;
 import compiler.lib.IndentPrinter;
 
 import java.util.ArrayList;
@@ -15,7 +12,7 @@ import java.util.Arrays;
  * @author Tyrerexus
  * @date 4/12/17.
  */
-public class ASTClass extends ASTParent implements SpiritType
+public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 {
 	/**
 	 * A class representing an import.

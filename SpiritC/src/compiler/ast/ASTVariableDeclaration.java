@@ -1,5 +1,6 @@
 package compiler.ast;
 
+import compiler.SpiritCallable;
 import compiler.SpiritType;
 import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
@@ -10,7 +11,7 @@ import compiler.lib.IndentPrinter;
  * @author Tyrerexus
  * @date 4/12/17.
  */
-public class ASTVariableDeclaration extends ASTParent
+public class ASTVariableDeclaration extends ASTParent implements SpiritCallable
 {
 	/**
 	 * The type of this variable declaration.

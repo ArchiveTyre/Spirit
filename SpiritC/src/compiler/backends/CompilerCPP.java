@@ -37,6 +37,7 @@ public class CompilerCPP extends LangCompiler
 
 		put("*",  "___mul");
 		put("/",  "___div");
+		put(Syntax.ReservedNames.SELF,"___call");
 	}};
 
 	private boolean possibleOverload(ASTBase node)
@@ -247,6 +248,10 @@ public class CompilerCPP extends LangCompiler
 		{
 			astFunctionCall.getDeclarationPath().compileSelf(this);
 		}
+		if (astFunctionCall.getExpressionType() instanceof ASTClass)
+		{
+			cppOutput.print("->___call");
+		}
 		cppOutput.print("(");
 
 		for (ASTBase child : astFunctionCall.childAsts)
@@ -362,7 +367,8 @@ public class CompilerCPP extends LangCompiler
 		String name;
 		if (topLevel && isConstructor)
 			name = getRawName((ASTClass)variableDeclaration.getParent());
-		else if (isOverload && possibleOverload(variableDeclaration))
+		else if ((isOverload && possibleOverload(variableDeclaration))
+				|| variableDeclaration.getName().equals(Syntax.ReservedNames.SELF))
 			name = overloadOperatorToOperatorName.get(variableDeclaration.getName());
 		else
 			name = variableDeclaration.getName();
