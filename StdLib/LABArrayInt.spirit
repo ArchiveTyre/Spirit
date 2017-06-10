@@ -1,0 +1,23 @@
+%> This is an experimental array. <%
+
+import Object
+
+#inline
+#include <stdlib.h>
+int *i_array;
+#end
+
+new : (size : int)
+	#inline
+	i_array = calloc(sizeof(int) * size);
+	#end
+
+this : (index : int)
+	#inline
+	return i_array[index];
+	#end
+
+set : (index : int, value : int)
+	#inline
+	i_array[index] = value;
+	#end

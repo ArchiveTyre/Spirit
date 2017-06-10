@@ -252,6 +252,7 @@ public class CompilerCPP extends LangCompiler
 		{
 			cppOutput.print("->___call");
 		}
+		
 		cppOutput.print("(");
 
 		for (ASTBase child : astFunctionCall.childAsts)
