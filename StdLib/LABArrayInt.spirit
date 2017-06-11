@@ -1,4 +1,4 @@
-%> This is an experimental array. <%
+% This is an experimental array.
 
 import Object
 
@@ -9,15 +9,15 @@ int *i_array;
 
 new : (size : int)
 	#inline
-	i_array = calloc(sizeof(int) * size);
+	i_array = (int*)calloc(sizeof(int), size);
 	#end
 
-this : (index : int)
+self : (index : int) int
 	#inline
 	return i_array[index];
 	#end
 
-set : (index : int, value : int)
+self : (index : int, value : int)
 	#inline
 	i_array[index] = value;
 	#end

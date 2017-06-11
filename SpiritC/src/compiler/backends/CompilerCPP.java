@@ -26,9 +26,6 @@ public class CompilerCPP extends LangCompiler
 
 	private IndentPrinter currentOutput;
 
-	private ASTMemberAccess astMemberAccess;
-
-
 	private static final HashMap<String, String> overloadOperatorToOperatorName = new HashMap<String, String>(){{
 		// FIXME: Complete the map!
 
@@ -252,7 +249,7 @@ public class CompilerCPP extends LangCompiler
 		{
 			cppOutput.print("->___call");
 		}
-		
+
 		cppOutput.print("(");
 
 		for (ASTBase child : astFunctionCall.childAsts)
