@@ -24,7 +24,14 @@ public class ASTVariableDeclaration extends ASTParent implements SpiritCallable
 	 */
 	public ASTBase getValue()
 	{
+<<<<<<< HEAD:SpiritC/src/compiler/ast/ASTVariableDeclaration.java
 		return childAsts.size() > 0 ? childAsts.get(0) : null;
+=======
+		if (childAsts.size() > 0)
+			return childAsts.get(0);
+		else
+			return null;
+>>>>>>> origin/dev:SpiritC/src/compiler/ast/ASTVariableDeclaration.java
 	}
 
 	public ASTVariableDeclaration(ASTParent parent, String name, SpiritType type, ASTBase value)

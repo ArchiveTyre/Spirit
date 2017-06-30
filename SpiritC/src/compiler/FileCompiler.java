@@ -21,11 +21,19 @@ import java.util.ArrayList;
 @SuppressWarnings("UnusedReturnValue")
 public class FileCompiler
 {
+<<<<<<< HEAD:SpiritC/src/compiler/FileCompiler.java
 	/**
 	 * Creates the corresponding symbol file of fileName
 	 * @param fileName
 	 * @return The file path of the corresponding symbol file.
 	 */
+=======
+	private static String getClassName(String fileName)
+	{
+		return new File(fileName).getName().split("\\.")[0];
+	}
+
+>>>>>>> origin/dev:SpiritC/src/compiler/FileCompiler.java
 	private static String getSymFileName(String fileName)
 	{
 		return "out/" + fileName + ".sym";
@@ -57,7 +65,11 @@ public class FileCompiler
 
 			// Try to see if already imported... //
 			// TODO: Replace with fileName to name.
+<<<<<<< HEAD:SpiritC/src/compiler/FileCompiler.java
 			if (shouldCompile(realFileName) && parent != null)
+=======
+			if (shouldCompile(realFileName))
+>>>>>>> origin/dev:SpiritC/src/compiler/FileCompiler.java
 			{
 				ASTBase alreadyImported = parent.findSymbol(getClassName(fileName));
 				if (alreadyImported != null && alreadyImported instanceof ASTClass)
@@ -67,7 +79,10 @@ public class FileCompiler
 			}
 
 			ASTClass loadedClass = loadClassAST(realFileName, parent);
+<<<<<<< HEAD:SpiritC/src/compiler/FileCompiler.java
 
+=======
+>>>>>>> origin/dev:SpiritC/src/compiler/FileCompiler.java
 			if (loadedClass == null)
 			{
 				System.err.println("ERROR: Could no load AST of " + fileName);
@@ -93,10 +108,13 @@ public class FileCompiler
 				symbolCompiler.compileClass(loadedClass);
 				symbolCompiler.closeStreams();
 
+<<<<<<< HEAD:SpiritC/src/compiler/FileCompiler.java
 				// TODO: This isn't DRY.
 				// TODO: Perhaps a wrapper function should be made?
 			}
 
+=======
+>>>>>>> origin/dev:SpiritC/src/compiler/FileCompiler.java
 			return loadedClass;
 		}
 		catch (FileNotFoundException e)
