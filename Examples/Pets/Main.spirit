@@ -1,0 +1,20 @@
+%>  Main.spirit             |
+|                           |
+|   This is the main class. |
+|   Everthing starts here.  |
+|                           |
+|   Author: Tyrerexus       |
+|                           |
+|                          <%
+
+import Cat
+
+% The main function
+new : ()
+	cat := Cat.new "Koneko"
+	cat.meow
+
+	dog := Dog.new "Awoo"
+	dog.bark
+
+	cat.meet dog
