@@ -26,7 +26,7 @@ public class TraverseAST
 
 	private static void traverseNode(ASTParent astParent, Class type, List<ASTBase> toTraverse)
 	{
-		for (ASTBase child : astParent.childAsts)
+		for (ASTBase child : astParent.children.getAll())
 		{
 			if (type.isInstance(child))
 			{

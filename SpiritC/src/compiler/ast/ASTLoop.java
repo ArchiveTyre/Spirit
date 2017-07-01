@@ -18,9 +18,14 @@ public class ASTLoop extends ASTParent
 	public ASTBase conditionalStatement = null;
 	public ASTBase iterationalStatement = null;
 
-	public ASTLoop(ASTParent parent)
+	public ASTLoop(ASTChildList.ListKey key, ASTParent parent)
 	{
-		super(parent, "");
+		super(key, parent, "");
+
+		children.addLists(ASTChildList.ListKey.BODY,
+						  ASTChildList.ListKey.FOR_CONDITION,
+						  ASTChildList.ListKey.FOR_INIT,
+						  ASTChildList.ListKey.FOR_ITERATIONAL);
 	}
 
 	@Override
@@ -49,7 +54,7 @@ public class ASTLoop extends ASTParent
 		destination.println(")");
 		destination.println("{");
 		destination.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTBase child : children.getBody())
 		{
 			if (compileChild(child))
 			{

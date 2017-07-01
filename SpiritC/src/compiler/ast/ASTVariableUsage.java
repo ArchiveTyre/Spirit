@@ -22,9 +22,9 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 			return getParent().findSymbol(name);
 	}
 
-	public ASTVariableUsage(ASTParent parent, String name)
+	public ASTVariableUsage(ASTChildList.ListKey key, ASTParent parent, String name)
 	{
-		super(parent, name);
+		super(key, parent, name);
 	}
 
 	@Override

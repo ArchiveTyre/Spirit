@@ -2,6 +2,7 @@ package compiler.ast;
 
 import compiler.SpiritType;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -12,14 +13,12 @@ import java.util.ArrayList;
  */
 public abstract class ASTParent extends ASTBase
 {
-	/**
-	 * A list of all the ast nodes in this ast node.
-	 */
-	public ArrayList<ASTBase> childAsts = new ArrayList<>();
 
-	public ASTParent(ASTParent parent, String name)
+	public ASTChildList children = new ASTChildList(this);
+
+	public ASTParent(ASTChildList.ListKey key, ASTParent parent, String name)
 	{
-		super(parent, name);
+		super(key, parent, name);
 	}
 
 	/**
@@ -31,7 +30,7 @@ public abstract class ASTParent extends ASTBase
 	{
 		// FIXME: More like findVariable!
 
-		for (ASTBase child : childAsts)
+		for (ASTBase child : this.children.getAll())
 		{
 			if (child.name.equals(symbolName) && (child instanceof ASTFunctionGroup || child instanceof ASTVariableDeclaration || child instanceof SpiritType))
 			{
@@ -45,14 +44,6 @@ public abstract class ASTParent extends ASTBase
 		return null;
 	}
 
-	/**
-	 * Returns the last child of this parent.
-	 * @return The last child of this parent.
-	 */
-	public ASTBase lastChild()
-	{
-		return childAsts.get(childAsts.size() - 1);
-	}
 
 	/**
 	 * Returns true if we should compile this child.
@@ -60,4 +51,6 @@ public abstract class ASTParent extends ASTBase
 	 * @return Returns true if child should be compiled.
 	 */
 	public abstract boolean compileChild(ASTBase child);
+
+
 }

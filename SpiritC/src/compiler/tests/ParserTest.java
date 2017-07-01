@@ -70,7 +70,8 @@ class ParserTest
 	void singleTest()
 	{
 		String tmpStrPrint = "print : (what : string)\n";
-		testClassCompile("Strings2", tmpStrPrint + "print  \"Hii\" ");
+		//testClassCompile("Strings2", tmpStrPrint + "print  \"Hii\" ");
+		testClassCompile("FunTest1", "a : (x : int, y : int) int = x + y");
 	}
 
 	@Test
@@ -186,8 +187,6 @@ class ParserTest
 		// Operator overloading. //
 		testClassCompile("Overload1", "+ : () int = 32");
 		testClassCompile("Overload2", "self : () int = 32");
-
 		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
-		testClassCompile("Test2", tmpStrPrint + "print\n\tif 10 == 10\n\t\ta := 20");
 	}
 }

@@ -21,9 +21,9 @@ public class ASTNumber extends ASTBase
 	 */
 	public int value;
 
-	public ASTNumber(ASTParent parent, int value)
+	public ASTNumber(ASTChildList.ListKey key, ASTParent parent, int value)
 	{
-		super(parent);
+		super(key, parent);
 		this.value = value;
 	}
 

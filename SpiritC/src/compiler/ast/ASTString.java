@@ -18,12 +18,10 @@ public class ASTString extends ASTBase
 	 */
 	public String value;
 
-	public ASTString(ASTParent parent, String value)
+	public ASTString(ASTChildList.ListKey key, ASTParent parent, String value)
 	{
-		super(parent);
+		super(key, parent);
 		this.value = value;
-
-
 	}
 
 	@Override

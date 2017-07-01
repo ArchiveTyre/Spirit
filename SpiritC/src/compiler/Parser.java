@@ -4,6 +4,7 @@ import com.sun.istack.internal.Nullable;
 import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
+import compiler.ast.ASTChildList.ListKey;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -122,20 +123,20 @@ public class Parser
 	 * @param parent The parent for this parent type.
 	 * @return The parsed primary token.
 	 */
-	private ASTBase parsePrimary(ASTParent parent)
+	private ASTBase parsePrimary(ListKey key, ASTParent parent)
 	{
 		if (match(TokenType.SYMBOL))
 		{
 			String symbol = previous.value;
-			return new ASTVariableUsage(parent, symbol);
+			return new ASTVariableUsage(key, parent, symbol);
 		}
 		if (match(TokenType.NUMBER))
-			return new ASTNumber(parent, Integer.parseInt(previous.value));
+			return new ASTNumber(key, parent, Integer.parseInt(previous.value));
 		if (match(TokenType.STRING))
-			return new ASTString(parent, previous.value);
+			return new ASTString(key, parent, previous.value);
 		if (match(TokenType.LPAR))
 		{
-			ASTBase expression = parseExpression(parent);
+			ASTBase expression = parseExpression(key, parent);
 			if (match(TokenType.RPAR))
 			{
 				return expression;
@@ -157,18 +158,18 @@ public class Parser
 	 * @param functionVariableUsage The location to the declaration of the function being called.
 	 * @return A function-call-ast-node.
 	 */
-	private ASTFunctionCall parseFunctionCallArguments(ASTParent parent, ASTPath functionVariableUsage)
+	private ASTFunctionCall parseFunctionCall(ListKey key, ASTParent parent, ASTPath functionVariableUsage)
 	{
-		ASTFunctionCall functionCall = new ASTFunctionCall(parent);
+		ASTFunctionCall functionCall = new ASTFunctionCall(key, parent);
 		functionCall.setDeclarationPath(functionVariableUsage);
 
 		// Parse arguments until we find something un-parsable. //
 		while(isPrimary(lookAheads[0].tokenType))
 		{
-			ASTBase left = parsePrimary(parent);
+			ASTBase left = parsePrimary(ListKey.ARGS,functionCall);
 			if (left == null)
 				return null;
-			parseOpExpression(left, 0, functionCall);
+			parseOpExpression(ListKey.ARGS, left, 0, functionCall);
 		}
 		return functionCall;
 	}
@@ -180,7 +181,7 @@ public class Parser
 	 * @param parent The parent for this expression.
 	 * @return The parsed expression.
 	 */
-	private ASTBase parseOpExpression(ASTBase left, int minPrecedence, ASTParent parent)
+	private ASTBase parseOpExpression(ListKey key, ASTBase left, int minPrecedence, ASTParent parent)
 	{
 		while (look(0,TokenType.OPERATOR))
 		{
@@ -201,20 +202,20 @@ public class Parser
 			{
 				String memberName = lookAheads[0].value;
 				step();
-				left = new ASTMemberAccess(parent, (ASTPath)left, memberName);
+				left = new ASTMemberAccess(key, parent, (ASTPath)left, memberName);
 				continue;
 			}
 
 			if (opPrecedence >= minPrecedence)
 			{
 
-				ASTBase right = parsePrimary(parent);
+				ASTBase right = parsePrimary(null, null);
 				while (look(0, TokenType.OPERATOR))
 				{
 					int otherPrecedence = operatorPrecedenceMap.get(lookAheads[0].value);
 					if (otherPrecedence > opPrecedence)
 					{
-						right = parseOpExpression(right, opPrecedence, parent);
+						right = parseOpExpression(key, right, opPrecedence, parent);
 					}
 					else
 					{
@@ -223,20 +224,21 @@ public class Parser
 					step();
 				}
 
-				left = new ASTOperator(parent, opName, right, left);
+				left = new ASTOperator(key, parent, opName, right, left);
 			}
 			else
 			{
 				break;
 			}
 		}
-		left.setParent(parent);
+		// TODO: Is this needed???
+		left.setParent(key, parent);
 		return left;
 	}
 
 	/**
 	 * Returns true if possible function call. If true the parse should call
-	 * {@link #parseFunctionCallArguments(ASTParent, ASTPath)}
+	 * {@link #parseFunctionCall(ListKey, ASTParent, ASTPath)}
 	 * @param check The ast to check against.
 	 * @return True if possible function call.
 	 */
@@ -251,27 +253,27 @@ public class Parser
 	 * @param parent The parent to place the expression in.
 	 * @return The parsed expression.
 	 */
-	private ASTBase parseExpression(ASTParent parent)
+	private ASTBase parseExpression(ListKey key, ASTParent parent)
 	{
 		if (isPrimary(lookAheads[0].tokenType))
 		{
-			ASTBase left = parsePrimary(parent);
+			ASTBase left = parsePrimary(key, parent);
 			if (left == null)
 				return null;
 
 			if (look(0, TokenType.OPERATOR))
 			{
-				left = parseOpExpression(left, 0, parent);
+				left = parseOpExpression(key, left, 0, parent);
 				if (left == null)
 					return null;
 			}
 
 			// TODO: Move this check.
 			if (isFunctionCall(left))
-				return parseFunctionCallArguments(parent, (ASTPath)left);
+				return parseFunctionCall(key, parent, (ASTPath)left);
 			else
 			{
-				left.setParent(parent);
+				left.setParent(key, parent);
 				return left;
 			}
 		}
@@ -285,7 +287,7 @@ public class Parser
 	}
 
 	/**
-	 * Mainly used by parseFunctionDeclaration() and parseVariableDeclaration().
+	 * Mainly used by #parseFunctionDeclaration(ASTParent) and parseVariableDeclaration().
 	 * @param perspective From what perspective to search from.
 	 * @return A type.
 	 */
@@ -327,14 +329,14 @@ public class Parser
 			else
 			{
 				ASTVariableDeclaration variableDeclaration =
-						new ASTVariableDeclaration(parent, name, Builtins.getBuiltin("function"), null);
-				group = new ASTFunctionGroup(variableDeclaration, name);
+						new ASTVariableDeclaration(ListKey.BODY, parent, name, Builtins.getBuiltin("function"), null);
+				group = new ASTFunctionGroup(ListKey.VALUE, variableDeclaration, name);
 				if (previous.tokenType == TokenType.OPERATOR || name.equals(Syntax.ReservedNames.SELF))
 					group.operatorOverload = true;
 			}
 
 			ASTFunctionDeclaration function =
-					new ASTFunctionDeclaration(group, Builtins.getBuiltin("void"));
+					new ASTFunctionDeclaration(ListKey.BODY, group, Builtins.getBuiltin("void"));
 
 			// Check that we specify the return type of the function (and the parameters). //
 			if (match(Syntax.Op.TYPEDEF))
@@ -359,13 +361,13 @@ public class Parser
 								{
 									for (String param : unspecifiedParams)
 									{
-										function.args.add(new ASTVariableDeclaration(null, param, argType, null));
+										function.args.add(new ASTVariableDeclaration(ListKey.ARGS, null, param, argType, null));
 
 									}
 									unspecifiedParams.clear();
 								}
 
-								function.args.add(new ASTVariableDeclaration(null, argName, argType, null));
+								function.args.add(new ASTVariableDeclaration(ListKey.ARGS, null, argName, argType, null));
 								specifiedAnyArguments = true;
 							}
 							else if (look(0, Syntax.Op.ARG_SEP) || look(0, TokenType.RPAR))
@@ -404,7 +406,7 @@ public class Parser
 						{
 							for (String param : unspecifiedParams)
 							{
-								function.args.add(new ASTVariableDeclaration(null, param, returnType, null));
+								function.args.add(new ASTVariableDeclaration(ListKey.ARGS, null, param, returnType, null));
 
 							}
 							unspecifiedParams.clear();
@@ -417,10 +419,6 @@ public class Parser
 					if (look(0, Syntax.Op.RETURN))
 					{
 						ASTReturnExpression call = parseReturnExpression(parent);
-						if (call != null)
-						{
-							call.setParent(function);
-						}
 					}
 					return (ASTVariableDeclaration)group.getParent();
 				}
@@ -452,14 +450,12 @@ public class Parser
 	{
 		if (match(Syntax.Op.RETURN))
 		{
-			ASTReturnExpression returnExpression = new ASTReturnExpression(parent);
+			ASTReturnExpression returnExpression = new ASTReturnExpression(ListKey.BODY, parent);
 
 			// Filter out any newlines. //
 			while (match(TokenType.NEWLINE));
 
-			ASTBase right = parseExpression(parent);
-			if (right != null)
-				right.setParent(returnExpression);
+			ASTBase right = parseExpression(ListKey.VALUE, returnExpression);
 
 			return returnExpression;
 		}
@@ -479,23 +475,23 @@ public class Parser
 			{
 				SpiritType spiritType = parseType(parent);
 				ASTBase value = null;
-
+				ASTVariableDeclaration declaration = new ASTVariableDeclaration(ListKey.BODY, parent, name, spiritType, null);
 
 				// Try to parse initial value. //
 				if (match("="))
 				{
-					value = parseExpression(parent);
+					value = parseExpression(ListKey.VALUE, declaration);
 
 					if (value == null)
 						return null;
 					else if (spiritType == null)
-						spiritType = value.getExpressionType();
+						declaration.type = value.getExpressionType();
 						// Check that the types match. //
 					//else if (spiritType != value.getExpressionType() && value.getExpressionType() != null)
 					//	error("ERROR: Type miss-match at line: " + previous.lineNumber);
 				}
 
-				return new ASTVariableDeclaration(parent, name, spiritType, value);
+				return declaration;
 			}
 			else
 			{
@@ -549,19 +545,19 @@ public class Parser
 	{
 		if (match(Syntax.Keyword.LOOP))
 		{
-			ASTLoop loop = new ASTLoop(parent);
+			ASTLoop loop = new ASTLoop(ListKey.BODY, parent);
 			if (look(1, Syntax.Op.TYPEDEF)
 					&& !look(2, TokenType.NEWLINE))
 				loop.initialStatement = parseVariableDeclaration(loop);
 			else
-				loop.initialStatement = parseExpression(loop);
+				loop.initialStatement = parseExpression(ListKey.FOR_INIT, loop);
 
 			if (match(","))
 			{
-				loop.conditionalStatement = parseExpression(loop);
+				loop.conditionalStatement = parseExpression(ListKey.FOR_CONDITION, loop);
 				if (match(","))
 				{
-					loop.iterationalStatement = parseExpression(loop);
+					loop.iterationalStatement = parseExpression(ListKey.FOR_ITERATIONAL, loop);
 				}
 			}
 
@@ -579,16 +575,16 @@ public class Parser
 					return null;
 				}
 				final String counterName = "__c_counter";
-				loop.initialStatement = new ASTVariableDeclaration(loop, counterName, Builtins.getBuiltin("int"), until);
+				loop.initialStatement = new ASTVariableDeclaration(ListKey.FOR_INIT, loop, counterName, Builtins.getBuiltin("int"), until);
 
-				loop.conditionalStatement = new ASTOperator(loop, ">",
-						new ASTVariableUsage(parent, counterName),
-						new ASTNumber(parent, 0));
+				loop.conditionalStatement = new ASTOperator(ListKey.FOR_CONDITION, loop, ">",
+						new ASTVariableUsage(ListKey.BODY, parent, counterName),
+						new ASTNumber(ListKey.BODY, parent, 0));
 
 
-				loop.iterationalStatement = new ASTOperator(loop, "--",
+				loop.iterationalStatement = new ASTOperator(ListKey.FOR_ITERATIONAL, loop, "--",
 						null,
-						new ASTVariableUsage(parent, counterName));
+						new ASTVariableUsage(ListKey.BODY, parent, counterName));
 			}
 
 
@@ -741,8 +737,9 @@ public class Parser
 		}
 		else if (match(Syntax.Keyword.IF))
 		{
-			ASTBase condition = parseExpression(parent);
-			newAST = new ASTIf(parent, condition);
+			newAST = new ASTIf(ListKey.BODY, parent);
+			parseExpression(ListKey.CONDITION, (ASTParent) newAST);
+
 		}
 		else if (match(Syntax.Keyword.ELSE))
 		{
@@ -788,14 +785,14 @@ public class Parser
 			// Get the code. //
 			String code = lookAheads[0].value;
 			step();
-			newAST = new ASTInline(parent, code);
+			newAST = new ASTInline(ListKey.BODY, parent, code);
 			return true;
 		}
 
 		// Otherwise it's just an expression. //
 		else
 		{
-			newAST = parseExpression(parent);
+			newAST = parseExpression(ListKey.BODY, parent);
 		}
 
 		if (newAST != null)

@@ -29,7 +29,7 @@ public class ASTFunctionCall extends ASTParent
 	public void setDeclarationPath(ASTPath newDeclarationPath)
 	{
 		declarationPath = newDeclarationPath;
-		newDeclarationPath.setParent(this);
+		newDeclarationPath.setParent(ASTChildList.ListKey.PATH, this);
 	}
 
 	/**
@@ -42,9 +42,10 @@ public class ASTFunctionCall extends ASTParent
 		return declarationPath.getEnd().equals(Syntax.ReservedNames.CONSTRUCTOR);
 	}
 
-	public ASTFunctionCall(ASTParent parent)
+	public ASTFunctionCall(ASTChildList.ListKey key, ASTParent parent)
 	{
-		super(parent, "");
+		super(key, parent, "");
+		children.addLists(ASTChildList.ListKey.ARGS, ASTChildList.ListKey.PATH);
 	}
 
 	@Override
@@ -56,17 +57,17 @@ public class ASTFunctionCall extends ASTParent
 	@Override
 	public void debugSelf(IndentPrinter destination)
 	{
-		String space = childAsts.isEmpty() || getParent() instanceof ASTFunctionCall
+		String space = children.getArgs().isEmpty() || getParent() instanceof ASTFunctionCall
 				? ""
 				: " ";
 		declarationPath.debugSelf(destination);
 		destination.print("(" + space);
-		for (ASTBase arg : childAsts)
+		for (ASTBase arg : children.getArgs())
 		{
 			if (compileChild(arg))
 			{
 				arg.debugSelf(destination);
-				if (arg != childAsts.get(childAsts.size() - 1))
+				if (arg != children.getArgs().get(children.getArgs().size() - 1))
 				{
 					destination.print(", ");
 				}

@@ -13,7 +13,7 @@ import compiler.lib.IndentPrinter;
 public interface ASTPath
 {
 	void debugSelf(IndentPrinter destination);
-	void setParent(ASTParent newParent);
+	void setParent(ASTChildList.ListKey key, ASTParent newParent);
 	void compileSelf(LangCompiler compiler);
 	String getName();
 	String getEnd();

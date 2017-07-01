@@ -4,6 +4,8 @@ import compiler.SpiritType;
 import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
 
+import java.util.List;
+
 /**
  * The base class for any AST node.
  *
@@ -55,12 +57,12 @@ public abstract class ASTBase
 	 * Setter for parent.
 	 * @param newParent The new parent.
 	 */
-	public void setParent(ASTParent newParent)
+	public void setParent(ASTChildList.ListKey key, ASTParent newParent)
 	{
 		if (this.parent != null)
-			this.parent.childAsts.remove(this);
+			this.parent.children.removeChild(this);
 		if (newParent != null)
-			newParent.childAsts.add(this);
+			newParent.children.addChild(key, this);
 		this.parent = newParent;
 
 	}
@@ -79,18 +81,19 @@ public abstract class ASTBase
 		return (ASTClass)parent;
 	}
 
-	public ASTBase(ASTParent parent)
+	public ASTBase(ASTChildList.ListKey key, ASTParent parent)
 	{
 		if (parent != null)
 		{
 			this.parent = parent;
-			parent.childAsts.add(this);
+			parent.children.addChild(key, this);
 		}
 	}
 
-	public ASTBase(ASTParent parent, String name)
+
+	public ASTBase(ASTChildList.ListKey key, ASTParent parent, String name)
 	{
-		this(parent);
+		this(key, parent);
 		this.name = name;
 	}
 

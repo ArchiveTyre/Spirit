@@ -1,5 +1,6 @@
 package compiler.tests;
 
+import compiler.ast.ASTChildList;
 import compiler.ast.ASTClass;
 import compiler.ast.ASTNumber;
 import compiler.ast.ASTParent;
@@ -16,7 +17,7 @@ class ASTClassTest
 	@SuppressWarnings("SameParameterValue")
 	private ASTNumber createChild(ASTClass parent, int indentation_level)
 	{
-		ASTNumber child = new ASTNumber(parent.getParentForNewCode(indentation_level), 42);
+		ASTNumber child = new ASTNumber(ASTChildList.ListKey.BODY, parent.getParentForNewCode(indentation_level), 42);
 		child.columnNumber = indentation_level;
 		return child;
 	}
@@ -30,12 +31,14 @@ class ASTClassTest
 			ASTParent p1 = class1.getParentForNewCode(1);
 			ASTClass class2 = new ASTClass("Sub-class", p1);
 			class2.columnNumber = 1;
+			class1.newlyInsertedCode = class2;
 
 			ASTParent p2 = class1.getParentForNewCode(2);
 			ASTClass class3 = new ASTClass("Other sub-class", p2);
 			class3.columnNumber = 2;
+			class1.newlyInsertedCode = class3;
 
-			Assertions.assertEquals(class3, ((ASTParent) class1.childAsts.get(0)).childAsts.get(0));
+			Assertions.assertEquals(class3, ((ASTParent) class1.children.getFirst()).children.getFirst());
 		}
 
 		{
@@ -43,8 +46,8 @@ class ASTClassTest
 			ASTNumber c1 = createChild(p1, 4);
 			ASTNumber c2 = createChild(p1, 4);
 
-			Assertions.assertEquals(c1, p1.childAsts.get(0));
-			Assertions.assertEquals(c2, p1.childAsts.get(1));
+			Assertions.assertEquals(c1, p1.children.getBody().get(0));
+			Assertions.assertEquals(c2, p1.children.getBody().get(1));
 		}
 	}
 

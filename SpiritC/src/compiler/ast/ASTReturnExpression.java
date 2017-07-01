@@ -12,9 +12,11 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTReturnExpression extends ASTParent
 {
-	public ASTReturnExpression(ASTParent parent)
+	public ASTReturnExpression(ASTChildList.ListKey key, ASTParent parent)
 	{
-		super(parent, "return");
+		super(key, parent, "return");
+
+		children.addLists(ASTChildList.ListKey.VALUE);
 	}
 
 	@Override
@@ -27,7 +29,7 @@ public class ASTReturnExpression extends ASTParent
 	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print("Return (");
-		childAsts.get(0).debugSelf(destination);
+		children.getValue().get(0).debugSelf(destination);
 		destination.println(")");
 	}
 

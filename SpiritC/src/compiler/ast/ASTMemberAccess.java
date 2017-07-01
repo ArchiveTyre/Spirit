@@ -59,11 +59,14 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	 */
 	public String getMemberName() { return memberName;}
 
-	public ASTMemberAccess(ASTParent parent, ASTPath ofObject, String memberName)
+	public ASTMemberAccess(ASTChildList.ListKey key, ASTParent parent, ASTPath ofObject, String memberName)
 	{
-		super(parent, "");
+		super(key, parent, "");
+
+		children.addLists(ASTChildList.ListKey.VALUE);
+
 		this.ofObject = ofObject;
-		ofObject.setParent(this);
+		ofObject.setParent(ASTChildList.ListKey.VALUE, this);
 		this.memberName = memberName;
 	}
 
@@ -89,6 +92,7 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 		else
 			destination.print("<<NOT FOUND>>");
 	}
+
 
 	@Override
 	public void compileSelf(LangCompiler compiler)

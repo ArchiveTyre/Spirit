@@ -16,7 +16,7 @@ public class ASTVariableDeclaration extends ASTParent implements SpiritCallable
 	/**
 	 * The type of this variable declaration.
 	 */
-	private SpiritType type;
+	public SpiritType type;
 
 	/**
 	 * Gets the initial value of this declaration.
@@ -24,19 +24,22 @@ public class ASTVariableDeclaration extends ASTParent implements SpiritCallable
 	 */
 	public ASTBase getValue()
 	{
-		return childAsts.size() > 0 ? childAsts.get(0) : null;
+		return children.getValue().size() > 0 ? children.getValue().get(0) : null;
 	}
 
-	public ASTVariableDeclaration(ASTParent parent, String name, SpiritType type, ASTBase value)
+	public ASTVariableDeclaration(ASTChildList.ListKey key, ASTParent parent, String name, SpiritType type, ASTBase value)
 	{
-		super(parent, name);
+		super(key, parent, name);
+
+		children.addLists(ASTChildList.ListKey.VALUE);
+
 		this.type = type;
 		if (name.equals("other"))
 		{
 			int a = 1;
 		}
 		if (value != null)
-			value.setParent(this);
+			value.setParent(key, this);
 	}
 
 	/**
@@ -59,7 +62,7 @@ public class ASTVariableDeclaration extends ASTParent implements SpiritCallable
 	{
 		destination.print("var " + type.getTypeName() + " " + name +
 				" = ");
-		if (childAsts.size() > 0)
+		if (getValue() != null)
 			getValue().debugSelf(destination);
 		else
 			destination.print("undefined");

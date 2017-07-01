@@ -38,7 +38,7 @@ public class CompilerSYM extends LangCompiler
 			}
 			symOutput.println();
 		}
-		for (ASTBase node : astClass.childAsts)
+		for (ASTBase node : astClass.children.getAll())
 		{
 			node.compileSelf(this);
 			symOutput.println();
@@ -56,9 +56,9 @@ public class CompilerSYM extends LangCompiler
 	@Override
 	public void compileFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration)
 	{
-		ArrayList<ASTVariableDeclaration> args = astFunctionDeclaration.args;
-		for (ASTVariableDeclaration arg : args)
+		for (ASTBase baseArg : astFunctionDeclaration.args)
 		{
+			ASTVariableDeclaration arg = (ASTVariableDeclaration) baseArg;
 			symOutput.println("Arg: " +
 					arg.getName() + " " +
 					arg.getExpressionType().getTypeName());
@@ -76,7 +76,7 @@ public class CompilerSYM extends LangCompiler
 	@Override
 	public void compileFunctionGroup(ASTFunctionGroup astFunctionGroup)
 	{
-		for (ASTBase node : astFunctionGroup.childAsts)
+		for (ASTBase node : astFunctionGroup.children.getBody())
 		{
 			node.compileSelf(this);
 		}

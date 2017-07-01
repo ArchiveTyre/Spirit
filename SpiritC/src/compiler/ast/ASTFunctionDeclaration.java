@@ -3,6 +3,7 @@ package compiler.ast;
 import compiler.SpiritType;
 import compiler.LangCompiler;
 import compiler.builtins.Builtins;
+import compiler.lib.Helper;
 import compiler.lib.IndentPrinter;
 
 import java.util.ArrayList;
@@ -17,10 +18,20 @@ import java.util.ArrayList;
 public class ASTFunctionDeclaration extends ASTParent
 {
 
+
+
 	/**
 	 * The arguments that are needed to call this function.
 	 */
-	public ArrayList<ASTVariableDeclaration> args = new ArrayList<>();
+	public ArrayList<ASTBase> args = new ArrayList<>();
+
+
+	/**
+	 * The ASTs that are contained within the body of the function.
+	 */
+	public ArrayList<ASTBase> body = new ArrayList<>();
+
+
 
 	/**
 	 * The return type of this function.
@@ -36,14 +47,18 @@ public class ASTFunctionDeclaration extends ASTParent
 
 	private boolean anonymous = false;
 
-	public ASTFunctionDeclaration(ASTParent parent, SpiritType returnType)
+
+	public ASTFunctionDeclaration(ASTChildList.ListKey key, ASTParent parent, SpiritType returnType)
 	{
-		this(parent, returnType, false);
+		this(key, parent, returnType, false);
 	}
 
-	public ASTFunctionDeclaration(ASTParent parent, SpiritType returnType, boolean anonymous)
+	public ASTFunctionDeclaration(ASTChildList.ListKey key, ASTParent parent, SpiritType returnType, boolean anonymous)
 	{
-		super(parent, "");
+		super(key, parent, "");
+
+		children.addLists(ASTChildList.ListKey.BODY, ASTChildList.ListKey.ARGS);
+
 		this.returnType = returnType;
 		isNestedFunction = !(parent.getParent().getParent() instanceof ASTClass);
 		if (isNestedFunction)
@@ -64,8 +79,9 @@ public class ASTFunctionDeclaration extends ASTParent
 		if (isNestedFunction)
 			destination.print("nested ");
 		destination.print("(");
-		for (ASTVariableDeclaration arg : args)
+		for (ASTBase baseArg : args)
 		{
+			ASTVariableDeclaration arg = (ASTVariableDeclaration) baseArg;
 			destination.print(arg.name + " : " + arg.getExpressionType().getTypeName());
 			if (arg != args.get(args.size() - 1))
 				destination.print(", ");
@@ -73,7 +89,7 @@ public class ASTFunctionDeclaration extends ASTParent
 		destination.println(") -> " + returnType.getTypeName());
 		destination.println("{");
 		destination.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTBase child : body)
 		{
 			child.debugSelf(destination);
 			destination.println("");
@@ -98,18 +114,6 @@ public class ASTFunctionDeclaration extends ASTParent
 	}
 
 	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		// This is quite slow... //
-		for (ASTBase arg : args)
-		{
-			if (arg == child)
-				return false;
-		}
-		return true;
-	}
-
-	@Override
 	public ASTBase findSymbol(String symbolName)
 	{
 		for (ASTBase arg : args)
@@ -118,5 +122,11 @@ public class ASTFunctionDeclaration extends ASTParent
 				return arg;
 		}
 		return super.findSymbol(symbolName);
+	}
+
+	@Override
+	public boolean compileChild(ASTBase child)
+	{
+		return true;
 	}
 }

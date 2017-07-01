@@ -17,7 +17,7 @@ public class ASTFileTypeDeclaration extends ASTBase
 	public FileType type;
 	public ASTFileTypeDeclaration(ASTParent parent, FileType type)
 	{
-		super(parent);
+		super(ASTChildList.ListKey.BODY, parent);
 		this.type = type;
 	}
 
