@@ -61,7 +61,10 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public SpiritType getExpressionType()
 	{
-		return Builtins.getBuiltin("function");
+		if (((ASTFunctionGroup)getParent()).isConstructor())
+			return getContainingClass();
+		else
+			return returnType;
 	}
 
 	@Override

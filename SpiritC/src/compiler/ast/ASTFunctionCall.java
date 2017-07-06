@@ -32,6 +32,19 @@ public class ASTFunctionCall extends ASTParent
 		newDeclarationPath.setParent(ASTChildList.ListKey.PATH, this);
 	}
 
+	public ASTFunctionGroup getFunctionGroup()
+	{
+		ASTVariableDeclaration declarationVar = (ASTVariableDeclaration)getDeclarationPath().getDeclaration();
+
+		if (!declarationVar.isFunctionDeclaration())
+		{
+			// Call to variable. //
+			declarationVar = (ASTVariableDeclaration) getDeclarationPath().getDeclaration().getExpressionType().getChildByName(Syntax.ReservedNames.SELF);
+		}
+
+		return (ASTFunctionGroup) declarationVar.getValue();
+	}
+
 	/**
 	 * Checks if this is a call to a constructor.
 	 * @return True if this is a call to a constructor.
@@ -51,7 +64,16 @@ public class ASTFunctionCall extends ASTParent
 	@Override
 	public SpiritType getExpressionType()
 	{
-			return declarationPath.getExpressionType();
+		ASTFunctionDeclaration declaration = getFunctionGroup().getWithMarchingArguments(children.getArgs());
+
+		if (declaration != null)
+		{
+			return declaration.getExpressionType();
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	@Override

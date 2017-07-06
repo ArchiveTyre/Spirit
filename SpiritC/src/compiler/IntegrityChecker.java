@@ -60,13 +60,24 @@ public class IntegrityChecker
 			// If we've found an error.
 			if (!hasFoundMatchingDeclaration)
 			{
-				System.out.println("Could not find MATCHING declaration for: " + call.getDeclarationPath().toString());
+				System.err.println("ERROR: Could not find MATCHING declaration for: " + call.getDeclarationPath().toString());
 			}
 		}
 	}
 
 	void checkVariableTypes()
 	{
+		for (ASTBase ast : TraverseAST.traverse(astClass, ASTVariableDeclaration.class))
+		{
+			ASTVariableDeclaration declaration = (ASTVariableDeclaration) ast;
 
+			if (declaration.getValue() != null && !declaration.isFunctionDeclaration())
+			{
+				if (declaration.getExpressionType() != declaration.getValue().getExpressionType())
+				{
+					System.err.println("ERROR: Type miss-match!: " + declaration.getName());
+				}
+			}
+		}
 	}
 }
