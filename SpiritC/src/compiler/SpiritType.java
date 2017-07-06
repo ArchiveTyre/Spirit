@@ -14,4 +14,5 @@ public interface SpiritType
 {
 	String getTypeName();
 	ArrayList<ASTBase> getChildNodes();
+	ASTBase getChildByName(String name);
 }

@@ -77,6 +77,12 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	}
 
 	@Override
+	public ASTBase getDeclaration()
+	{
+		return getMember();
+	}
+
+	@Override
 	public String getEnd()
 	{
 		return memberName;
@@ -104,5 +110,11 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	public boolean compileChild(ASTBase child)
 	{
 		return false;
+	}
+
+	@Override
+	public String toString()
+	{
+		return ofObject.toString() + "." + memberName;
 	}
 }

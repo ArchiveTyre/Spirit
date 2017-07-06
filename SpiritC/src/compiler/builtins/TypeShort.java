@@ -22,4 +22,10 @@ public class TypeShort implements SpiritType
 	{
 		return null;
 	}
+
+	@Override
+	public ASTBase getChildByName(String name)
+	{
+		return null;
+	}
 }

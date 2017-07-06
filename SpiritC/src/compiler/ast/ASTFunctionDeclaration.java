@@ -18,21 +18,6 @@ import java.util.ArrayList;
 public class ASTFunctionDeclaration extends ASTParent
 {
 
-
-
-	/**
-	 * The arguments that are needed to call this function.
-	 */
-	public ArrayList<ASTBase> args = new ArrayList<>();
-
-
-	/**
-	 * The ASTs that are contained within the body of the function.
-	 */
-	public ArrayList<ASTBase> body = new ArrayList<>();
-
-
-
 	/**
 	 * The return type of this function.
 	 */
@@ -79,17 +64,17 @@ public class ASTFunctionDeclaration extends ASTParent
 		if (isNestedFunction)
 			destination.print("nested ");
 		destination.print("(");
-		for (ASTBase baseArg : args)
+		for (ASTBase baseArg : children.getArgs())
 		{
 			ASTVariableDeclaration arg = (ASTVariableDeclaration) baseArg;
 			destination.print(arg.name + " : " + arg.getExpressionType().getTypeName());
-			if (arg != args.get(args.size() - 1))
+			if (arg != children.getArgs().get(children.getArgs().size() - 1))
 				destination.print(", ");
 		}
 		destination.println(") -> " + returnType.getTypeName());
 		destination.println("{");
 		destination.indentation++;
-		for (ASTBase child : body)
+		for (ASTBase child : children.getBody())
 		{
 			child.debugSelf(destination);
 			destination.println("");
@@ -116,7 +101,7 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public ASTBase findSymbol(String symbolName)
 	{
-		for (ASTBase arg : args)
+		for (ASTBase arg : children.getArgs())
 		{
 			if (arg.name.equals(symbolName) && (arg instanceof ASTFunctionGroup || arg instanceof ASTVariableDeclaration || arg instanceof SpiritType))
 				return arg;

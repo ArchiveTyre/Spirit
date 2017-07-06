@@ -361,13 +361,12 @@ public class Parser
 								{
 									for (String param : unspecifiedParams)
 									{
-										function.args.add(new ASTVariableDeclaration(ListKey.ARGS, null, param, argType, null));
-
+										new ASTVariableDeclaration(ListKey.ARGS, function, param, argType, null);
 									}
 									unspecifiedParams.clear();
 								}
 
-								function.args.add(new ASTVariableDeclaration(ListKey.ARGS, null, argName, argType, null));
+								new ASTVariableDeclaration(ListKey.ARGS, function, argName, argType, null);
 								specifiedAnyArguments = true;
 							}
 							else if (look(0, Syntax.Op.ARG_SEP) || look(0, TokenType.RPAR))
@@ -406,7 +405,7 @@ public class Parser
 						{
 							for (String param : unspecifiedParams)
 							{
-								function.args.add(new ASTVariableDeclaration(ListKey.ARGS, null, param, returnType, null));
+								new ASTVariableDeclaration(ListKey.ARGS, function, param, returnType, null);
 
 							}
 							unspecifiedParams.clear();
@@ -418,7 +417,7 @@ public class Parser
 					}
 					if (look(0, Syntax.Op.RETURN))
 					{
-						ASTReturnExpression call = parseReturnExpression(parent);
+						ASTReturnExpression call = parseReturnExpression(function);
 					}
 					return (ASTVariableDeclaration)group.getParent();
 				}

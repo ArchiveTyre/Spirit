@@ -33,7 +33,7 @@ public class Polisher
 	{
 		ASTVariableDeclaration v = new ASTVariableDeclaration(ListKey.BODY, astClass,
 				Syntax.ReservedNames.CONSTRUCTOR, Builtins.getBuiltin("function"), null);
-		ASTFunctionGroup group = new ASTFunctionGroup(ListKey.BODY ,v, Syntax.ReservedNames.CONSTRUCTOR);
+		ASTFunctionGroup group = new ASTFunctionGroup(ListKey.VALUE, v, Syntax.ReservedNames.CONSTRUCTOR);
 		new ASTFunctionDeclaration(ListKey.BODY, group, Builtins.getBuiltin("void"));
 	}
 
@@ -76,11 +76,11 @@ public class Polisher
 			// Thus, parent is specified later. //
 			ASTFunctionCall astFunctionCall = new ASTFunctionCall(ListKey.BODY, function);
 			astFunctionCall.setDeclarationPath(
-					new ASTMemberAccess(ListKey.BODY, astClass,
-							new ASTVariableUsage(ListKey.BODY, astFunctionCall, "super"),
+					new ASTMemberAccess(ListKey.PATH, astFunctionCall,
+							new ASTVariableUsage(ListKey.BODY, astClass, "super"),
 					Syntax.ReservedNames.CONSTRUCTOR));
-			function.body.remove(astFunctionCall);
-			function.body.add(0, astFunctionCall);
+			function.children.getBody().remove(astFunctionCall);
+			function.children.getBody().add(0, astFunctionCall);
 		}
 	}
 

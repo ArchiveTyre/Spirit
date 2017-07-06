@@ -383,7 +383,7 @@ public class CompilerCPP extends LangCompiler
 			declaration.append(child.getExpressionType().getTypeName());
 			declaration.append(' ');
 			declaration.append(child.getName());
-			if (child != astFunctionDeclaration.args.get(astFunctionDeclaration.args.size() - 1))
+			if (child != astFunctionDeclaration.children.getLast(ListKey.ARGS))
 				declaration.append(", ");
 		}
 		declaration.append(")");

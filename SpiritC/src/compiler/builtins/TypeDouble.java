@@ -22,4 +22,10 @@ public class TypeDouble implements SpiritType
 	{
 		return null;
 	}
+
+	@Override
+	public ASTBase getChildByName(String name)
+	{
+		return null;
+	}
 }

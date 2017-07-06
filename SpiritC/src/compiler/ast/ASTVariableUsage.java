@@ -30,6 +30,10 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 	@Override
 	public SpiritType getExpressionType()
 	{
+		if (getDeclaration() == null)
+		{
+			System.out.println("Whoops!");
+		}
 		return getDeclaration().getExpressionType();
 	}
 
@@ -49,5 +53,11 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 	public String getEnd()
 	{
 		return getName();
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
 	}
 }

@@ -56,7 +56,7 @@ public class CompilerSYM extends LangCompiler
 	@Override
 	public void compileFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration)
 	{
-		for (ASTBase baseArg : astFunctionDeclaration.args)
+		for (ASTBase baseArg : astFunctionDeclaration.children.getArgs())
 		{
 			ASTVariableDeclaration arg = (ASTVariableDeclaration) baseArg;
 			symOutput.println("Arg: " +

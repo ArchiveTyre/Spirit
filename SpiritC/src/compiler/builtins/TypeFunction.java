@@ -22,4 +22,10 @@ public class TypeFunction implements SpiritType
 	{
 		return null;
 	}
+
+	@Override
+	public ASTBase getChildByName(String name)
+	{
+		return null;
+	}
 }

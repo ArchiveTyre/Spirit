@@ -179,6 +179,19 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	}
 
 	@Override
+	public ASTBase getChildByName(String name)
+	{
+		for (ASTBase astChild : children.getAll())
+		{
+			if (astChild.getName().equals(name))
+			{
+				return astChild;
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileClass(this);
