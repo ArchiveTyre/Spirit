@@ -24,7 +24,7 @@ public class Builtins
 
 	public static SpiritType getBuiltin(String name)
 	{
-		// FIXME: This is so slow onii-chan. I want a direct reference to the builtins too.
+		// FIXME: This is so slow onii-chan. I want a direct reference to the builtins too. //
 
 		for (SpiritType type : builtins)
 		{
@@ -33,6 +33,8 @@ public class Builtins
 				return type;
 			}
 		}
-		return null;
+
+		// FIXME: Is this the best way? //
+		return new TypeUndefined(name);
 	}
 }

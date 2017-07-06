@@ -341,6 +341,30 @@ public class Parser
 			// Check that we specify the return type of the function (and the parameters). //
 			if (match(Syntax.Op.TYPEDEF))
 			{
+				// Check if we have generics. //
+				if (match(Syntax.Op.GENERIC_START))
+				{
+					ArrayList<String> generics = new ArrayList<>();
+
+					while (match(TokenType.SYMBOL))
+					{
+						generics.add(previous.value);
+					}
+
+					if (!match(Syntax.Op.GENERIC_END))
+					{
+						error.syntaxError("]", "Expected function declaration generics terminator.");
+						return null;
+					}
+					else
+					{
+						String[] arrayGenerics = new String[generics.size()];
+						arrayGenerics = generics.toArray(arrayGenerics);
+						function.generics = arrayGenerics;
+
+					}
+				}
+
 				// Make sure we match a parenthesis which is basically the function indicator. //
 				if (match(TokenType.LPAR))
 				{
@@ -727,10 +751,10 @@ public class Parser
 			return parseExtendDeclaration(dest);
 		}
 		// Check if we are defining a function. //
-		else if (  (look(0, TokenType.SYMBOL)
-					|| look(0, TokenType.OPERATOR))
-				&& look(1, Syntax.Op.TYPEDEF)
-				&& look(2, TokenType.LPAR))
+		else if (
+					(look(0, TokenType.SYMBOL) || look(0, TokenType.OPERATOR))
+				  && look(1, Syntax.Op.TYPEDEF)
+				  && (look(2, TokenType.LPAR) || look(2, Syntax.Op.GENERIC_START)))
 		{
 			newAST = parseFunctionDeclaration(parent);
 		}

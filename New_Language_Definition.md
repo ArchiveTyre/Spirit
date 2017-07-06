@@ -77,7 +77,8 @@ comment.
 There are three types ways to use text as data in Spirit.
 
 The first one is through a normal string like this:
-```Spirit
+
+```spirit
 my_string := "This is a string"
 
 ```
@@ -101,3 +102,64 @@ Multiline raw: <** String **>
 ## 9.0 Imports
 
 ## 10.0 Type definition
+
+## 11.0 Generics
+
+Generics in Spirit are very easy.
+
+### Functions
+
+**File.spirit**
+
+```
+myFunction : [T E] (myVar T, myOtherVar E) T
+```
+
+
+
+### In Function calls
+**File.spirit**
+
+```
+myFunction [T E] val1 val2 valN
+```
+
+### In classes
+
+*File.spirit*
+
+```
+with (T E)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
