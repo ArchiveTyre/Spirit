@@ -361,8 +361,27 @@ public class CompilerCPP extends LangCompiler
 				? getRawName((ASTClass)variableDeclaration.getParent()) + "::"
 				: "";
 
+
+
+
 		/// Create the declaration. ///
 		StringBuilder declaration = new StringBuilder();
+
+		if (astFunctionDeclaration.generics != null)
+		{
+			declaration.append("template <");
+			for (int i = 0; i < astFunctionDeclaration.generics.length; i++)
+			{
+				String generic = astFunctionDeclaration.generics[i];
+				declaration.append("typename ");
+				declaration.append(generic);
+				if (i != astFunctionDeclaration.generics.length -1)
+				{
+					declaration.append(", ");
+				}
+			}
+			declaration.append("> ");
+		}
 
 		// The return type
 		if (!isConstructor)
@@ -399,7 +418,7 @@ public class CompilerCPP extends LangCompiler
 		ASTFunctionGroup group = (ASTFunctionGroup) astFunctionDeclaration.getParent();
 		String declaration = createFunctionDeclaration(astFunctionDeclaration, !justDeclaration);
 
-		currentOutput.println(declaration);
+		currentOutput.print(declaration);
 		if (justDeclaration)
 		{
 			// If it's just a declaration, end it here. //
@@ -439,7 +458,7 @@ public class CompilerCPP extends LangCompiler
 				}
 			}
 
-			currentOutput.println("{");
+			currentOutput.println("\n{");
 			currentOutput.indentation++;
 			for (ASTBase child : astFunctionDeclaration.children.getBody())
 			{

@@ -3,6 +3,7 @@ package compiler.ast;
 import compiler.SpiritType;
 import compiler.LangCompiler;
 import compiler.builtins.Builtins;
+import compiler.builtins.TypeUndefined;
 import compiler.lib.Helper;
 import compiler.lib.IndentPrinter;
 
@@ -32,6 +33,10 @@ public class ASTFunctionDeclaration extends ASTParent
 	public ArrayList<ASTBase> body = new ArrayList<>();
 
 
+	/**
+	 * If the function has generics, they are placed inside of this array.
+	 */
+	public String[] generics = null;
 
 	/**
 	 * The return type of this function.
@@ -78,15 +83,29 @@ public class ASTFunctionDeclaration extends ASTParent
 	{
 		if (isNestedFunction)
 			destination.print("nested ");
+
+		if (generics != null)
+		{
+			destination.print("[");
+			for (String generic : generics)
+			{
+				destination.print(generic + " ");
+			}
+			destination.print("] ");
+		}
+
 		destination.print("(");
 		for (ASTBase baseArg : args)
 		{
 			ASTVariableDeclaration arg = (ASTVariableDeclaration) baseArg;
-			destination.print(arg.name + " : " + arg.getExpressionType().getTypeName());
+			String undefined = (arg.getExpressionType() instanceof TypeUndefined) ? "[?] " : "";
+			destination.print(arg.name + " : " + undefined + arg.getExpressionType().getTypeName());
 			if (arg != args.get(args.size() - 1))
 				destination.print(", ");
 		}
-		destination.println(") -> " + returnType.getTypeName());
+
+		String undefined = (returnType instanceof TypeUndefined) ? "[?] " : "";
+		destination.println(") -> " + undefined + returnType.getTypeName());
 		destination.println("{");
 		destination.indentation++;
 		for (ASTBase child : body)

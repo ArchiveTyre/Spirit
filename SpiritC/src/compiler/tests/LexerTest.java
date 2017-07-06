@@ -52,6 +52,7 @@ class LexerTest
 		testForTokens("a \"Kawaii desu ne?\" ", new String[]{"a", "Kawaii desu ne?", ""});
 
 		testForTokens("a is b", new String[]{"a", "==", "b"});
+		testForTokens("[T]", new String[]{"[", "T", "]"});
 		System.out.println("Test/s successful.");
 
 

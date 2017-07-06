@@ -69,9 +69,8 @@ class ParserTest
 	@Test
 	void singleTest()
 	{
-		String tmpStrPrint = "print : (what : string)\n";
-		//testClassCompile("Strings2", tmpStrPrint + "print  \"Hii\" ");
-		testClassCompile("FunTest1", "a : (x : int, y : int) int = x + y");
+		testClassCompile("Generics1", "a : [T E V] (x : T, y : E, z, d : V) T = x * 2");
+		//testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na 1 2");
 	}
 
 	@Test
@@ -188,5 +187,7 @@ class ParserTest
 		testClassCompile("Overload1", "+ : () int = 32");
 		testClassCompile("Overload2", "self : () int = 32");
 		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
+
+		testClassCompile("Generics1", "test : [");
 	}
 }

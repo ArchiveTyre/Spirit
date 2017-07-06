@@ -90,6 +90,8 @@ public class Syntax
 		public static final char	INLINE_COMMENT		=	'%'		;
 		public static final char	ANON_FUNC_START		=	'{'		;
 		public static final char	ANON_FUNC_END		=	'}'		;
+		public static final char	GENERIC_START		=	'['		;
+		public static final char	GENERIC_END			=	']'		;
 
 
 	}

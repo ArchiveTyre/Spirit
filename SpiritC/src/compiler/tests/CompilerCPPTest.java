@@ -55,7 +55,7 @@ class CompilerCPPTest
 	@Test
 	void singleTest()
 	{
-		//testCompiler("Loops", "B := 0\nloop A:=1, A < 10, A = A + 1\n\tB = B + 1");
+		testCompiler("Func", "a : (x, y : T) T\n\t = x + y");
 	}
 
 	@Test
