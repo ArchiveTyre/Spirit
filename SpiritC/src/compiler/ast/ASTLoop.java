@@ -56,11 +56,8 @@ public class ASTLoop extends ASTParent
 		destination.indentation++;
 		for (ASTBase child : children.getBody())
 		{
-			if (compileChild(child))
-			{
-				child.debugSelf(destination);
-				destination.println("");
-			}
+			child.debugSelf(destination);
+			destination.println("");
 		}
 		destination.indentation--;
 		destination.print("}");
@@ -71,14 +68,5 @@ public class ASTLoop extends ASTParent
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileLoop(this);
-	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return child != preparationalStatement
-				&& child != initialStatement
-				&& child != conditionalStatement
-				&& child != iterationalStatement;
 	}
 }

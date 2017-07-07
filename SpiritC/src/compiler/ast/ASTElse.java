@@ -55,12 +55,6 @@ public class ASTElse extends ASTParent
 	}
 
 	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return true;
-	}
-
-	@Override
 	public void debugSelf(IndentPrinter destination)
 	{
 		/*

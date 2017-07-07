@@ -198,12 +198,6 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	}
 
 	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return true;
-	}
-
-	@Override
 	public SpiritType getExpressionType()
 	{
 		return this;

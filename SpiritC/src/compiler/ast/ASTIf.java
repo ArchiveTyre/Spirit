@@ -77,10 +77,4 @@ public class ASTIf extends ASTParent
 	{
 		compiler.compileIf(this);
 	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return false;
-	}
 }

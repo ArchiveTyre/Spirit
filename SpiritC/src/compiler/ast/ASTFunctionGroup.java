@@ -72,12 +72,6 @@ public class ASTFunctionGroup extends ASTParent
 	}
 
 	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return true;
-	}
-
-	@Override
 	public SpiritType getExpressionType()
 	{
 		// TODO: This is not really right.

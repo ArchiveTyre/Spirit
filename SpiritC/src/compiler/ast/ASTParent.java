@@ -43,14 +43,4 @@ public abstract class ASTParent extends ASTBase
 
 		return null;
 	}
-
-
-	/**
-	 * Returns true if we should compile this child.
-	 * @param child The child to test against.
-	 * @return Returns true if child should be compiled.
-	 */
-	public abstract boolean compileChild(ASTBase child);
-
-
 }

@@ -107,12 +107,6 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	}
 
 	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return false;
-	}
-
-	@Override
 	public String toString()
 	{
 		return ofObject.toString() + "." + memberName;

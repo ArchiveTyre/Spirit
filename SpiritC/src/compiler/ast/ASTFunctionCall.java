@@ -86,13 +86,10 @@ public class ASTFunctionCall extends ASTParent
 		destination.print("(" + space);
 		for (ASTBase arg : children.getArgs())
 		{
-			if (compileChild(arg))
+			arg.debugSelf(destination);
+			if (arg != children.getArgs().get(children.getArgs().size() - 1))
 			{
-				arg.debugSelf(destination);
-				if (arg != children.getArgs().get(children.getArgs().size() - 1))
-				{
-					destination.print(", ");
-				}
+				destination.print(", ");
 			}
 		}
 		destination.print(space + ")");
@@ -102,11 +99,5 @@ public class ASTFunctionCall extends ASTParent
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileFunctionCall(this);
-	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return !(child == declarationPath);
 	}
 }

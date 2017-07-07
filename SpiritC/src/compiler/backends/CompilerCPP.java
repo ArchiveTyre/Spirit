@@ -443,12 +443,9 @@ public class CompilerCPP extends LangCompiler
 
 					for (ASTBase child : listInitSuperConstructorCall.children.getArgs())
 					{
-						if (listInitSuperConstructorCall.compileChild(child))
-						{
-							child.compileSelf(this);
-							if (child != listInitSuperConstructorCall.children.getLast(ListKey.ARGS))
-								currentOutput.print(", ");
-						}
+						child.compileSelf(this);
+						if (child != listInitSuperConstructorCall.children.getLast(ListKey.ARGS))
+							currentOutput.print(", ");
 					}
 					currentOutput.println(")");
 				}

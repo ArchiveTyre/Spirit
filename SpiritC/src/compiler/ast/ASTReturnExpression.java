@@ -38,10 +38,4 @@ public class ASTReturnExpression extends ASTParent
 	{
 		compiler.compileReturnExpression(this);
 	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return false;
-	}
 }

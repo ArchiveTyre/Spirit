@@ -131,10 +131,4 @@ public class ASTFunctionDeclaration extends ASTParent
 		}
 		return super.findSymbol(symbolName);
 	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return true;
-	}
 }

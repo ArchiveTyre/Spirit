@@ -81,10 +81,4 @@ public class ASTVariableDeclaration extends ASTParent implements SpiritCallable
 			compiler.compileVariableDeclaration(this);
 		}
 	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return false;
-	}
 }
