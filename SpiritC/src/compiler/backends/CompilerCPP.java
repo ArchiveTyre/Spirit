@@ -122,7 +122,7 @@ public class CompilerCPP extends LangCompiler
 
 		hppOutput.println("#pragma once");
 		hppOutput.println("#include <string>");
-		hppOutput.println("using std::string;");
+		hppOutput.println("using string = std::string;");
 
 		/// Set up the class declaration. ///
 		hppOutput.println("#define " + astClass.getName() + ' ' + getRawName(astClass) + '*');
@@ -227,18 +227,29 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
 	{
+
+		/* Check if call to class constructor. */
 		if (astFunctionCall.isConstructorCall())
 		{
+			/* Add "new " and compile the path without the ".new" part. */
+
 			cppOutput.print("new ");
 			((ASTMemberAccess)astFunctionCall.getDeclarationPath()).ofObject.compileSelf(this);
 		}
+
+		/* Check if call on class. */
+		else if (astFunctionCall.getDeclarationPath().getExpressionType() instanceof ASTClass)
+		{
+			/* It is, compile as normal function call but add "->___call". */
+
+			astFunctionCall.getDeclarationPath().compileSelf(this);
+			cppOutput.print("->___call");
+		}
 		else
 		{
+			/* Just a normal function call. */
+
 			astFunctionCall.getDeclarationPath().compileSelf(this);
-		}
-		if (astFunctionCall.getExpressionType() instanceof ASTClass)
-		{
-			cppOutput.print("->___call");
 		}
 
 		cppOutput.print("(");

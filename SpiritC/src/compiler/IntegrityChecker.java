@@ -3,7 +3,10 @@ package compiler;
 import compiler.ast.*;
 
 /**
- * Created by alex on 30/06/17.
+ * This class can check if a class has type integrity.
+ *
+ * @author Tyrerexus
+ * @date 30/06/17
  */
 public class IntegrityChecker
 {
@@ -14,10 +17,33 @@ public class IntegrityChecker
 		this.astClass = astClass;
 	}
 
+	/**
+	 * Checks all possible integrities of a class.
+	 */
 	void checkIntegrity()
 	{
 		checkFunctionCalls();
 		checkVariableTypes();
+		checkAssignments();
+	}
+
+	/**
+	 * Checks that L side is assignable from R side of assignment operators.
+	 */
+	private void checkAssignments()
+	{
+		for (ASTBase ast : TraverseAST.traverse(astClass, ASTOperator.class))
+		{
+			ASTOperator operator = (ASTOperator) ast;
+
+			if (operator.getName().equals(Syntax.Op.Assign.IS))
+			{
+				if (operator.getLeftExpression().getExpressionType() != operator.getRightExpression().getExpressionType())
+				{
+					System.err.println("ERROR: Type miss-match in assignment of: " + operator.getLeftExpression().toString());
+				}
+			}
+		}
 	}
 
 	/**
@@ -75,7 +101,7 @@ public class IntegrityChecker
 			{
 				if (declaration.getExpressionType() != declaration.getValue().getExpressionType())
 				{
-					System.err.println("ERROR: Type miss-match!: " + declaration.getName());
+					System.err.println("ERROR: Type miss-match in declaration!: " + declaration.getName());
 				}
 			}
 		}

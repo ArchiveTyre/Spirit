@@ -224,7 +224,7 @@ public class Parser
 					step();
 				}
 
-				left = new ASTOperator(key, parent, opName, right, left);
+				left = new ASTOperator(key, parent, opName, left, right);
 			}
 			else
 			{

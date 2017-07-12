@@ -34,20 +34,19 @@ public class ASTOperator extends ASTParent
 		return children.getList(ListKey.OPERATOR_CALL).get(0);
 	}
 
-	public ASTOperator(ASTChildList.ListKey key, ASTParent parent, String operatorName, ASTBase rightExpression, ASTBase leftExpression)
+	public ASTOperator(ASTChildList.ListKey key, ASTParent parent, String operatorName, ASTBase leftExpression, ASTBase rightExpression)
 	{
 		super(key, parent, operatorName);
 
 		children.addList(ListKey.OPERATOR_CALL, 2);
 
-		if (rightExpression != null)
-		{
-			rightExpression.setParent(ListKey.OPERATOR_CALL, this);
-		}
 		if (leftExpression != null)
 		{
 			leftExpression.setParent(ListKey.OPERATOR_CALL, this);
-
+		}
+		if (rightExpression != null)
+		{
+			rightExpression.setParent(ListKey.OPERATOR_CALL, this);
 		}
 	}
 
