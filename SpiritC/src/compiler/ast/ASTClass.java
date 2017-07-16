@@ -192,6 +192,12 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	}
 
 	@Override
+	public SpiritType getSuperType()
+	{
+		return extendsClassAST;
+	}
+
+	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileClass(this);

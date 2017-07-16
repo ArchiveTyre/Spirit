@@ -29,4 +29,10 @@ public class TypeLong implements SpiritType
 	{
 		return null;
 	}
+
+	@Override
+	public SpiritType getSuperType()
+	{
+		return Builtins.getBuiltin("rational_number");
+	}
 }

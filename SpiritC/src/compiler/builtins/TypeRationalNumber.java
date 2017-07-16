@@ -6,22 +6,15 @@ import compiler.ast.ASTBase;
 import java.util.ArrayList;
 
 /**
- * Created by david on 7/6/17.
+ * @author Tyrerexus
+ * @date 7/16/17
  */
-public class TypeUndefined implements SpiritType
+public class TypeRationalNumber implements SpiritType
 {
-
-	private String typeName;
-
-	public TypeUndefined(String typeName)
-	{
-		this.typeName = typeName;
-	}
-
 	@Override
 	public String getTypeName()
 	{
-		return typeName;
+		return "rational_number";
 	}
 
 	@Override

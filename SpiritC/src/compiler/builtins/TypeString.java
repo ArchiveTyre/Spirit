@@ -28,4 +28,10 @@ public class TypeString implements SpiritType
 	{
 		return null;
 	}
+
+	@Override
+	public SpiritType getSuperType()
+	{
+		return null;
+	}
 }

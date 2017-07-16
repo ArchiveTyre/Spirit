@@ -38,7 +38,8 @@ public class IntegrityChecker
 
 			if (operator.getName().equals(Syntax.Op.Assign.IS))
 			{
-				if (operator.getLeftExpression().getExpressionType() != operator.getRightExpression().getExpressionType())
+				if (!SpiritType.isAssignableFrom(operator.getLeftExpression().getExpressionType(),
+				                                operator.getRightExpression().getExpressionType()))
 				{
 					System.err.println("ERROR: Type miss-match in assignment of: " + operator.getLeftExpression().toString());
 				}
@@ -99,7 +100,8 @@ public class IntegrityChecker
 
 			if (declaration.getValue() != null && !declaration.isFunctionDeclaration())
 			{
-				if (declaration.getExpressionType() != declaration.getValue().getExpressionType())
+				if (!SpiritType.isAssignableFrom(declaration.getExpressionType(),
+				                                declaration.getValue().getExpressionType()))
 				{
 					System.err.println("ERROR: Type miss-match in declaration!: " + declaration.getName());
 				}

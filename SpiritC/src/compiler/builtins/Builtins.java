@@ -9,7 +9,10 @@ import compiler.SpiritType;
 public class Builtins
 {
 
+
+
 	private static SpiritType[] builtins = {
+			new TypeRationalNumber(),
 			new TypeInteger(),
 			new TypeBool(),
 			new TypeChar(),
@@ -34,7 +37,7 @@ public class Builtins
 			}
 		}
 
-		// FIXME: Is this the best way? //
+		// FIXME: Is this the best way?
 		return new TypeUndefined(name);
 	}
 }

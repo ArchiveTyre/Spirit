@@ -29,4 +29,10 @@ public class TypeBool implements SpiritType
 	{
 		return null;
 	}
+
+	@Override
+	public SpiritType getSuperType()
+	{
+		return null;
+	}
 }
