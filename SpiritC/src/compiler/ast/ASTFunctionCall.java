@@ -21,6 +21,13 @@ public class ASTFunctionCall extends ASTParent
 	 */
 	private ASTPath declarationPath;
 
+
+	/**
+	 * This is a reference to the generics used in the function call.
+	 * If there are none, this variable is null.
+	 */
+	public String[] generics = null;
+
 	public ASTPath getDeclarationPath()
 	{
 		return declarationPath;
@@ -61,6 +68,17 @@ public class ASTFunctionCall extends ASTParent
 				? ""
 				: " ";
 		declarationPath.debugSelf(destination);
+
+		if (generics != null)
+		{
+			destination.print("[");
+			for (String generic : generics)
+			{
+				destination.print(generic + " ");
+			}
+			destination.print("]");
+		}
+
 		destination.print("(" + space);
 		for (ASTBase arg : children.getArgs())
 		{

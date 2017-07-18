@@ -227,6 +227,8 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
 	{
+
+
 		if (astFunctionCall.isConstructorCall())
 		{
 			cppOutput.print("new ");
@@ -240,6 +242,24 @@ public class CompilerCPP extends LangCompiler
 		{
 			cppOutput.print("->___call");
 		}
+
+		 if (astFunctionCall.generics != null)
+		 {
+			 cppOutput.print("<");
+			 for (int i = 0; i < astFunctionCall.generics.length; i++)
+			 {
+			 	String generic = astFunctionCall.generics[i];
+				cppOutput.print(generic);
+				if (i != astFunctionCall.generics.length - 1)
+				{
+					cppOutput.print(", ");
+				}
+			 }
+
+			 cppOutput.print(">");
+		 }
+
+
 
 		cppOutput.print("(");
 

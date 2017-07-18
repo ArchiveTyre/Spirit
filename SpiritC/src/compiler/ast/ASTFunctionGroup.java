@@ -20,6 +20,9 @@ public class ASTFunctionGroup extends ASTParent
 		children.addLists(ASTChildList.ListKey.BODY);
 	}
 
+
+
+
 	public boolean isConstructor()
 	{
 		return name.equals(Syntax.ReservedNames.CONSTRUCTOR);

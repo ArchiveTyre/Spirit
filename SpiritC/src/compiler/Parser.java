@@ -5,6 +5,7 @@ import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
 import compiler.ast.ASTChildList.ListKey;
+import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -163,6 +164,33 @@ public class Parser
 		ASTFunctionCall functionCall = new ASTFunctionCall(key, parent);
 		functionCall.setDeclarationPath(functionVariableUsage);
 
+		if (match(Syntax.Op.GENERIC_START))
+		{
+			ArrayList<String> generics = new ArrayList<>();
+			while (match(TokenType.SYMBOL))
+			{
+				generics.add(previous.value);
+			}
+
+			if (match(Syntax.Op.GENERIC_END))
+			{
+				if (generics.size() > 0)
+				{
+					String[] arrayGenerics = new String[generics.size()];
+					functionCall.generics = generics.toArray(arrayGenerics);
+
+				}
+				else
+				{
+					error.syntaxError("Generic", "Generics cannot be empty." );
+				}
+			}
+			else
+			{
+				error.syntaxError("]", "Expected end of generics declaration.");
+			}
+		}
+
 		// Parse arguments until we find something un-parsable. //
 		while(isPrimary(lookAheads[0].tokenType))
 		{
@@ -261,12 +289,14 @@ public class Parser
 			if (left == null)
 				return null;
 
-			if (look(0, TokenType.OPERATOR))
+			if (look(0, TokenType.OPERATOR) && !look(0, Syntax.Op.GENERIC_START))
 			{
 				left = parseOpExpression(key, left, 0, parent);
 				if (left == null)
 					return null;
 			}
+
+
 
 			// TODO: Move this check.
 			if (isFunctionCall(left))
@@ -884,6 +914,7 @@ public class Parser
 	/**
 	 * Moves lookAheads[0] into previous.
 	 * Then shifts lookAheads.
+	 * Finally it gets a new token from the lexer.
 	 * Finally it gets a new token from the lexer.
 	 */
 	private void step()

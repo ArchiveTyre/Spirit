@@ -55,8 +55,10 @@ class CompilerCPPTest
 	@Test
 	void singleTest()
 	{
-		testCompiler("Func", "a : (x, y : T) T\n\t = x + y");
+		testCompiler("Func", "add : [T] (a, b : int) int\n\t= a + b\n\nadd [T] a b");
+
 	}
+
 
 	@Test
 	void testAll()
