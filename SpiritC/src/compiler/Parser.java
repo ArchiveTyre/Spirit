@@ -231,8 +231,6 @@ public class Parser
 				break;
 			}
 		}
-		// TODO: Is this needed???
-		//left.setParent(key, parent);
 		return left;
 	}
 

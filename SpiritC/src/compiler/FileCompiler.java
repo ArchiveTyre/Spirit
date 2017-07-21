@@ -56,7 +56,6 @@ public class FileCompiler
 			}
 
 			// Try to see if already imported... //
-			// TODO: Replace with fileName to name.
 			if (shouldCompile(realFileName) && parent != null)
 			{
 				ASTBase alreadyImported = parent.findSymbol(getClassName(fileName));

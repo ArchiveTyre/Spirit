@@ -326,26 +326,28 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileOperator(ASTOperator astOperator)
 	{
-		if (astOperator.getLeftExpression() != null)
-			astOperator.getLeftExpression().compileSelf(this);
+
 		boolean callsFunction = astOperator.getLeftExpression().getExpressionType() instanceof ASTClass
 				&& possibleOverload(astOperator);
 		if (callsFunction)
 		{
+			if (astOperator.getLeftExpression() != null)
+				astOperator.getLeftExpression().compileSelf(this);
 			currentOutput.print("->");
 			currentOutput.print(overloadOperatorToOperatorName.get(astOperator.getName()));
 			currentOutput.print("(");
+			if (astOperator.getRightExpression() != null)
+				astOperator.getRightExpression().compileSelf(this);
+			currentOutput.print(")");
 		}
 		else
 		{
+			currentOutput.print("(");
+			if (astOperator.getLeftExpression() != null)
+				astOperator.getLeftExpression().compileSelf(this);
 			currentOutput.print(" " + astOperator.getName() + " ");
-		}
-		if (astOperator.getRightExpression() != null)
-		{
-			astOperator.getRightExpression().compileSelf(this);
-		}
-		if (callsFunction)
-		{
+			if (astOperator.getRightExpression() != null)
+				astOperator.getRightExpression().compileSelf(this);
 			currentOutput.print(")");
 		}
 	}
