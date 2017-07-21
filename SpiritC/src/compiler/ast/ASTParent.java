@@ -3,9 +3,6 @@ package compiler.ast;
 import compiler.SpiritType;
 import compiler.builtins.Builtins;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-
 /**
  * Defines an AST that can have child ASTs.
  *
@@ -24,12 +21,11 @@ public abstract class ASTParent extends ASTBase
 
 	/**
 	 * Finds another AST from this AST's perspective.
-	 * @param symbolName The name of the symbol we want to find.
-	 * @return The symbol was found. Null if none.
+	 * @param symbolName The name of the declaration we want to find.
+	 * @return The declaration that was found. Null if none.
 	 */
-	public ASTBase findSymbol(String symbolName)
+	public ASTBase findDeclaration(String symbolName)
 	{
-		// FIXME: More like findVariable! or rather, findDeclaration.
 
 		for (ASTBase child : this.children.getAll())
 		{
@@ -40,7 +36,7 @@ public abstract class ASTParent extends ASTBase
 		}
 
 		if (getParent() != null)
-			return getParent().findSymbol(symbolName);
+			return getParent().findDeclaration(symbolName);
 
 		return null;
 	}

@@ -37,7 +37,7 @@ public class ParserSYM
 	{
 		String name = grab();
 
-		ASTBase f = perspective.findSymbol(name);
+		ASTBase f = perspective.findDeclaration(name);
 		if (f instanceof ASTClass)
 			return (ASTClass) f;
 
@@ -92,7 +92,6 @@ public class ParserSYM
 
 				String name = grab();
 				SpiritType spiritType = parseType(dest);
-				// FIXME:  Should args really have no parent?
 				freeArgs.add(new ASTVariableDeclaration(ASTChildList.ListKey.ARGS, null, name, spiritType, null));
 				break;
 			}

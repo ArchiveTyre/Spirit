@@ -4,11 +4,9 @@ import compiler.ast.ASTBase;
 import compiler.ast.ASTClass;
 import compiler.backends.CompilerCPP;
 import compiler.backends.CompilerSYM;
-import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
 
 import java.io.*;
-import java.util.ArrayList;
 
 /**
  * This class compiles files written in our language.
@@ -65,7 +63,7 @@ public class FileCompiler
 			// Try to see if already imported... //
 			if (shouldCompile(realFileName) && parent != null)
 			{
-				ASTBase alreadyImported = parent.findSymbol(getClassName(fileName));
+				ASTBase alreadyImported = parent.findDeclaration(getClassName(fileName));
 				if (alreadyImported != null && alreadyImported instanceof ASTClass)
 				{
 					return (ASTClass) alreadyImported;
