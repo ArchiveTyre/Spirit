@@ -64,10 +64,6 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 			this.columnNumber = -2;
 		else
 			this.columnNumber = -1;
-
-		// TODO: Perhaps this should be in the polisher?
-		if (!name.equals("Object"))
-			importClass("Object", new String[]{"*"});
 	}
 
 	/**

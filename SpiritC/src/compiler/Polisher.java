@@ -122,6 +122,9 @@ public class Polisher
 		if (astClass.getName().equals(Syntax.ReservedNames.OBJECT_CLASS))
 			return;
 
+		// Make sure that the class imports the object class because otherwise we can't extend it.
+		astClass.importClass("Object", new String[]{"*"});
+
 		// Make sure that the class extends something. //
 		forceExtendSomething();
 
