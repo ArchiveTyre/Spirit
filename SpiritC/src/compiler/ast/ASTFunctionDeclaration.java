@@ -121,14 +121,14 @@ public class ASTFunctionDeclaration extends ASTParent
 		compiler.compileFunctionDeclaration(this);
 	}
 
-	@Override
+	/*@Override
 	public ASTBase findSymbol(String symbolName)
 	{
-		for (ASTBase arg : children.getArgs())
+		for (ASTBase arg : children.getAll())
 		{
 			if (arg.name.equals(symbolName) && (arg instanceof ASTFunctionGroup || arg instanceof ASTVariableDeclaration || arg instanceof SpiritType))
 				return arg;
 		}
 		return super.findSymbol(symbolName);
-	}
+	}*/
 }

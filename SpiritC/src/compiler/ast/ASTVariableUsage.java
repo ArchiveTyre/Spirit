@@ -32,7 +32,7 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 	{
 		if (getDeclaration() == null)
 		{
-			System.out.println("Whoops!");
+			System.out.println("Whoops, declaration is null!");
 		}
 		return getDeclaration().getExpressionType();
 	}

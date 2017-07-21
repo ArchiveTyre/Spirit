@@ -232,7 +232,7 @@ public class Parser
 			}
 		}
 		// TODO: Is this needed???
-		left.setParent(key, parent);
+		//left.setParent(key, parent);
 		return left;
 	}
 

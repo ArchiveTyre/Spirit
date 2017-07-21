@@ -1,6 +1,7 @@
 package compiler.ast;
 
 import compiler.SpiritType;
+import compiler.builtins.Builtins;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public abstract class ASTParent extends ASTBase
 	 */
 	public ASTBase findSymbol(String symbolName)
 	{
-		// FIXME: More like findVariable!
+		// FIXME: More like findVariable! or rather, findDeclaration.
 
 		for (ASTBase child : this.children.getAll())
 		{
@@ -42,5 +43,30 @@ public abstract class ASTParent extends ASTBase
 			return getParent().findSymbol(symbolName);
 
 		return null;
+	}
+
+	/**
+	 * Returns a function group by name
+	 * It the function group does not exist, it will be created.
+	 * @return The either created or found function group.
+	 */
+	public ASTFunctionGroup getFunctionGroup(String name)
+	{
+		ASTFunctionGroup group = null;
+		for (ASTBase possibleGroup : this.children.getBody())
+		{
+			if (possibleGroup instanceof ASTVariableDeclaration && possibleGroup.name.equals(name))
+			{
+				if (((ASTVariableDeclaration) possibleGroup).isFunctionDeclaration())
+				{
+					group = (ASTFunctionGroup) ((ASTVariableDeclaration) possibleGroup).children.getLast(ASTChildList.ListKey.VALUE);
+				}
+			}
+		}
+		if (group == null) {
+			ASTParent parent = new ASTVariableDeclaration(ASTChildList.ListKey.BODY, this, name, Builtins.getBuiltin("function"), null);
+			group = new ASTFunctionGroup(ASTChildList.ListKey.VALUE, parent, name);
+		}
+		return group;
 	}
 }

@@ -77,6 +77,9 @@ public class FileCompiler
 			// Make sure the class is complete with all required features. //
 			new Polisher(loadedClass).polishClass();
 
+			// Make sure that nothing illegal happens in the AST. //
+			new IntegrityChecker(loadedClass).checkIntegrity();
+
 			if (shouldCompile(realFileName))
 			{
 				// While compiling we create two outputs:                       //
@@ -144,9 +147,6 @@ public class FileCompiler
 
 			// Parse the represented AST from the file into the the dest node. //
 			parser.parseFile(dest);
-
-			// Make sure that nothing illegal happens in the AST. //
-			new IntegrityChecker(dest).checkIntegrity();
 		}
 		else
 		{
