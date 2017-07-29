@@ -93,20 +93,26 @@ public class ParserSYM
 				String name = grab();
 				SpiritType spiritType = parseType(dest);
 				// FIXME:  Should args really have no parent?
-				freeArgs.add(new ASTVariableDeclaration(null, name, spiritType, null));
+				freeArgs.add(new ASTVariableDeclaration(ASTChildList.ListKey.ARGS, null, name, spiritType, null));
 				break;
 			}
 			case "Fun":
 			{
 				String name = grab();
 				SpiritType spiritType = parseType(dest);
-				ASTVariableDeclaration varDecl = new ASTVariableDeclaration(dest, name, Builtins.getBuiltin("function"), null);
-				ASTFunctionGroup group = new ASTFunctionGroup(varDecl, name);
-				ASTFunctionDeclaration fun = new ASTFunctionDeclaration(group, spiritType);
-				fun.args = freeArgs;
-				freeArgs = new ArrayList<>();
+				ASTVariableDeclaration varDecl = new ASTVariableDeclaration(ASTChildList.ListKey.BODY, dest, name, Builtins.getBuiltin("function"), null);
+				ASTFunctionGroup group = new ASTFunctionGroup(ASTChildList.ListKey.VALUE, varDecl, name);
+				ASTFunctionDeclaration fun = new ASTFunctionDeclaration(ASTChildList.ListKey.BODY, group, spiritType);
+
+				//fun.args = freeArgs;
+				//freeArgs = new ArrayList<>();
 				//for (ASTVariableDeclaration var : fun.args)
-				//	var.setParent(fun);
+				//var.setParent(fun);
+				// That was some truly badly written code. Tihi /tyrerexus
+
+				for (ASTVariableDeclaration arg : freeArgs)
+					arg.setParent(ASTChildList.ListKey.ARGS, fun);
+
 
 				break;
 			}
@@ -114,7 +120,7 @@ public class ParserSYM
 			{
 				String name = grab();
 				SpiritType spiritType = parseType(dest);
-				new ASTVariableDeclaration(dest, name, spiritType, null);
+				new ASTVariableDeclaration(ASTChildList.ListKey.BODY, dest, name, spiritType, null);
 				break;
 			}
 			case "Dependency":

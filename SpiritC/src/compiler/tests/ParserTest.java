@@ -9,9 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  *
@@ -69,8 +66,7 @@ class ParserTest
 	@Test
 	void singleTest()
 	{
-		String tmpStrPrint = "print : (what : string)\n";
-		testClassCompile("Strings2", tmpStrPrint + "print  \"Hii\" ");
+		testClassCompile("Class Generics 1", "generic [A B C]");
 	}
 
 	@Test
@@ -186,8 +182,10 @@ class ParserTest
 		// Operator overloading. //
 		testClassCompile("Overload1", "+ : () int = 32");
 		testClassCompile("Overload2", "self : () int = 32");
-
 		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
-		testClassCompile("Test2", tmpStrPrint + "print\n\tif 10 == 10\n\t\ta := 20");
+
+		testClassCompile("Generics1", "test : [A] (b : A) = b * 2");
+
+		testClassCompile("Class Generics 1", "generics [A B C]");
 	}
 }

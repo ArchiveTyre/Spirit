@@ -3,8 +3,7 @@ package compiler.ast;
 import compiler.*;
 import compiler.lib.IndentPrinter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Creates a basic class.
@@ -52,11 +51,22 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	 */
 	public boolean ignoreImports = false;
 
+
+	/**
+	 * Stores the generics of the class.
+	 * null = no generics.
+	 */
+	public String[] generics = null;
+
 	public ASTBase newlyInsertedCode = null;
 
 	public ASTClass(String name, ASTParent parent)
 	{
-		super(parent, name);
+		super(ASTChildList.ListKey.BODY, parent, name);
+
+		children.addLists(ASTChildList.ListKey.BODY);
+
+		// Check if root or not... //
 		if (parent == null)
 			this.columnNumber = -2;
 		else
@@ -85,7 +95,7 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	 */
 	public boolean getConstructorDeclared()
 	{
-		for (ASTBase child : childAsts)
+		for (ASTBase child : children.getAll())
 		{
 			if (child instanceof ASTVariableDeclaration
 					&&((ASTVariableDeclaration) child).isFunctionDeclaration())
@@ -149,7 +159,7 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 			if (parentAsVar.getValue() instanceof ASTFunctionGroup)
 			{
 				ASTFunctionGroup group = (ASTFunctionGroup)parentAsVar.getValue();
-				return (ASTParent)group.lastChild();
+				return (ASTParent)group.children.getLast();
 			}
 
 		}
@@ -172,19 +182,32 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	@Override
 	public ArrayList<ASTBase> getChildNodes()
 	{
-		return childAsts;
+		return new ArrayList<>(Arrays.asList(children.getAll()));
+	}
+
+	@Override
+	public ASTBase getChildByName(String name)
+	{
+		for (ASTBase astChild : children.getAll())
+		{
+			if (astChild.getName().equals(name))
+			{
+				return astChild;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public SpiritType getSuperType()
+	{
+		return extendsClassAST;
 	}
 
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileClass(this);
-	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return true;
 	}
 
 	@Override
@@ -201,9 +224,18 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 			to.println("from " + declaration.importPackage + " import " + Arrays.toString(declaration.importSymbols));
 		}
 		to.println(name);
+		if (generics != null)
+		{
+			to.print("<");
+			for (String generic : generics)
+			{
+				to.print(generic + ", ");
+			}
+			to.print(">");
+		}
 		to.println("{");
 		to.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTBase child : children.getAll())
 		{
 			child.debugSelf(to);
 			to.println("");

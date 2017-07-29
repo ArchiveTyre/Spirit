@@ -22,14 +22,18 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 			return getParent().findSymbol(name);
 	}
 
-	public ASTVariableUsage(ASTParent parent, String name)
+	public ASTVariableUsage(ASTChildList.ListKey key, ASTParent parent, String name)
 	{
-		super(parent, name);
+		super(key, parent, name);
 	}
 
 	@Override
 	public SpiritType getExpressionType()
 	{
+		if (getDeclaration() == null)
+		{
+			System.out.println("Whoops!");
+		}
 		return getDeclaration().getExpressionType();
 	}
 
@@ -49,5 +53,11 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 	public String getEnd()
 	{
 		return getName();
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
 	}
 }

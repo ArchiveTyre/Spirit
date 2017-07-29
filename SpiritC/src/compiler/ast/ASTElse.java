@@ -20,10 +20,13 @@ public class ASTElse extends ASTParent
 
 	public ASTElse(ASTParent parent)
 	{
-		super(parent, "");
+		super(ASTChildList.ListKey.BODY, parent, "");
+
+		children.addLists(ASTChildList.ListKey.BODY);
 
 		// Try to find the owning ASTIf. //
-		ASTBase lastSibling = parent.childAsts.get(parent.childAsts.size() - 2);
+		// Find the previous last child in body and check if ASTIf. //
+		ASTBase lastSibling = parent.children.getBody().get(parent.children.getBody().size() - 2);
 		if (lastSibling != null && lastSibling instanceof ASTIf)
 		{
 			ifStatement = (ASTIf)lastSibling;
@@ -49,12 +52,6 @@ public class ASTElse extends ASTParent
 	public ASTParent getParent()
 	{
 		return ifStatement;
-	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return true;
 	}
 
 	@Override

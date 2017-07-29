@@ -20,18 +20,19 @@ public class Syntax
 	public class Keyword
 	{
 
-		public static final String IF		= "if"			;
-		public static final String ELSE		= "else"		;
-		public static final String ELSEIF	= "elseif"		;
-		public static final String MATCH	= "match"		;
-		public static final String LOOP		= "loop"		;
-		public static final String MY		= "my"			;
-		public static final String IMPORT	= "import"		;
-		public static final String FROM		= "from"		;
-		public static final String USE		= "use"			;
-		public static final String THEN		= "then"		;
-		public static final String TYPE		= "type"		;
-		public static final String EXTENDS	= "extends"		;
+		public static final String IF		= "if"				;
+		public static final String ELSE		= "else"			;
+		public static final String ELSEIF	= "elseif"			;
+		public static final String MATCH	= "match"			;
+		public static final String LOOP		= "loop"			;
+		public static final String MY		= "my"				;
+		public static final String IMPORT	= "import"			;
+		public static final String FROM		= "from"			;
+		public static final String USE		= "use"				;
+		public static final String THEN		= "then"			;
+		public static final String TYPE		= "type"			;
+		public static final String EXTENDS	= "extends"			;
+		public static final String CLASS_GENERICS = "generic";
 	}
 
 	public class Op
@@ -90,6 +91,8 @@ public class Syntax
 		public static final char	INLINE_COMMENT		=	'%'		;
 		public static final char	ANON_FUNC_START		=	'{'		;
 		public static final char	ANON_FUNC_END		=	'}'		;
+		public static final char	GENERIC_START		=	'['		;
+		public static final char	GENERIC_END			=	']'		;
 
 
 	}

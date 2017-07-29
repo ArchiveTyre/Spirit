@@ -2,6 +2,7 @@ package compiler.backends;
 
 import compiler.*;
 import compiler.ast.*;
+import compiler.ast.ASTChildList.ListKey;
 import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
 
@@ -60,7 +61,7 @@ public class CompilerCPP extends LangCompiler
 				|| ast instanceof ASTLoop
 				|| ast instanceof ASTElse
 				|| ast instanceof  ASTInline
-				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).childAsts.get(0) instanceof ASTFunctionGroup);
+				|| (ast instanceof ASTVariableDeclaration && ((ASTVariableDeclaration) ast).children.getValue().get(0) instanceof ASTFunctionGroup);
 	}
 
 	private String getRawName(SpiritType targetType)
@@ -79,15 +80,30 @@ public class CompilerCPP extends LangCompiler
 
 		/// Compile members of the class. ///
 
-		for (ASTBase child : astClass.childAsts)
+		for (ASTBase child : astClass.children.getBody())
 		{
 			child.compileSelf(this);
-
-			if (child != astClass.lastChild())
-				cppOutput.println(isSemicolonless(child) ? ' ' : ';');
-			else
-				cppOutput.print(isSemicolonless(child) ? ' ' : ';');
+			cppOutput.print(isSemicolonless(child) ? ' ' : ';');
 		}
+
+
+		StringBuilder genericsDefinition = new StringBuilder();
+		if (astClass.generics != null && astClass.generics.length > 0)
+		{
+			genericsDefinition.append("template <");
+			for (int i = 0; i < astClass.generics.length; i++)
+			{
+				genericsDefinition.append("typename ");
+				genericsDefinition.append(astClass.generics[i]);
+				if (i != astClass.generics.length - 1)
+				{
+					genericsDefinition.append(", ");
+				}
+			}
+			genericsDefinition.append(">");
+		}
+
+
 
 		// If this is the main class. //
 		if (astClass.getName().equals("Main"))
@@ -125,10 +141,13 @@ public class CompilerCPP extends LangCompiler
 
 		hppOutput.println("#pragma once");
 		hppOutput.println("#include <string>");
-		hppOutput.println("using std::string;");
+		hppOutput.println("using string = std::string;");
 
 		/// Set up the class declaration. ///
 		hppOutput.println("#define " + astClass.getName() + ' ' + getRawName(astClass) + '*');
+
+		hppOutput.println(genericsDefinition.toString());
+
 		hppOutput.print("class " + getRawName(astClass));
 
 		if (astClass.extendsClassAST != null)
@@ -138,7 +157,7 @@ public class CompilerCPP extends LangCompiler
 		hppOutput.println("public:");
 		hppOutput.indentation++;
 
-		for (ASTBase child : astClass.childAsts)
+		for (ASTBase child : astClass.children.getAll())
 		{
 			if (child instanceof ASTVariableDeclaration)
 			{
@@ -173,7 +192,7 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.println(")");
 		cppOutput.println("{");
 		cppOutput.indentation++;
-		for (ASTBase child : astIf.childAsts)
+		for (ASTBase child : astIf.children.getBody())
 		{
 			child.compileSelf(this);
 			cppOutput.println(isSemicolonless(child) ? ' ' : ';');
@@ -187,7 +206,7 @@ public class CompilerCPP extends LangCompiler
 			cppOutput.println("else");
 			cppOutput.println("{");
 			cppOutput.indentation++;
-			for (ASTBase child : astIf.elseStatement.childAsts)
+			for (ASTBase child : astIf.elseStatement.children.getBody())
 			{
 				child.compileSelf(this);
 				cppOutput.println(isSemicolonless(child) ? ' ' : ';');
@@ -217,16 +236,10 @@ public class CompilerCPP extends LangCompiler
 		cppOutput.println(")");
 		cppOutput.println("{");
 		cppOutput.indentation++;
-		for (ASTBase child : astLoop.childAsts)
+		for (ASTBase child : astLoop.children.getBody())
 		{
-			if (child != astLoop.preparationalStatement
-					&& child != astLoop.initialStatement
-					&& child != astLoop.conditionalStatement
-					&& child != astLoop.iterationalStatement)
-			{
-				child.compileSelf(this);
-				cppOutput.println(isSemicolonless(child) ? ' ' : ';');
-			}
+			child.compileSelf(this);
+			cppOutput.println(isSemicolonless(child) ? ' ' : ';');
 		}
 		cppOutput.indentation--;
 		cppOutput.println("}");
@@ -236,32 +249,39 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileFunctionCall(ASTFunctionCall astFunctionCall)
 	{
+
+		/* Check if call to class constructor. */
 		if (astFunctionCall.isConstructorCall())
 		{
+			/* Add "new " and compile the path without the ".new" part. */
+
 			cppOutput.print("new ");
 			((ASTMemberAccess)astFunctionCall.getDeclarationPath()).ofObject.compileSelf(this);
 		}
+
+		/* Check if call on class. */
+		else if (astFunctionCall.getDeclarationPath().getExpressionType() instanceof ASTClass)
+		{
+			/* It is, compile as normal function call but add "->___call". */
+
+			astFunctionCall.getDeclarationPath().compileSelf(this);
+			cppOutput.print("->___call");
+		}
 		else
 		{
+			/* Just a normal function call. */
+
 			astFunctionCall.getDeclarationPath().compileSelf(this);
-		}
-		if (astFunctionCall.getExpressionType() instanceof ASTClass)
-		{
-			cppOutput.print("->___call");
 		}
 
 		cppOutput.print("(");
 
-		for (ASTBase child : astFunctionCall.childAsts)
+		for (ASTBase child : astFunctionCall.children.getArgs())
 		{
-			if (astFunctionCall.compileChild(child))
-			{
-				child.compileSelf(this);
-				if (child != astFunctionCall.lastChild())
-					cppOutput.print(", ");
-			}
+			child.compileSelf(this);
+			if (child != astFunctionCall.children.getLast(ASTChildList.ListKey.ARGS))
+				cppOutput.print(", ");
 		}
-
 
 		cppOutput.print(")");
 	}
@@ -269,10 +289,10 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileFunctionGroup(ASTFunctionGroup astFunctionGroup)
 	{
-		for (ASTBase node : astFunctionGroup.childAsts)
+		for (ASTBase node : astFunctionGroup.children.getBody())
 		{
 			node.compileSelf(this);
-			if (node != astFunctionGroup.lastChild())
+			if (node != astFunctionGroup.children.getBody())
 			{
 				currentOutput.println();
 			}
@@ -374,8 +394,27 @@ public class CompilerCPP extends LangCompiler
 				? getRawName((ASTClass)variableDeclaration.getParent()) + "::"
 				: "";
 
+
+
+
 		/// Create the declaration. ///
 		StringBuilder declaration = new StringBuilder();
+
+		if (astFunctionDeclaration.generics != null)
+		{
+			declaration.append("template <");
+			for (int i = 0; i < astFunctionDeclaration.generics.length; i++)
+			{
+				String generic = astFunctionDeclaration.generics[i];
+				declaration.append("typename ");
+				declaration.append(generic);
+				if (i != astFunctionDeclaration.generics.length -1)
+				{
+					declaration.append(", ");
+				}
+			}
+			declaration.append("> ");
+		}
 
 		// The return type
 		if (!isConstructor)
@@ -390,12 +429,13 @@ public class CompilerCPP extends LangCompiler
 
 		// The arguments. //
 		declaration.append("(");
-		for (ASTVariableDeclaration child : astFunctionDeclaration.args)
+		for (ASTBase baseChild : astFunctionDeclaration.children.getArgs())
 		{
+			ASTVariableDeclaration child = (ASTVariableDeclaration)baseChild;
 			declaration.append(child.getExpressionType().getTypeName());
 			declaration.append(' ');
 			declaration.append(child.getName());
-			if (child != astFunctionDeclaration.args.get(astFunctionDeclaration.args.size() - 1))
+			if (child != astFunctionDeclaration.children.getLast(ListKey.ARGS))
 				declaration.append(", ");
 		}
 		declaration.append(")");
@@ -411,7 +451,7 @@ public class CompilerCPP extends LangCompiler
 		ASTFunctionGroup group = (ASTFunctionGroup) astFunctionDeclaration.getParent();
 		String declaration = createFunctionDeclaration(astFunctionDeclaration, !justDeclaration);
 
-		currentOutput.println(declaration);
+		currentOutput.print(declaration);
 		if (justDeclaration)
 		{
 			// If it's just a declaration, end it here. //
@@ -421,12 +461,10 @@ public class CompilerCPP extends LangCompiler
 		{
 			// Otherwise, continue...
 
-			ASTFunctionCall listInitSuperConstructorCall = null;
-
 			// A special case for constructors... //
-			if (group.isConstructor() && astFunctionDeclaration.childAsts.size() > 0)
+			if (group.isConstructor() && astFunctionDeclaration.children.getBody().size() > 0)
 			{
-				listInitSuperConstructorCall = (ASTFunctionCall) astFunctionDeclaration.childAsts.get(0);
+				ASTFunctionCall listInitSuperConstructorCall = (ASTFunctionCall) astFunctionDeclaration.children.getFirst();
 
 				// Check if listInitSuperCall is actually valid... //
 				if (listInitSuperConstructorCall.getDeclarationPath() instanceof ASTMemberAccess
@@ -436,14 +474,11 @@ public class CompilerCPP extends LangCompiler
 					currentOutput.print(getRawName(astFunctionDeclaration.getContainingClass().extendsClassAST));
 					currentOutput.print("(");
 
-					for (ASTBase child : listInitSuperConstructorCall.childAsts)
+					for (ASTBase child : listInitSuperConstructorCall.children.getArgs())
 					{
-						if (listInitSuperConstructorCall.compileChild(child))
-						{
-							child.compileSelf(this);
-							if (child != listInitSuperConstructorCall.lastChild())
-								currentOutput.print(", ");
-						}
+						child.compileSelf(this);
+						if (child != listInitSuperConstructorCall.children.getLast(ListKey.ARGS))
+							currentOutput.print(", ");
 					}
 					currentOutput.println(")");
 				}
@@ -453,15 +488,12 @@ public class CompilerCPP extends LangCompiler
 				}
 			}
 
-			currentOutput.println("{");
+			currentOutput.println("\n{");
 			currentOutput.indentation++;
-			for (ASTBase child : astFunctionDeclaration.childAsts)
+			for (ASTBase child : astFunctionDeclaration.children.getBody())
 			{
-				if (child != listInitSuperConstructorCall && astFunctionDeclaration.compileChild(child))
-				{
-					child.compileSelf(this);
-					currentOutput.println(isSemicolonless(child) ? ' ' : ';');
-				}
+				child.compileSelf(this);
+				currentOutput.println(isSemicolonless(child) ? ' ' : ';');
 			}
 			currentOutput.indentation--;
 			currentOutput.println("}");
@@ -484,7 +516,7 @@ public class CompilerCPP extends LangCompiler
 	public void compileReturnExpression(ASTReturnExpression astReturnExpression)
 	{
 		currentOutput.print("return ");
-		astReturnExpression.childAsts.get(0).compileSelf(this);
+		astReturnExpression.children.getValue().get(0).compileSelf(this);
 	}
 
 	@Override

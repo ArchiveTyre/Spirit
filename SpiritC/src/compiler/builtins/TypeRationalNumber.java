@@ -6,15 +6,15 @@ import compiler.ast.ASTBase;
 import java.util.ArrayList;
 
 /**
- * @author david
- * @date 4/13/17
+ * @author Tyrerexus
+ * @date 7/16/17
  */
-public class TypeFloat implements SpiritType
+public class TypeRationalNumber implements SpiritType
 {
 	@Override
 	public String getTypeName()
 	{
-		return "float";
+		return "rational_number";
 	}
 
 	@Override
@@ -32,6 +32,6 @@ public class TypeFloat implements SpiritType
 	@Override
 	public SpiritType getSuperType()
 	{
-		return Builtins.getBuiltin("rational_number");
+		return null;
 	}
 }

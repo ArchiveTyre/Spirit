@@ -1,0 +1,5 @@
+% This class needs a complete rewrite.
+%#inline
+%#include <string>
+%using String = std::string;
+%#end

@@ -3,6 +3,7 @@ package compiler.ast;
 import compiler.SpiritType;
 import compiler.LangCompiler;
 import compiler.lib.IndentPrinter;
+import compiler.ast.ASTChildList.ListKey;
 
 /**
  * Defines a operator usage in the ast. <br>
@@ -14,15 +15,6 @@ import compiler.lib.IndentPrinter;
 public class ASTOperator extends ASTParent
 {
 
-	/**
-	 * Right hand side of the operator
-	 */
-	private ASTBase rightExpression;
-
-	/**
-	 * Left hand side of the operator.
-	 */
-	private ASTBase leftExpression;
 
 	/**
 	 * Getter for rightExpression.
@@ -30,7 +22,7 @@ public class ASTOperator extends ASTParent
 	 */
 	public ASTBase getRightExpression()
 	{
-		return rightExpression;
+		return children.getList(ListKey.OPERATOR_CALL).get(1);
 	}
 
 	/**
@@ -39,30 +31,30 @@ public class ASTOperator extends ASTParent
 	 */
 	public ASTBase getLeftExpression()
 	{
-		return leftExpression;
+		return children.getList(ListKey.OPERATOR_CALL).get(0);
 	}
 
-	public ASTOperator(ASTParent parent, String operatorName, ASTBase rightExpression, ASTBase leftExpression)
+	public ASTOperator(ASTChildList.ListKey key, ASTParent parent, String operatorName, ASTBase leftExpression, ASTBase rightExpression)
 	{
-		super(parent, operatorName);
+		super(key, parent, operatorName);
 
-		if (rightExpression != null)
-		{
-			rightExpression.setParent(this);
-			this.rightExpression = rightExpression;
-		}
+		children.addList(ListKey.OPERATOR_CALL, 2);
+
 		if (leftExpression != null)
 		{
-			leftExpression.setParent(this);
-			this.leftExpression = leftExpression;
+			leftExpression.setParent(ListKey.OPERATOR_CALL, this);
+		}
+		if (rightExpression != null)
+		{
+			rightExpression.setParent(ListKey.OPERATOR_CALL, this);
 		}
 	}
 
 	@Override
 	public SpiritType getExpressionType()
 	{
-		SpiritType operatorType = rightExpression.getExpressionType();
-		if (operatorType == leftExpression.getExpressionType())
+		SpiritType operatorType = getRightExpression().getExpressionType();
+		if (operatorType == getLeftExpression().getExpressionType())
 			return operatorType;
 
 		System.err.println("Unhandled error for non-matching call types. ");
@@ -73,11 +65,11 @@ public class ASTOperator extends ASTParent
 	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print("(");
-		if (leftExpression != null)
-			leftExpression.debugSelf(destination);
+		if (getLeftExpression() != null)
+			getLeftExpression().debugSelf(destination);
 		destination.print(' ' + name + ' ');
-		if (rightExpression != null)
-			rightExpression.debugSelf(destination);
+		if (getRightExpression() != null)
+			getRightExpression().debugSelf(destination);
 		destination.print(")");
 	}
 
@@ -85,11 +77,5 @@ public class ASTOperator extends ASTParent
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileOperator(this);
-	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return false;
 	}
 }

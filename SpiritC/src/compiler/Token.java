@@ -23,7 +23,7 @@ public class Token
 		LPAR,
 		RPAR,
 		EOF,
-		INLINE,
+		INLINE;
 	}
 
 

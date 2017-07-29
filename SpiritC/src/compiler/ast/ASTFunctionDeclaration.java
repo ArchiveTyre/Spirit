@@ -3,6 +3,8 @@ package compiler.ast;
 import compiler.SpiritType;
 import compiler.LangCompiler;
 import compiler.builtins.Builtins;
+import compiler.builtins.TypeUndefined;
+import compiler.lib.Helper;
 import compiler.lib.IndentPrinter;
 
 import java.util.ArrayList;
@@ -18,9 +20,9 @@ public class ASTFunctionDeclaration extends ASTParent
 {
 
 	/**
-	 * The arguments that are needed to call this function.
+	 * If the function has generics, they are placed inside of this array.
 	 */
-	public ArrayList<ASTVariableDeclaration> args = new ArrayList<>();
+	public String[] generics = null;
 
 	/**
 	 * The return type of this function.
@@ -36,14 +38,18 @@ public class ASTFunctionDeclaration extends ASTParent
 
 	private boolean anonymous = false;
 
-	public ASTFunctionDeclaration(ASTParent parent, SpiritType returnType)
+
+	public ASTFunctionDeclaration(ASTChildList.ListKey key, ASTParent parent, SpiritType returnType)
 	{
-		this(parent, returnType, false);
+		this(key, parent, returnType, false);
 	}
 
-	public ASTFunctionDeclaration(ASTParent parent, SpiritType returnType, boolean anonymous)
+	public ASTFunctionDeclaration(ASTChildList.ListKey key, ASTParent parent, SpiritType returnType, boolean anonymous)
 	{
-		super(parent, "");
+		super(key, parent, "");
+
+		children.addLists(ASTChildList.ListKey.BODY, ASTChildList.ListKey.ARGS);
+
 		this.returnType = returnType;
 		isNestedFunction = !(parent.getParent().getParent() instanceof ASTClass);
 		if (isNestedFunction)
@@ -55,7 +61,10 @@ public class ASTFunctionDeclaration extends ASTParent
 	@Override
 	public SpiritType getExpressionType()
 	{
-		return Builtins.getBuiltin("function");
+		if (((ASTFunctionGroup)getParent()).isConstructor())
+			return getContainingClass();
+		else
+			return returnType;
 	}
 
 	@Override
@@ -63,17 +72,32 @@ public class ASTFunctionDeclaration extends ASTParent
 	{
 		if (isNestedFunction)
 			destination.print("nested ");
-		destination.print("(");
-		for (ASTVariableDeclaration arg : args)
+
+		if (generics != null)
 		{
-			destination.print(arg.name + " : " + arg.getExpressionType().getTypeName());
-			if (arg != args.get(args.size() - 1))
+			destination.print("[");
+			for (String generic : generics)
+			{
+				destination.print(generic + " ");
+			}
+			destination.print("] ");
+		}
+
+		destination.print("(");
+		for (ASTBase baseArg : children.getArgs())
+		{
+			ASTVariableDeclaration arg = (ASTVariableDeclaration) baseArg;
+			String undefined = (arg.getExpressionType() instanceof TypeUndefined) ? "[?] " : "";
+			destination.print(arg.name + " : " + undefined + arg.getExpressionType().getTypeName());
+			if (arg != children.getLast(ASTChildList.ListKey.ARGS))
 				destination.print(", ");
 		}
-		destination.println(") -> " + returnType.getTypeName());
+
+		String undefined = (returnType instanceof TypeUndefined) ? "[?] " : "";
+		destination.println(") -> " + undefined + returnType.getTypeName());
 		destination.println("{");
 		destination.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTBase child : children.getBody())
 		{
 			child.debugSelf(destination);
 			destination.println("");
@@ -98,21 +122,9 @@ public class ASTFunctionDeclaration extends ASTParent
 	}
 
 	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		// This is quite slow... //
-		for (ASTBase arg : args)
-		{
-			if (arg == child)
-				return false;
-		}
-		return true;
-	}
-
-	@Override
 	public ASTBase findSymbol(String symbolName)
 	{
-		for (ASTBase arg : args)
+		for (ASTBase arg : children.getArgs())
 		{
 			if (arg.name.equals(symbolName) && (arg instanceof ASTFunctionGroup || arg instanceof ASTVariableDeclaration || arg instanceof SpiritType))
 				return arg;

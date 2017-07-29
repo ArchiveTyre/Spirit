@@ -12,9 +12,9 @@ public class ASTInline extends ASTBase
 {
 
 	public String code;
-	public ASTInline(ASTParent parent, String code)
+	public ASTInline(ASTChildList.ListKey key, ASTParent parent, String code)
 	{
-		super(parent);
+		super(key, parent);
 		this.code = code;
 
 	}

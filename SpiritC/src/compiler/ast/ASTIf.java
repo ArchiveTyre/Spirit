@@ -13,10 +13,6 @@ import compiler.lib.IndentPrinter;
  */
 public class ASTIf extends ASTParent
 {
-	/**
-	 * The condition to check against.
-	 */
-	private ASTBase condition;
 
 	/**
 	 * Optionally attached "else" statement.
@@ -29,14 +25,14 @@ public class ASTIf extends ASTParent
 	 */
 	public ASTBase getCondition()
 	{
-		return condition;
+		return children.getLast(ASTChildList.ListKey.CONDITION);
 	}
 
-	public ASTIf(ASTParent parent, ASTBase condition)
+	public ASTIf(ASTChildList.ListKey key, ASTParent parent)
 	{
-		super(parent, "");
-		this.condition = condition;
-		condition.setParent(this);
+		super(key, parent, "");
+
+		children.addLists(ASTChildList.ListKey.BODY, ASTChildList.ListKey.CONDITION);
 	}
 
 	@Override
@@ -49,17 +45,14 @@ public class ASTIf extends ASTParent
 	public void debugSelf(IndentPrinter destination)
 	{
 		destination.print("if (");
-		condition.debugSelf(destination);
+		getCondition().debugSelf(destination);
 		destination.println(")");
 		destination.println("{");
 		destination.indentation++;
-		for (ASTBase child : childAsts)
+		for (ASTBase child : children.getBody())
 		{
-			if (child != condition)
-			{
-				child.debugSelf(destination);
-				destination.println("");
-			}
+			child.debugSelf(destination);
+			destination.println("");
 		}
 		destination.indentation--;
 
@@ -69,7 +62,7 @@ public class ASTIf extends ASTParent
 			destination.println("else");
 			destination.println("{");
 			destination.indentation++;
-			for (ASTBase child : elseStatement.childAsts)
+			for (ASTBase child : elseStatement.children.getBody())
 			{
 				child.debugSelf(destination);
 				destination.println("");
@@ -83,11 +76,5 @@ public class ASTIf extends ASTParent
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileIf(this);
-	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return false;
 	}
 }

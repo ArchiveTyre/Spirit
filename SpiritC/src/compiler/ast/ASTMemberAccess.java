@@ -59,11 +59,14 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	 */
 	public String getMemberName() { return memberName;}
 
-	public ASTMemberAccess(ASTParent parent, ASTPath ofObject, String memberName)
+	public ASTMemberAccess(ASTChildList.ListKey key, ASTParent parent, ASTPath ofObject, String memberName)
 	{
-		super(parent, "");
+		super(key, parent, "");
+
+		children.addLists(ASTChildList.ListKey.VALUE);
+
 		this.ofObject = ofObject;
-		ofObject.setParent(this);
+		ofObject.setParent(ASTChildList.ListKey.VALUE, this);
 		this.memberName = memberName;
 	}
 
@@ -71,6 +74,12 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	public SpiritType getExpressionType()
 	{
 		return getMember().getExpressionType();
+	}
+
+	@Override
+	public ASTBase getDeclaration()
+	{
+		return getMember();
 	}
 
 	@Override
@@ -90,6 +99,7 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 			destination.print("<<NOT FOUND>>");
 	}
 
+
 	@Override
 	public void compileSelf(LangCompiler compiler)
 	{
@@ -97,8 +107,8 @@ public class ASTMemberAccess extends ASTParent implements ASTPath
 	}
 
 	@Override
-	public boolean compileChild(ASTBase child)
+	public String toString()
 	{
-		return false;
+		return ofObject.toString() + "." + memberName;
 	}
 }

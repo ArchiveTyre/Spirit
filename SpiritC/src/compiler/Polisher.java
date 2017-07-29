@@ -1,9 +1,11 @@
 package compiler;
 
 import compiler.ast.*;
+import compiler.ast.ASTChildList.ListKey;
 import compiler.builtins.Builtins;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Polishes a class before compilation.
@@ -29,10 +31,10 @@ public class Polisher
 
 	public void polishClassCreateConstructor()
 	{
-		ASTVariableDeclaration v = new ASTVariableDeclaration(astClass,
+		ASTVariableDeclaration v = new ASTVariableDeclaration(ListKey.BODY, astClass,
 				Syntax.ReservedNames.CONSTRUCTOR, Builtins.getBuiltin("function"), null);
-		ASTFunctionGroup group = new ASTFunctionGroup(v, Syntax.ReservedNames.CONSTRUCTOR);
-		new ASTFunctionDeclaration(group, Builtins.getBuiltin("void"));
+		ASTFunctionGroup group = new ASTFunctionGroup(ListKey.VALUE, v, Syntax.ReservedNames.CONSTRUCTOR);
+		new ASTFunctionDeclaration(ListKey.BODY, group, Builtins.getBuiltin("void"));
 	}
 
 	/**
@@ -44,9 +46,9 @@ public class Polisher
 		boolean callsSuper = false;
 
 		// We can't check something that doesn't have anything. //
-		if (function.childAsts.size() > 0)
+		if (function.children.getBody().size() > 0)
 		{
-			ASTBase firstThing = function.childAsts.get(0);
+			ASTBase firstThing = function.children.getFirst();
 			if (firstThing instanceof ASTFunctionCall)
 			{
 				ASTFunctionCall firstCall = (ASTFunctionCall) firstThing;
@@ -72,13 +74,13 @@ public class Polisher
 			// Compiles roughly to: (super.constructor) //
 			// Inserts as first thing that happens on call. //
 			// Thus, parent is specified later. //
-			ASTFunctionCall astFunctionCall = new ASTFunctionCall(function);
+			ASTFunctionCall astFunctionCall = new ASTFunctionCall(ListKey.BODY, function);
 			astFunctionCall.setDeclarationPath(
-					new ASTMemberAccess(astClass,
-							new ASTVariableUsage(astFunctionCall, "super"),
+					new ASTMemberAccess(ListKey.PATH, astFunctionCall,
+							new ASTVariableUsage(ListKey.BODY, astClass, "super"),
 					Syntax.ReservedNames.CONSTRUCTOR));
-			function.childAsts.remove(astFunctionCall);
-			function.childAsts.add(0, astFunctionCall);
+			function.children.getBody().remove(astFunctionCall);
+			function.children.getBody().add(0, astFunctionCall);
 		}
 	}
 
@@ -93,7 +95,10 @@ public class Polisher
 		if (astClass.extendsClassAST == null)
 			return;
 
-		for (ASTBase child : new ArrayList<>(astClass.childAsts))
+
+
+
+		for (ASTBase child : astClass.children.getAll())
 		{
 			if (child instanceof ASTVariableDeclaration
 					&& ((ASTVariableDeclaration)child).isFunctionDeclaration())
@@ -101,7 +106,7 @@ public class Polisher
 				ASTFunctionGroup group = (ASTFunctionGroup)((ASTVariableDeclaration) child).getValue();
 				if (group.isConstructor())
 				{
-					for (ASTBase possibleFunction : group.childAsts)
+					for (ASTBase possibleFunction : group.children.getBody())
 					{
 						polishClassConstructor((ASTFunctionDeclaration) possibleFunction);
 					}

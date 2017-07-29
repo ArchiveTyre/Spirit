@@ -29,7 +29,20 @@ public class ASTFunctionCall extends ASTParent
 	public void setDeclarationPath(ASTPath newDeclarationPath)
 	{
 		declarationPath = newDeclarationPath;
-		newDeclarationPath.setParent(this);
+		newDeclarationPath.setParent(ASTChildList.ListKey.PATH, this);
+	}
+
+	public ASTFunctionGroup getFunctionGroup()
+	{
+		ASTVariableDeclaration declarationVar = (ASTVariableDeclaration)getDeclarationPath().getDeclaration();
+
+		if (!declarationVar.isFunctionDeclaration())
+		{
+			// Call to variable. //
+			declarationVar = (ASTVariableDeclaration) getDeclarationPath().getDeclaration().getExpressionType().getChildByName(Syntax.ReservedNames.SELF);
+		}
+
+		return (ASTFunctionGroup) declarationVar.getValue();
 	}
 
 	/**
@@ -42,34 +55,41 @@ public class ASTFunctionCall extends ASTParent
 		return declarationPath.getEnd().equals(Syntax.ReservedNames.CONSTRUCTOR);
 	}
 
-	public ASTFunctionCall(ASTParent parent)
+	public ASTFunctionCall(ASTChildList.ListKey key, ASTParent parent)
 	{
-		super(parent, "");
+		super(key, parent, "");
+		children.addLists(ASTChildList.ListKey.ARGS, ASTChildList.ListKey.PATH);
 	}
 
 	@Override
 	public SpiritType getExpressionType()
 	{
-			return declarationPath.getExpressionType();
+		ASTFunctionDeclaration declaration = getFunctionGroup().getWithMarchingArguments(children.getArgs());
+
+		if (declaration != null)
+		{
+			return declaration.getExpressionType();
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	@Override
 	public void debugSelf(IndentPrinter destination)
 	{
-		String space = childAsts.isEmpty() || getParent() instanceof ASTFunctionCall
+		String space = children.getArgs().isEmpty() || getParent() instanceof ASTFunctionCall
 				? ""
 				: " ";
 		declarationPath.debugSelf(destination);
 		destination.print("(" + space);
-		for (ASTBase arg : childAsts)
+		for (ASTBase arg : children.getArgs())
 		{
-			if (compileChild(arg))
+			arg.debugSelf(destination);
+			if (arg != children.getArgs().get(children.getArgs().size() - 1))
 			{
-				arg.debugSelf(destination);
-				if (arg != childAsts.get(childAsts.size() - 1))
-				{
-					destination.print(", ");
-				}
+				destination.print(", ");
 			}
 		}
 		destination.print(space + ")");
@@ -79,11 +99,5 @@ public class ASTFunctionCall extends ASTParent
 	public void compileSelf(LangCompiler compiler)
 	{
 		compiler.compileFunctionCall(this);
-	}
-
-	@Override
-	public boolean compileChild(ASTBase child)
-	{
-		return !(child == declarationPath);
 	}
 }
