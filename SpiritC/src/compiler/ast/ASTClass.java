@@ -42,7 +42,7 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	public String extendsClass = null;
 
 	/**
-	 * The result of <code>this.findSymbol(extendsClass)</code>.
+	 * The result of <code>this.findDeclaration(extendsClass)</code>.
 	 */
 	public ASTClass extendsClassAST = null;
 
@@ -71,10 +71,6 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 			this.columnNumber = -2;
 		else
 			this.columnNumber = -1;
-
-		// TODO: Perhaps this should be in the polisher?
-		if (!name.equals("Object"))
-			importClass("Object", new String[]{"*"});
 	}
 
 	/**
@@ -84,7 +80,7 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	public void extendClass(String className)
 	{
 		extendsClass = className;
-		ASTBase search = this.findSymbol(className);
+		ASTBase search = this.findDeclaration(className);
 		if (search instanceof ASTClass)
 			extendsClassAST = (ASTClass)search;
 	}

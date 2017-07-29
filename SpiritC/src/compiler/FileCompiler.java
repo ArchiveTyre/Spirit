@@ -4,11 +4,9 @@ import compiler.ast.ASTBase;
 import compiler.ast.ASTClass;
 import compiler.backends.CompilerCPP;
 import compiler.backends.CompilerSYM;
-import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
 
 import java.io.*;
-import java.util.ArrayList;
 
 /**
  * This class compiles files written in our language.
@@ -36,6 +34,13 @@ public class FileCompiler
 		return new File(fileName).getName().split("\\.")[0];
 	}
 
+	private static void useCompiler(LangCompiler compiler, String fileName, ASTClass source)
+	{
+		compiler.createFileStreams(fileName);
+		compiler.compileClass(source);
+		compiler.closeStreams();
+	}
+
 	/**
 	 * Imports/compiles/loads the file into parent.
 	 *
@@ -51,15 +56,14 @@ public class FileCompiler
 
 			if (realFileName == null)
 			{
-				System.err.println("ERROR Could not find class: " + fileName + " in path: " + Main.getPath());
+				System.err.println("ERROR Could not find class: " + fileName + " in path: \"" + Main.getPath() + "\"");
 				return null;
 			}
 
 			// Try to see if already imported... //
-			// TODO: Replace with fileName to name.
 			if (shouldCompile(realFileName) && parent != null)
 			{
-				ASTBase alreadyImported = parent.findSymbol(getClassName(fileName));
+				ASTBase alreadyImported = parent.findDeclaration(getClassName(fileName));
 				if (alreadyImported != null && alreadyImported instanceof ASTClass)
 				{
 					return (ASTClass) alreadyImported;
@@ -77,6 +81,9 @@ public class FileCompiler
 			// Make sure the class is complete with all required features. //
 			new Polisher(loadedClass).polishClass();
 
+			// Make sure that nothing illegal happens in the AST. //
+			new IntegrityChecker(loadedClass).checkIntegrity();
+
 			if (shouldCompile(realFileName))
 			{
 				// While compiling we create two outputs:                       //
@@ -84,25 +91,17 @@ public class FileCompiler
 				// * The symbol file used to load the class without re-parsing. //
 
 				LangCompiler compiler = chooseCompiler();
-				compiler.createFileStreams(fileName);
-				compiler.compileClass(loadedClass);
-				compiler.closeStreams();
+				useCompiler(compiler, fileName, loadedClass);
 
 				LangCompiler symbolCompiler = new CompilerSYM();
-				symbolCompiler.createFileStreams(fileName);
-				symbolCompiler.compileClass(loadedClass);
-				symbolCompiler.closeStreams();
-
-				// TODO: This isn't DRY.
-				// TODO: Perhaps a wrapper function should be made?
+				useCompiler(symbolCompiler, fileName, loadedClass);
 			}
 
 			return loadedClass;
 		}
 		catch (FileNotFoundException e)
 		{
-			System.err.println("ERROR: File not found!"); // FIXME: Doesn't report what file.
-			// TODO: Using fileName won't do because there might be more than one place where such an exception can occure.
+			System.err.println("ERROR: File not found: " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
@@ -129,8 +128,8 @@ public class FileCompiler
 	{
 		if (!new File(fileName).exists())
 		{
-			// TODO: We could just report the error here instead of in importFile().
-			throw new FileNotFoundException(fileName);
+			System.err.println("ERROR: File not found: " + fileName);
+			return null;
 		}
 
 		ASTClass dest = new ASTClass(getClassName(fileName), root);
@@ -144,9 +143,6 @@ public class FileCompiler
 
 			// Parse the represented AST from the file into the the dest node. //
 			parser.parseFile(dest);
-
-			// Make sure that nothing illegal happens in the AST. //
-			new IntegrityChecker(dest).checkIntegrity();
 		}
 		else
 		{

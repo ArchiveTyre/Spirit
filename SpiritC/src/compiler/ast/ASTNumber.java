@@ -5,10 +5,12 @@ import compiler.LangCompiler;
 import compiler.builtins.Builtins;
 import compiler.lib.IndentPrinter;
 
+import java.math.BigDecimal;
+
 /**
  * Puts a number into an AST.
  *
- * TODO: Support more than just integers in size.
+ * TODO: Support decimal numbers in the constructor.
  *
  * @author Tyrerexus
  * @date 4/12/17.
@@ -19,12 +21,12 @@ public class ASTNumber extends ASTBase
 	/**
 	 * The value of this number.
 	 */
-	public int value;
+	public BigDecimal value;
 
 	public ASTNumber(ASTChildList.ListKey key, ASTParent parent, int value)
 	{
 		super(key, parent);
-		this.value = value;
+		this.value = new BigDecimal(value);
 	}
 
 	@Override

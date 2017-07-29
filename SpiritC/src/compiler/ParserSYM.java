@@ -37,7 +37,7 @@ public class ParserSYM
 	{
 		String name = grab();
 
-		ASTBase f = perspective.findSymbol(name);
+		ASTBase f = perspective.findDeclaration(name);
 		if (f instanceof ASTClass)
 			return (ASTClass) f;
 
@@ -92,7 +92,6 @@ public class ParserSYM
 
 				String name = grab();
 				SpiritType spiritType = parseType(dest);
-				// FIXME:  Should args really have no parent?
 				freeArgs.add(new ASTVariableDeclaration(ASTChildList.ListKey.ARGS, null, name, spiritType, null));
 				break;
 			}
@@ -100,8 +99,7 @@ public class ParserSYM
 			{
 				String name = grab();
 				SpiritType spiritType = parseType(dest);
-				ASTVariableDeclaration varDecl = new ASTVariableDeclaration(ASTChildList.ListKey.BODY, dest, name, Builtins.getBuiltin("function"), null);
-				ASTFunctionGroup group = new ASTFunctionGroup(ASTChildList.ListKey.VALUE, varDecl, name);
+				ASTFunctionGroup group = dest.getFunctionGroup(name);
 				ASTFunctionDeclaration fun = new ASTFunctionDeclaration(ASTChildList.ListKey.BODY, group, spiritType);
 
 				//fun.args = freeArgs;
@@ -113,6 +111,8 @@ public class ParserSYM
 				for (ASTVariableDeclaration arg : freeArgs)
 					arg.setParent(ASTChildList.ListKey.ARGS, fun);
 
+				// Remember to clear the free args list once we're done. //
+				freeArgs = new ArrayList<>();
 
 				break;
 			}

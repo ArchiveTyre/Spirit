@@ -231,8 +231,6 @@ public class Parser
 				break;
 			}
 		}
-		// TODO: Is this needed???
-		left.setParent(key, parent);
 		return left;
 	}
 
@@ -247,7 +245,7 @@ public class Parser
 		return check instanceof ASTVariableUsage || check instanceof  ASTMemberAccess;
 	}
 
-	// FIXME: Add support for strings.
+
 	/**
 	 * Parse a full expression and return it.
 	 * @param parent The parent to place the expression in.
@@ -321,7 +319,7 @@ public class Parser
 		{
 			String name = previous.value;
 			ASTFunctionGroup group;
-			ASTBase possibleGroupDeclaration = parent.findSymbol(name);
+			ASTBase possibleGroupDeclaration = parent.findDeclaration(name);
 			if (possibleGroupDeclaration instanceof ASTVariableDeclaration
 					&& ((ASTVariableDeclaration) possibleGroupDeclaration).getValue() != null
 					&& ((ASTVariableDeclaration) possibleGroupDeclaration).getValue() instanceof  ASTFunctionGroup)
@@ -920,7 +918,7 @@ public class Parser
 	{
 		// FIXME: Is this really the best place?
 
-		ASTBase f = perspective.findSymbol(name);
+		ASTBase f = perspective.findDeclaration(name);
 		if (f instanceof ASTClass)
 			return (ASTClass) f;
 

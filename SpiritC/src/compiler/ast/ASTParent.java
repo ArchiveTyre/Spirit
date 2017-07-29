@@ -1,9 +1,7 @@
 package compiler.ast;
 
 import compiler.SpiritType;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+import compiler.builtins.Builtins;
 
 /**
  * Defines an AST that can have child ASTs.
@@ -23,12 +21,11 @@ public abstract class ASTParent extends ASTBase
 
 	/**
 	 * Finds another AST from this AST's perspective.
-	 * @param symbolName The name of the symbol we want to find.
-	 * @return The symbol was found. Null if none.
+	 * @param symbolName The name of the declaration we want to find.
+	 * @return The declaration that was found. Null if none.
 	 */
-	public ASTBase findSymbol(String symbolName)
+	public ASTBase findDeclaration(String symbolName)
 	{
-		// FIXME: More like findVariable!
 
 		for (ASTBase child : this.children.getAll())
 		{
@@ -39,8 +36,33 @@ public abstract class ASTParent extends ASTBase
 		}
 
 		if (getParent() != null)
-			return getParent().findSymbol(symbolName);
+			return getParent().findDeclaration(symbolName);
 
 		return null;
+	}
+
+	/**
+	 * Returns a function group by name
+	 * It the function group does not exist, it will be created.
+	 * @return The either created or found function group.
+	 */
+	public ASTFunctionGroup getFunctionGroup(String name)
+	{
+		ASTFunctionGroup group = null;
+		for (ASTBase possibleGroup : this.children.getBody())
+		{
+			if (possibleGroup instanceof ASTVariableDeclaration && possibleGroup.name.equals(name))
+			{
+				if (((ASTVariableDeclaration) possibleGroup).isFunctionDeclaration())
+				{
+					group = (ASTFunctionGroup) ((ASTVariableDeclaration) possibleGroup).children.getLast(ASTChildList.ListKey.VALUE);
+				}
+			}
+		}
+		if (group == null) {
+			ASTParent parent = new ASTVariableDeclaration(ASTChildList.ListKey.BODY, this, name, Builtins.getBuiltin("function"), null);
+			group = new ASTFunctionGroup(ASTChildList.ListKey.VALUE, parent, name);
+		}
+		return group;
 	}
 }

@@ -59,6 +59,13 @@ public class IntegrityChecker
 			ASTVariableDeclaration declarationVar = (ASTVariableDeclaration) call.getDeclarationPath().getDeclaration();
 			ASTFunctionGroup group;
 
+			if (declarationVar == null)
+			{
+				// TODO: Improve error report!
+				System.out.println("ERROR, unknown function: " + call.getDeclarationPath().toString());
+				continue;
+			}
+
 			if (!declarationVar.isFunctionDeclaration())
 			{
 				// Call to variable. //
@@ -79,7 +86,7 @@ public class IntegrityChecker
 				// Here we test that the call and the declaration takes in the same amount of arguments. //
 				if (declaration.children.getArgs().size() == call.children.getArgs().size())
 				{
-					// TODO:  We also need to check the types.
+					// TODO: We also need to check the types.
 					hasFoundMatchingDeclaration = true;
 				}
 			}

@@ -18,9 +18,10 @@ public class Main
 	public static final String VERSION        = "0.0.1 ALPHA";
 	public static final String COMPILER_NAME  = "Spirit";
 	public static final String COPYRIGHT      = "© 2017 TYREREXUS AND DAVID ALL RIGHTS RESERVED";
-	public static final String ENV_PKG_PATH = "SPIRITENV_PKG_PATH";
+	public static final String ENV_PKG_PATH   = "SPIRITENV_PKG_PATH";
 	public static final String FILE_EXTENSION = ".spirit";
 	public static File outDir = new File("out/");
+	public static boolean compilerDebug = false;
 
 	public static String getPath()
 	{
@@ -58,6 +59,9 @@ public class Main
 				case "--version":
 					printVersion();
 					break;
+				case "--compiler-debug":
+					compilerDebug = true;
+					break;
 				default:
 					fileNames.add(arg);
 			}
@@ -65,19 +69,17 @@ public class Main
 
 		ASTClass root = new ASTClass("root", null);
 		FileCompiler.importFile(Syntax.ReservedNames.OBJECT_CLASS + FILE_EXTENSION, root);
-		//ASTClass objectClass = new ASTClass(Syntax.ReservedNames.OBJECT_CLASS, root);
-
-		//Polisher polishObject = new Polisher(objectClass);
-		//polishObject.polishClassCreateConstructor();
-		//polishObject.forceConstructorsCallSuper();
 
 		for (String file : fileNames)
 		{
 			FileCompiler.importFile(file, root);
 		}
 
-		IndentPrinter printer = new IndentPrinter(System.out);
-		root.debugSelf(printer);
+		if (compilerDebug)
+		{
+			IndentPrinter printer = new IndentPrinter(System.out);
+			root.debugSelf(printer);
+		}
 	}
 
 	private static void printVersion()

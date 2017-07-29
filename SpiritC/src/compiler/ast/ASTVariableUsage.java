@@ -19,7 +19,7 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 		if (name.equals("super"))
 			return this.getContainingClass().extendsClassAST;
 		else
-			return getParent().findSymbol(name);
+			return getParent().findDeclaration(name);
 	}
 
 	public ASTVariableUsage(ASTChildList.ListKey key, ASTParent parent, String name)
@@ -32,7 +32,7 @@ public class ASTVariableUsage extends ASTBase implements ASTPath
 	{
 		if (getDeclaration() == null)
 		{
-			System.out.println("Whoops!");
+			System.out.println("Whoops, declaration is null!");
 		}
 		return getDeclaration().getExpressionType();
 	}
