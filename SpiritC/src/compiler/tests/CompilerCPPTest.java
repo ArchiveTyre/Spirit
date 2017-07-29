@@ -55,7 +55,7 @@ class CompilerCPPTest
 	@Test
 	void singleTest()
 	{
-		testCompiler("Func", "a : (x, y : T) T\n\t = x + y");
+		testCompiler("ClassGenerics", "generic [A B C]");
 	}
 
 	@Test

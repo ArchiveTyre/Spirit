@@ -717,6 +717,51 @@ public class Parser
 	}
 
 
+	/**
+	 * Returns generics. Should only be called when generics are found.
+	 *
+	 * @return The generics as an array of Strings.
+	 */
+	private String[] parseGenerics ()
+	{
+		// Check if we have generics. //
+		if (match(Syntax.Op.GENERIC_START))
+		{
+			ArrayList<String> generics = new ArrayList<>();
+
+			// Match generics until we no longer find the generics. //
+			while (match(TokenType.SYMBOL))
+			{
+				generics.add(previous.value);
+			}
+
+			// Check if we have found no generics, and if so, throw an error, because they are not supposed to be able to declare no generics. //
+			if (generics.size() == 0)
+			{
+				error.syntaxError("Generic Name Symbol", "No generics were found in the generics clause.");
+				return null;
+			}
+
+			// Make sure that they terminate the generics with a propper generic end operator. //
+			if (match(Syntax.Op.GENERIC_END))
+			{
+				String[] arrayGenerics = new String[generics.size()];
+				arrayGenerics = generics.toArray(arrayGenerics);
+				return arrayGenerics;
+			}
+			else
+			{
+				error.syntaxError("]", "Expected function declaration generics terminator.");
+				return null;
+			}
+		}
+		else
+		{
+			error.compilerError("COMPILER ERROR: NO GENERICS FOUND!!!");
+		}
+		return null;
+	}
+
 	private boolean parseLine(ASTClass dest)
 	{
 		ASTBase newAST = null;
@@ -749,6 +794,12 @@ public class Parser
 		if (look(0, Syntax.Keyword.EXTENDS))
 		{
 			return parseExtendDeclaration(dest);
+		}
+
+		// Check if we are declaring the generics of the class
+		else if (match(Syntax.Keyword.CLASS_GENERICS))
+		{
+			return dest.generics == null && (dest.generics = parseGenerics()) != null;
 		}
 		// Check if we are defining a function. //
 		else if (

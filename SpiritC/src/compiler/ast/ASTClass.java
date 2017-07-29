@@ -51,6 +51,13 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 	 */
 	public boolean ignoreImports = false;
 
+
+	/**
+	 * Stores the generics of the class.
+	 * null = no generics.
+	 */
+	public String[] generics = null;
+
 	public ASTBase newlyInsertedCode = null;
 
 	public ASTClass(String name, ASTParent parent)
@@ -217,6 +224,15 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 			to.println("from " + declaration.importPackage + " import " + Arrays.toString(declaration.importSymbols));
 		}
 		to.println(name);
+		if (generics != null)
+		{
+			to.print("<");
+			for (String generic : generics)
+			{
+				to.print(generic + ", ");
+			}
+			to.print(">");
+		}
 		to.println("{");
 		to.indentation++;
 		for (ASTBase child : children.getAll())

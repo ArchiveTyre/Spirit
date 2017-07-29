@@ -86,6 +86,25 @@ public class CompilerCPP extends LangCompiler
 			cppOutput.print(isSemicolonless(child) ? ' ' : ';');
 		}
 
+
+		StringBuilder genericsDefinition = new StringBuilder();
+		if (astClass.generics != null && astClass.generics.length > 0)
+		{
+			genericsDefinition.append("template <");
+			for (int i = 0; i < astClass.generics.length; i++)
+			{
+				genericsDefinition.append("typename ");
+				genericsDefinition.append(astClass.generics[i]);
+				if (i != astClass.generics.length - 1)
+				{
+					genericsDefinition.append(", ");
+				}
+			}
+			genericsDefinition.append(">");
+		}
+
+
+
 		// If this is the main class. //
 		if (astClass.getName().equals("Main"))
 		{
@@ -126,6 +145,9 @@ public class CompilerCPP extends LangCompiler
 
 		/// Set up the class declaration. ///
 		hppOutput.println("#define " + astClass.getName() + ' ' + getRawName(astClass) + '*');
+
+		hppOutput.println(genericsDefinition.toString());
+
 		hppOutput.print("class " + getRawName(astClass));
 
 		if (astClass.extendsClassAST != null)

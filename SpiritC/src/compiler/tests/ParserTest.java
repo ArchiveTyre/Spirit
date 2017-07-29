@@ -66,8 +66,7 @@ class ParserTest
 	@Test
 	void singleTest()
 	{
-		testClassCompile("Generics1", "a : [T E V] (x : T, y : E, z, d : V) T = x * 2");
-		//testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na 1 2");
+		testClassCompile("Class Generics 1", "generic [A B C]");
 	}
 
 	@Test
@@ -185,6 +184,8 @@ class ParserTest
 		testClassCompile("Overload2", "self : () int = 32");
 		testClassCompile("Test", "a := 5\nif a < 10\n\ta = 100");
 
-		testClassCompile("Generics1", "test : [");
+		testClassCompile("Generics1", "test : [A] (b : A) = b * 2");
+
+		testClassCompile("Class Generics 1", "generics [A B C]");
 	}
 }
