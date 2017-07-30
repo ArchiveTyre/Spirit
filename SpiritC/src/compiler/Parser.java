@@ -148,7 +148,7 @@ public class Parser
 			}
 		}
 
-		System.err.println("COMPILER ERROR! Trying to parse primary type on non-primary!");
+		error.compilerError("Trying to parse primary type on non-primary!");
 		return null;
 	}
 
@@ -191,7 +191,7 @@ public class Parser
 			// Make sure that the operator exists in the precedence table. //
 			if (!operatorPrecedenceMap.containsKey(opName))
 			{
-				System.err.println("COMPILER ERROR! Table does not contain precedence value of operator "
+				error.compilerError("Table does not contain precedence value of operator "
 						+ lookAheads[0].value);
 				return null;
 			}
@@ -457,7 +457,7 @@ public class Parser
 		}
 		else
 		{
-			System.err.println("COMPILER ERROR! Trying to parse function declaration from non-symbol!");
+			error.compilerError("Trying to parse function declaration from non-symbol!");
 			return null;
 		}
 	}
@@ -613,7 +613,7 @@ public class Parser
 		}
 		else
 		{
-			System.err.println("COMPILER ERROR! Trying to create loop from non-loop keyword");
+			error.compilerError("Trying to create loop from non-loop keyword");
 			return null;
 		}
 	}
@@ -634,7 +634,7 @@ public class Parser
 		}
 		else
 		{
-			System.err.println("COMPILER ERROR! There was no subclass expression!");
+			error.compilerError("There was no subclass expression!");
 		}
 		return false;
 	}
@@ -705,7 +705,7 @@ public class Parser
 		}
 		else
 		{
-			System.err.println("COMPILER ERROR! There was no import expression");
+			error.compilerError("There was no import expression");
 			return false;
 		}
 
@@ -755,7 +755,7 @@ public class Parser
 		}
 		else
 		{
-			error.compilerError("COMPILER ERROR: NO GENERICS FOUND!!!");
+			error.compilerError("NO GENERICS FOUND!!!");
 		}
 		return null;
 	}
@@ -784,7 +784,7 @@ public class Parser
 
 		if (parent == null)
 		{
-			error("Incorrect line indentation at: " + lexer.getLineNumber() + "\n Tabbing: " + lineIndent);
+			error.error("Incorrect line indentation", "Tabbing: " + lineIndent);
 			return false;
 		}
 
@@ -1031,16 +1031,4 @@ public class Parser
 	{
 		return lookAheads[index].tokenType == type;
 	}
-
-
-	/**
-	 * Reports an error.
-	 * @param message The error message.
-	 */
-	private void error(String message)
-	{
-		System.err.println("[" + Main.COMPILER_NAME + "]: Error in file: " + lexer.getFileName() + "\tat line " + previous.lineNumber + ".");
-		System.err.println("Message:\t\t" + (message.equals("") ? "[NONE]" : message));
-	}
-
 }

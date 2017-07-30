@@ -1,0 +1,22 @@
+% TODO: Add header.
+generic [T]
+
+#inline
+#include <stdlib.h>
+T* i_array;
+#end
+
+new : (size : int)
+	#inline
+	i_array = (T*) calloc(sizeof(T), size);
+	#end
+
+self : (index : int) T
+	#inline
+	return i_array[index];
+	#end
+
+self : (index : int, value : T)
+	#inline
+	i_array[index] = value;
+	#end 

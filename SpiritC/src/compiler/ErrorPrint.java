@@ -13,6 +13,11 @@ public class ErrorPrint
 	private String filename;
 	private Parser parser;
 
+	private int getLineNumber()
+	{
+		return this.parser.previous.lineNumber + 1;
+	}
+
 	public ErrorPrint(Parser parser, PrintStream out)
 	{
 		this.parser = parser;
@@ -21,27 +26,27 @@ public class ErrorPrint
 
 	public void syntaxError(String expected, String actual, String message)
 	{
-		error("Syntax", expected, actual, message);
+		error(getLineNumber(), "Syntax", expected, actual, message);
 	}
 
 	public void syntaxError(String expected, String message)
 	{
-		error("Syntax", expected, message);
+		error(getLineNumber(), "Syntax", expected, "", message);
 	}
 
 	public void unexpectedExpressionError(String expected, String actual, String message)
 	{
-		error("Unexpected Expression", expected, actual, message);
+		error(getLineNumber(), "Unexpected Expression", expected, actual, message);
 	}
 
 	public void unexpectedExpressionError(String expected, String message)
 	{
-		error("Unexpected Expression", expected, message);
+		error(getLineNumber(), "Unexpected Expression", expected, "", message);
 	}
 
 	public void compilerError(String message)
 	{
-		error("Compiler", message);
+		error(getLineNumber(), "Compiler", "", "", message);
 	}
 
 	/**
@@ -52,24 +57,19 @@ public class ErrorPrint
 	 * @param message	Additional message providing more information.
 	 */
 	@SuppressWarnings("WeakerAccess")
-	public void error(String errorType, String expected, String actual, String message)
+	public void error(int line, String errorType, String expected, String actual, String message)
 	{
-		System.err.println("[" + Main.COMPILER_NAME + "] " + errorType + " error in file \"" + parser.lexer.getFileName() + "\"\tat line: ");
-		if (!expected.isEmpty()) System.out.println("\tExpected:\t\t" + message);
-		if (!actual.isEmpty()) System.out.println("\tActual:\t\t" + message);
-		if (!message.isEmpty()) System.out.println("\tMessage:\t\t" + message);
+		System.err.println("[" + Main.COMPILER_NAME + "] " + errorType + " error in file \"" + parser.lexer.getFileName() + "\"\tat line: " + line);
+		if (!expected.isEmpty()) System.err.println("\tExpected:\t\t" + message);
+		if (!actual.isEmpty()) System.err.println("\tActual:\t\t" + message);
+		if (!message.isEmpty()) System.err.println("\tMessage:\t\t" + message);
 
 		System.exit(0);
 	}
 
-	public void error(String errorType, String expected, String message)
-	{
-		error(errorType, expected, parser.lookAheads[0].value, message);
-	}
-
 	public void error(String errorType, String message)
 	{
-		error(errorType, "", "", "");
+		error(-1, errorType, "", "", message);
 	}
 }
 
