@@ -2,6 +2,7 @@ package compiler.ast;
 
 import compiler.SpiritType;
 import compiler.LangCompiler;
+import compiler.Token;
 import compiler.lib.IndentPrinter;
 
 /**
@@ -12,6 +13,11 @@ public class ASTInline extends ASTBase
 {
 
 	public String code;
+
+
+	public boolean hpp = false;
+
+
 	public ASTInline(ASTChildList.ListKey key, ASTParent parent, String code)
 	{
 		super(key, parent);
@@ -19,11 +25,13 @@ public class ASTInline extends ASTBase
 
 	}
 
+
 	@Override
 	public SpiritType getExpressionType()
 	{
 		return null;
 	}
+
 
 	@Override
 	public void debugSelf(IndentPrinter destination)
@@ -32,6 +40,7 @@ public class ASTInline extends ASTBase
 		destination.println(code);
 		destination.println("#end-backend");
 	}
+
 
 	@Override
 	public void compileSelf(LangCompiler compiler)

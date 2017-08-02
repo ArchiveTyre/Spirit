@@ -23,6 +23,7 @@ public class Builtins
 			new TypeString(),
 			new TypeVoid(),
 			new TypeFunction(),
+			new TypeGeneric(),
 	};
 
 	public static SpiritType getBuiltin(String name)

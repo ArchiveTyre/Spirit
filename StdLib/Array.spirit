@@ -2,21 +2,29 @@
 generic [T]
 
 #inline
+#top
 #include <stdlib.h>
+#end
+
+#inline
+#hpp
 T* i_array;
 #end
 
 new : (size : int)
 	#inline
+	#hpp
 	i_array = (T*) calloc(sizeof(T), size);
 	#end
 
 self : (index : int) T
 	#inline
+	#hpp
 	return i_array[index];
 	#end
 
 self : (index : int, value : T)
 	#inline
+	#hpp
 	i_array[index] = value;
 	#end 

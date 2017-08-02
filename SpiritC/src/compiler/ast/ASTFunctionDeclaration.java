@@ -3,6 +3,7 @@ package compiler.ast;
 import compiler.SpiritType;
 import compiler.LangCompiler;
 import compiler.builtins.Builtins;
+import compiler.builtins.TypeGeneric;
 import compiler.builtins.TypeUndefined;
 import compiler.lib.Helper;
 import compiler.lib.IndentPrinter;
@@ -43,6 +44,13 @@ public class ASTFunctionDeclaration extends ASTParent
 	{
 		this(key, parent, returnType, false);
 	}
+
+
+	public boolean usesGenerics()
+	{
+		return generics != null || getContainingClass().generics != null;
+	}
+
 
 	public ASTFunctionDeclaration(ASTChildList.ListKey key, ASTParent parent, SpiritType returnType, boolean anonymous)
 	{

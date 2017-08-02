@@ -5,6 +5,8 @@ import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
 import compiler.ast.ASTChildList.ListKey;
+import compiler.builtins.TypeGeneric;
+import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -163,6 +165,33 @@ public class Parser
 		ASTFunctionCall functionCall = new ASTFunctionCall(key, parent);
 		functionCall.setDeclarationPath(functionVariableUsage);
 
+		if (match(Syntax.Op.GENERIC_START))
+		{
+			ArrayList<String> generics = new ArrayList<>();
+			while (match(TokenType.SYMBOL))
+			{
+				generics.add(previous.value);
+			}
+
+			if (match(Syntax.Op.GENERIC_END))
+			{
+				if (generics.size() > 0)
+				{
+					String[] arrayGenerics = new String[generics.size()];
+					functionCall.generics = generics.toArray(arrayGenerics);
+
+				}
+				else
+				{
+					error.syntaxError("Generic", "Generics cannot be empty." );
+				}
+			}
+			else
+			{
+				error.syntaxError("]", "Expected end of generics declaration.");
+			}
+		}
+
 		// Parse arguments until we find something un-parsable. //
 		while(isPrimary(lookAheads[0].tokenType))
 		{
@@ -259,12 +288,14 @@ public class Parser
 			if (left == null)
 				return null;
 
-			if (look(0, TokenType.OPERATOR))
+			if (look(0, TokenType.OPERATOR) && !look(0, Syntax.Op.GENERIC_START))
 			{
 				left = parseOpExpression(key, left, 0, parent);
 				if (left == null)
 					return null;
 			}
+
+
 
 			// TODO: Move this check.
 			if (isFunctionCall(left))
@@ -856,9 +887,17 @@ public class Parser
 		{
 			// Get the code. //
 			String code = lookAheads[0].value;
+			Token.InlineMode mode = lookAheads[0].inlineMode;
 			step();
+
+			if (mode == Token.InlineMode.HPP_TOP) {
+				dest.topInlineCode += (code + '\n');
+				return true;
+			}
+
+
 			newAST = new ASTInline(ListKey.BODY, parent, code);
-			return true;
+			((ASTInline) newAST).hpp = mode == Token.InlineMode.HPP;
 		}
 
 		// Otherwise it's just an expression. //
@@ -918,20 +957,29 @@ public class Parser
 	{
 		// FIXME: Is this really the best place?
 
+		// Check if it is a generic from the containing class. //
+		if (perspective.getContainingClass().generics != null)
+		{
+			for (String generic : perspective.getContainingClass().generics)
+			{
+				if (generic.equals(name))
+					return new TypeGeneric(); // FIXME: This might be wrong...
+			}
+		}
+
+		// Try to find it in the AST. //
 		ASTBase f = perspective.findDeclaration(name);
 		if (f instanceof ASTClass)
 			return (ASTClass) f;
 
-		SpiritType type = Builtins.getBuiltin(name);
-		if (type != null)
-			return type;
-
-		return null;
+		// It doesn't exist in the AST, as such, it might be a builtin. //
+		return Builtins.getBuiltin(name);
 	}
 
 	/**
 	 * Moves lookAheads[0] into previous.
 	 * Then shifts lookAheads.
+	 * Finally it gets a new token from the lexer.
 	 * Finally it gets a new token from the lexer.
 	 */
 	private void step()
