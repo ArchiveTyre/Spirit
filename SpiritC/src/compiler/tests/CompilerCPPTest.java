@@ -56,7 +56,10 @@ class CompilerCPPTest
 	void singleTest()
 	{
 		testCompiler("ClassGenerics", "generic [A B C]");
+		//testCompiler("Func", "add : [T] (a, b : int) int\n\t= a + b\n\nadd [T] a b");
+
 	}
+
 
 	@Test
 	void testAll()
@@ -74,6 +77,8 @@ class CompilerCPPTest
 		testCompiler("Inline", "a := 10\n#inline\ncout << a;\n#end\na := 15");
 
 		testCompiler("Overloading", "+ : () int = 3");
+		testCompiler("ClassGenerics", "generic [A B C]");
+		testCompiler("Func", "add : [T] (a, b : int) int\n\t= a + b\n\nadd [T] a b");
 
 		/*
 		try

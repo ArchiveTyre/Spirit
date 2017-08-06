@@ -67,6 +67,8 @@ class ParserTest
 	void singleTest()
 	{
 		testClassCompile("Class Generics 1", "generic [A B C]");
+		//testClassCompile("Generics1", "a : (x : T, y : E, z, d : V) T = x * 2\n\na [a a a] 1 2 3");
+		//testClassCompile("FunCall1", "a : (x : int, y : int) int = x + y\na 1 2");
 	}
 
 	@Test

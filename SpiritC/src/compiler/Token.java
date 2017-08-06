@@ -22,14 +22,24 @@ public class Token
 		INDENT,
 		LPAR,
 		RPAR,
+		LGENERIC,
+		RGENERIC,
 		EOF,
 		INLINE;
+	}
+
+	public enum InlineMode
+	{
+		HPP,
+		HPP_TOP,
+		CPP
 	}
 
 
 	public String value;
 	public TokenType tokenType;
 	public int indent = 0;
+	InlineMode inlineMode = InlineMode.CPP;
 
 
 	public int columnNumber;
@@ -42,7 +52,6 @@ public class Token
 		this.columnNumber = columnNumber;
 		this.lineNumber = lineNumber;
 
-
 		if (tokenType == TokenType.SYMBOL)
 		{
 			if (Syntax.isOperator(value))
@@ -53,6 +62,7 @@ public class Token
 		}
 
 	}
+
 
 	public Token(int indent, int lineNumber)
 	{

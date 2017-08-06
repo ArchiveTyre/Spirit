@@ -5,6 +5,8 @@ import compiler.ast.*;
 import compiler.builtins.Builtins;
 import compiler.builtins.FileType;
 import compiler.ast.ASTChildList.ListKey;
+import compiler.builtins.TypeGeneric;
+import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -148,7 +150,7 @@ public class Parser
 			}
 		}
 
-		System.err.println("COMPILER ERROR! Trying to parse primary type on non-primary!");
+		error.compilerError("Trying to parse primary type on non-primary!");
 		return null;
 	}
 
@@ -162,6 +164,33 @@ public class Parser
 	{
 		ASTFunctionCall functionCall = new ASTFunctionCall(key, parent);
 		functionCall.setDeclarationPath(functionVariableUsage);
+
+		if (match(Syntax.Op.GENERIC_START))
+		{
+			ArrayList<String> generics = new ArrayList<>();
+			while (match(TokenType.SYMBOL))
+			{
+				generics.add(previous.value);
+			}
+
+			if (match(Syntax.Op.GENERIC_END))
+			{
+				if (generics.size() > 0)
+				{
+					String[] arrayGenerics = new String[generics.size()];
+					functionCall.generics = generics.toArray(arrayGenerics);
+
+				}
+				else
+				{
+					error.syntaxError("Generic", "Generics cannot be empty." );
+				}
+			}
+			else
+			{
+				error.syntaxError("]", "Expected end of generics declaration.");
+			}
+		}
 
 		// Parse arguments until we find something un-parsable. //
 		while(isPrimary(lookAheads[0].tokenType))
@@ -191,7 +220,7 @@ public class Parser
 			// Make sure that the operator exists in the precedence table. //
 			if (!operatorPrecedenceMap.containsKey(opName))
 			{
-				System.err.println("COMPILER ERROR! Table does not contain precedence value of operator "
+				error.compilerError("Table does not contain precedence value of operator "
 						+ lookAheads[0].value);
 				return null;
 			}
@@ -259,12 +288,14 @@ public class Parser
 			if (left == null)
 				return null;
 
-			if (look(0, TokenType.OPERATOR))
+			if (look(0, TokenType.OPERATOR) && !look(0, Syntax.Op.GENERIC_START))
 			{
 				left = parseOpExpression(key, left, 0, parent);
 				if (left == null)
 					return null;
 			}
+
+
 
 			// TODO: Move this check.
 			if (isFunctionCall(left))
@@ -457,7 +488,7 @@ public class Parser
 		}
 		else
 		{
-			System.err.println("COMPILER ERROR! Trying to parse function declaration from non-symbol!");
+			error.compilerError("Trying to parse function declaration from non-symbol!");
 			return null;
 		}
 	}
@@ -613,7 +644,7 @@ public class Parser
 		}
 		else
 		{
-			System.err.println("COMPILER ERROR! Trying to create loop from non-loop keyword");
+			error.compilerError("Trying to create loop from non-loop keyword");
 			return null;
 		}
 	}
@@ -634,7 +665,7 @@ public class Parser
 		}
 		else
 		{
-			System.err.println("COMPILER ERROR! There was no subclass expression!");
+			error.compilerError("There was no subclass expression!");
 		}
 		return false;
 	}
@@ -705,7 +736,7 @@ public class Parser
 		}
 		else
 		{
-			System.err.println("COMPILER ERROR! There was no import expression");
+			error.compilerError("There was no import expression");
 			return false;
 		}
 
@@ -755,7 +786,7 @@ public class Parser
 		}
 		else
 		{
-			error.compilerError("COMPILER ERROR: NO GENERICS FOUND!!!");
+			error.compilerError("NO GENERICS FOUND!!!");
 		}
 		return null;
 	}
@@ -784,7 +815,7 @@ public class Parser
 
 		if (parent == null)
 		{
-			error("Incorrect line indentation at: " + lexer.getLineNumber() + "\n Tabbing: " + lineIndent);
+			error.error("Incorrect line indentation", "Tabbing: " + lineIndent);
 			return false;
 		}
 
@@ -856,9 +887,17 @@ public class Parser
 		{
 			// Get the code. //
 			String code = lookAheads[0].value;
+			Token.InlineMode mode = lookAheads[0].inlineMode;
 			step();
+
+			if (mode == Token.InlineMode.HPP_TOP) {
+				dest.topInlineCode += (code + '\n');
+				return true;
+			}
+
+
 			newAST = new ASTInline(ListKey.BODY, parent, code);
-			return true;
+			((ASTInline) newAST).hpp = mode == Token.InlineMode.HPP;
 		}
 
 		// Otherwise it's just an expression. //
@@ -918,20 +957,29 @@ public class Parser
 	{
 		// FIXME: Is this really the best place?
 
+		// Check if it is a generic from the containing class. //
+		if (perspective.getContainingClass().generics != null)
+		{
+			for (String generic : perspective.getContainingClass().generics)
+			{
+				if (generic.equals(name))
+					return new TypeGeneric(); // FIXME: This might be wrong...
+			}
+		}
+
+		// Try to find it in the AST. //
 		ASTBase f = perspective.findDeclaration(name);
 		if (f instanceof ASTClass)
 			return (ASTClass) f;
 
-		SpiritType type = Builtins.getBuiltin(name);
-		if (type != null)
-			return type;
-
-		return null;
+		// It doesn't exist in the AST, as such, it might be a builtin. //
+		return Builtins.getBuiltin(name);
 	}
 
 	/**
 	 * Moves lookAheads[0] into previous.
 	 * Then shifts lookAheads.
+	 * Finally it gets a new token from the lexer.
 	 * Finally it gets a new token from the lexer.
 	 */
 	private void step()
@@ -1031,16 +1079,4 @@ public class Parser
 	{
 		return lookAheads[index].tokenType == type;
 	}
-
-
-	/**
-	 * Reports an error.
-	 * @param message The error message.
-	 */
-	private void error(String message)
-	{
-		System.err.println("[" + Main.COMPILER_NAME + "]: Error in file: " + lexer.getFileName() + "\tat line " + previous.lineNumber + ".");
-		System.err.println("Message:\t\t" + (message.equals("") ? "[NONE]" : message));
-	}
-
 }

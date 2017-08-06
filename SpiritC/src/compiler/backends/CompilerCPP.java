@@ -3,6 +3,8 @@ package compiler.backends;
 import compiler.*;
 import compiler.ast.*;
 import compiler.ast.ASTChildList.ListKey;
+import compiler.builtins.TypeGeneric;
+import compiler.builtins.TypeUndefined;
 import compiler.lib.IndentPrinter;
 import compiler.lib.PathFind;
 
@@ -69,24 +71,8 @@ public class CompilerCPP extends LangCompiler
 		return "___Raw" + targetType.getTypeName();
 	}
 
-	@Override
-	public void compileClass(ASTClass astClass)
+	private void compileHppTop(ASTClass astClass)
 	{
-
-		/// Include guard. ///
-		cppOutput.println("#include \"" + hppLocation + "\"");
-
-		currentOutput = cppOutput;
-
-		/// Compile members of the class. ///
-
-		for (ASTBase child : astClass.children.getBody())
-		{
-			child.compileSelf(this);
-			cppOutput.print(isSemicolonless(child) ? ' ' : ';');
-		}
-
-
 		StringBuilder genericsDefinition = new StringBuilder();
 		if (astClass.generics != null && astClass.generics.length > 0)
 		{
@@ -103,19 +89,19 @@ public class CompilerCPP extends LangCompiler
 			genericsDefinition.append(">");
 		}
 
+		/// Include guard. ///
+		currentOutput.println("#pragma once");
+		currentOutput.println("#include <string>");
+		currentOutput.println("using string = std::string;");
 
-
-		// If this is the main class. //
-		if (astClass.getName().equals("Main"))
+		/// Set up the class declaration. ///
+		if (astClass.generics == null)
 		{
-			cppOutput.println();
-			cppOutput.println("int main () ");
-			cppOutput.println("{");
-			cppOutput.indentation++;
-			cppOutput.println("Main main = new ___RawMain();");
-			cppOutput.println("return 0;");
-			cppOutput.indentation--;
-			cppOutput.println("}");
+			currentOutput.println("#define " + astClass.getName() + ' ' + getRawName(astClass) + '*');
+		}
+		else
+		{
+			currentOutput.println("#define " + astClass.getName() + " auto");
 		}
 
 		/// Compile the imports. ///
@@ -132,30 +118,64 @@ public class CompilerCPP extends LangCompiler
 				}
 				else
 				{
-					hppOutput.println("#include \"" + pkgPath + "\"");
+					currentOutput.println("#include \"" + pkgPath + "\"");
 				}
 			}
 		}
 
-		currentOutput = hppOutput;
+		currentOutput.print(astClass.topInlineCode);
 
-		hppOutput.println("#pragma once");
-		hppOutput.println("#include <string>");
-		hppOutput.println("using string = std::string;");
+		currentOutput.println(genericsDefinition.toString());
 
-		/// Set up the class declaration. ///
-		hppOutput.println("#define " + astClass.getName() + ' ' + getRawName(astClass) + '*');
-
-		hppOutput.println(genericsDefinition.toString());
-
-		hppOutput.print("class " + getRawName(astClass));
+		currentOutput.print("class " + getRawName(astClass));
 
 		if (astClass.extendsClassAST != null)
-			hppOutput.print(" : public " + getRawName(astClass.extendsClassAST));
-		hppOutput.println();
-		hppOutput.println("{");
-		hppOutput.println("public:");
-		hppOutput.indentation++;
+			currentOutput.print(" : public " + getRawName(astClass.extendsClassAST));
+		currentOutput.println();
+		currentOutput.println("{");
+		currentOutput.println("public:");
+		currentOutput.indentation++;
+
+	}
+
+	@SuppressWarnings("unused")
+	private void compileCppTop(ASTClass astClass)
+	{
+		currentOutput.println("#include \"" + hppLocation + "\"");
+	}
+
+	@Override
+	public void compileClass(ASTClass astClass)
+	{
+
+
+		currentOutput = hppOutput;
+		compileHppTop(astClass);
+		currentOutput = cppOutput;
+		compileCppTop(astClass);
+
+		/// Compile members of the class. ///
+
+		for (ASTBase child : astClass.children.getBody())
+		{
+			child.compileSelf(this);
+			currentOutput.print(isSemicolonless(child) ? ' ' : ';');
+		}
+
+		// If this is the main class. //
+		if (astClass.getName().equals("Main"))
+		{
+			cppOutput.println();
+			cppOutput.println("int main () ");
+			cppOutput.println("{");
+			cppOutput.indentation++;
+			cppOutput.println("Main main = new ___RawMain();");
+			cppOutput.println("return 0;");
+			cppOutput.indentation--;
+			cppOutput.println("}");
+		}
+
+		currentOutput = hppOutput;
 
 		for (ASTBase child : astClass.children.getAll())
 		{
@@ -168,51 +188,59 @@ public class CompilerCPP extends LangCompiler
 				}
 				else
 				{
-					hppOutput.print(varChild.getExpressionType().getTypeName());
-					hppOutput.print(" ");
-					hppOutput.print(varChild.getName());
+					// FIXME: Use TypeGeneric instead.
+					if (varChild.getExpressionType() instanceof TypeGeneric)
+					{
+						currentOutput.print("auto");
+					}
+					else
+					{
+						currentOutput.print(varChild.getExpressionType().getTypeName());
+					}
+					currentOutput.print(" ");
+					currentOutput.print(varChild.getName());
 					if (varChild.getValue() != null)
 					{
-						hppOutput.print(" = ");
+						currentOutput.print(" = ");
 						varChild.getValue().compileSelf(this);
 					}
-					hppOutput.println(";");
+					currentOutput.println(";");
 				}
 			}
 		}
-		hppOutput.indentation--;
-		hppOutput.println("};");
+		currentOutput.indentation--;
+		currentOutput.println("};");
 	}
 
 	@Override
 	public void compileIf(ASTIf astIf)
 	{
-		cppOutput.print("if (");
+		currentOutput.print("if (");
 		astIf.getCondition().compileSelf(this);
-		cppOutput.println(")");
-		cppOutput.println("{");
-		cppOutput.indentation++;
+		currentOutput.println(")");
+		currentOutput.println("{");
+		currentOutput.indentation++;
 		for (ASTBase child : astIf.children.getBody())
 		{
 			child.compileSelf(this);
-			cppOutput.println(isSemicolonless(child) ? ' ' : ';');
+			currentOutput.println(isSemicolonless(child) ? ' ' : ';');
 		}
-		cppOutput.indentation--;
-		cppOutput.print("}");
+		currentOutput.indentation--;
+		currentOutput.print("}");
 
 		if (astIf.elseStatement != null)
 		{
-			cppOutput.println();
-			cppOutput.println("else");
-			cppOutput.println("{");
-			cppOutput.indentation++;
+			currentOutput.println();
+			currentOutput.println("else");
+			currentOutput.println("{");
+			currentOutput.indentation++;
 			for (ASTBase child : astIf.elseStatement.children.getBody())
 			{
 				child.compileSelf(this);
-				cppOutput.println(isSemicolonless(child) ? ' ' : ';');
+				currentOutput.println(isSemicolonless(child) ? ' ' : ';');
 			}
-			cppOutput.indentation--;
-			cppOutput.print("}");
+			currentOutput.indentation--;
+			currentOutput.print("}");
 		}
 	}
 
@@ -222,27 +250,27 @@ public class CompilerCPP extends LangCompiler
 		if (astLoop.preparationalStatement != null)
 		{
 			astLoop.preparationalStatement.compileSelf(this);
-			cppOutput.println();
+			currentOutput.println();
 		}
-		cppOutput.print("for (");
+		currentOutput.print("for (");
 		if (astLoop.initialStatement != null)
 			astLoop.initialStatement.compileSelf(this);
-		cppOutput.print("; ");
+		currentOutput.print("; ");
 		if (astLoop.conditionalStatement != null)
 			astLoop.conditionalStatement.compileSelf(this);
-		cppOutput.print("; ");
+		currentOutput.print("; ");
 		if (astLoop.iterationalStatement != null)
 			astLoop.iterationalStatement.compileSelf(this);
-		cppOutput.println(")");
-		cppOutput.println("{");
-		cppOutput.indentation++;
+		currentOutput.println(")");
+		currentOutput.println("{");
+		currentOutput.indentation++;
 		for (ASTBase child : astLoop.children.getBody())
 		{
 			child.compileSelf(this);
-			cppOutput.println(isSemicolonless(child) ? ' ' : ';');
+			currentOutput.println(isSemicolonless(child) ? ' ' : ';');
 		}
-		cppOutput.indentation--;
-		cppOutput.println("}");
+		currentOutput.indentation--;
+		currentOutput.println("}");
 
 	}
 
@@ -255,7 +283,7 @@ public class CompilerCPP extends LangCompiler
 		{
 			/* Add "new " and compile the path without the ".new" part. */
 
-			cppOutput.print("new ");
+			currentOutput.print("new ");
 			((ASTMemberAccess)astFunctionCall.getDeclarationPath()).ofObject.compileSelf(this);
 		}
 
@@ -265,7 +293,7 @@ public class CompilerCPP extends LangCompiler
 			/* It is, compile as normal function call but add "->___call". */
 
 			astFunctionCall.getDeclarationPath().compileSelf(this);
-			cppOutput.print("->___call");
+			currentOutput.print("->___call");
 		}
 		else
 		{
@@ -274,16 +302,34 @@ public class CompilerCPP extends LangCompiler
 			astFunctionCall.getDeclarationPath().compileSelf(this);
 		}
 
-		cppOutput.print("(");
+		 if (astFunctionCall.generics != null)
+		 {
+			 currentOutput.print("<");
+			 for (int i = 0; i < astFunctionCall.generics.length; i++)
+			 {
+			 	String generic = astFunctionCall.generics[i];
+				 currentOutput.print(generic);
+				if (i != astFunctionCall.generics.length - 1)
+				{
+					currentOutput.print(", ");
+				}
+			 }
+
+			 currentOutput.print(">");
+		 }
+
+
+
+		currentOutput.print("(");
 
 		for (ASTBase child : astFunctionCall.children.getArgs())
 		{
 			child.compileSelf(this);
 			if (child != astFunctionCall.children.getLast(ASTChildList.ListKey.ARGS))
-				cppOutput.print(", ");
+				currentOutput.print(", ");
 		}
 
-		cppOutput.print(")");
+		currentOutput.print(")");
 	}
 
 	@Override
@@ -334,7 +380,15 @@ public class CompilerCPP extends LangCompiler
 	{
 		if (!(astVariableDeclaration.getParent() instanceof ASTClass))
 		{
-			currentOutput.print(astVariableDeclaration.getExpressionType().getTypeName());
+			// FIXME: Use TypeGeneric instead.
+			if (astVariableDeclaration.getExpressionType() instanceof TypeUndefined)
+			{
+				currentOutput.print("auto");
+			}
+			else
+			{
+				currentOutput.print(astVariableDeclaration.getExpressionType().getTypeName());
+			}
 			currentOutput.print(" ");
 			currentOutput.print(astVariableDeclaration.getName());
 			if (astVariableDeclaration.getValue() != null)
@@ -449,12 +503,17 @@ public class CompilerCPP extends LangCompiler
 	public void compileFunctionDeclaration(ASTFunctionDeclaration astFunctionDeclaration)
 	{
 		boolean justDeclaration = currentOutput == hppOutput;
+		boolean usesGenerics    = astFunctionDeclaration.usesGenerics();
+
+		// Skip compilation in .cpp for any function with generics. //
+		if (!justDeclaration && usesGenerics)
+			return;
 
 		ASTFunctionGroup group = (ASTFunctionGroup) astFunctionDeclaration.getParent();
 		String declaration = createFunctionDeclaration(astFunctionDeclaration, !justDeclaration);
 
 		currentOutput.print(declaration);
-		if (justDeclaration)
+		if (justDeclaration && !usesGenerics)
 		{
 			// If it's just a declaration, end it here. //
 			currentOutput.println(";");
@@ -546,8 +605,9 @@ public class CompilerCPP extends LangCompiler
 	@Override
 	public void compileInline(ASTInline astInline)
 	{
+		IndentPrinter chosen = astInline.hpp ? hppOutput : cppOutput;
 		for (String line : astInline.code.split("\n"))
-			currentOutput.println(line);
+			chosen.println(line);
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")

@@ -122,8 +122,18 @@ public class Lexer
 			--parenthesesCount;
 			return new Token(")", Token.TokenType.RPAR, columnNumber, lineNumber);
 		}
+		else if (c == '[')
+		{
+			return new Token("[", Token.TokenType.LGENERIC, columnNumber, lineNumber);
+		}
+		else if (c == ']')
+		{
+			return new Token("]", Token.TokenType.RGENERIC, columnNumber, lineNumber);
+		}
 		else if (c == ':')
+		{
 			return new Token(":", Token.TokenType.OPERATOR, columnNumber, lineNumber);
+		}
 
 		// Check if we are reading a number. //
 		else if (Character.isDigit((char) c))
@@ -180,8 +190,9 @@ public class Lexer
 			// Check if we have found an inline statement. //
 			if (macro.equals(Syntax.Macro.INLINE))
 			{
-
 				StringBuilder inlineCode = new StringBuilder();
+				Token.InlineMode inlineMode = Token.InlineMode.CPP;
+
 				// We have found an inline statement. //
 				boolean inline = true;
 				while (inline)
@@ -189,6 +200,7 @@ public class Lexer
 					c = readChar();
 					if (c == Syntax.Macro.IDENTIFIER)
 					{
+
 						StringBuilder inlineMacro = new StringBuilder();
 						while (Character.isAlphabetic((c = readChar())))
 						{
@@ -201,6 +213,18 @@ public class Lexer
 						{
 							inline = false;
 						}
+						else if (inlineMacro.toString().equals("hpp"))
+						{
+							inlineMode = Token.InlineMode.HPP;
+						}
+						else if (inlineMacro.toString().equals("cpp"))
+						{
+							inlineMode = Token.InlineMode.CPP;
+						}
+						else if (inlineMacro.toString().equals("top"))
+						{
+							inlineMode = Token.InlineMode.HPP_TOP;
+						}
 						else
 						{
 							inlineCode.append(Syntax.Macro.IDENTIFIER);
@@ -211,7 +235,9 @@ public class Lexer
 					inlineCode.append((char) c);
 
 				}
-				return new Token(inlineCode.toString(), Token.TokenType.INLINE, columnNumber, lineNumber);
+				Token token = new Token(inlineCode.toString(), Token.TokenType.INLINE, columnNumber, lineNumber);
+				token.inlineMode = inlineMode;
+				return token;
 			}
 			else
 			{

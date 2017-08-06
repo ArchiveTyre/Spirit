@@ -31,6 +31,9 @@ public class ASTClass extends ASTParent implements SpiritType, SpiritCallable
 		}
 	}
 
+	public String topInlineCode  = "";
+
+
 	/**
 	 * A list of packages to import.
 	 */
